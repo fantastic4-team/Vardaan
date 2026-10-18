@@ -60,12 +60,12 @@ export default function WaitlistForm({ id }: { id?: string }) {
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          className="h-11 min-w-0 flex-1 bg-transparent px-3 text-[15px] text-ink caret-ink outline-none"
+          className="h-11 min-w-0 flex-1 bg-transparent px-2.5 text-[14px] text-ink caret-ink outline-none sm:px-3 sm:text-[15px]"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="waitlist-button h-11 shrink-0 cursor-pointer rounded-[10px] px-5 text-[14px] disabled:cursor-wait disabled:opacity-70"
+          className="waitlist-button h-11 shrink-0 cursor-pointer rounded-[10px] px-3.5 text-[13px] disabled:cursor-wait disabled:opacity-70 sm:px-5 sm:text-[14px]"
         >
           {status === "loading" ? "Joining…" : "Join waitlist"}
         </button>

@@ -6,7 +6,11 @@ Vardaan is a voice-first AI agent. You call it, say what you need in your own la
 
 This repository contains the Vardaan website: the beta landing page, the waitlist and the product pages.
 
-![Vardaan landing page](docs/home.jpg)
+<p align="center">
+  <img src="docs/home.jpg" alt="Vardaan landing page on desktop" width="78%" />
+  &nbsp;
+  <img src="docs/home-mobile.jpg" alt="Vardaan landing page on a phone" width="18%" />
+</p>
 
 ---
 
@@ -53,7 +57,11 @@ Vardaan remembers preferences and context, and when information is missing or a 
 | `/team` | The Fantastic 4 team: photos, roles and website, GitHub and LinkedIn links |
 | `/api/waitlist` | `POST` endpoint that stores waitlist emails |
 
-![How it works page](docs/how-it-works.jpg)
+| How it works | Use cases |
+|---|---|
+| ![How it works page](docs/how-it-works.jpg) | ![Use cases page](docs/use-cases.jpg) |
+| **FAQ** | **Team** |
+| ![FAQ page](docs/faq.jpg) | ![Team page](docs/team.jpg) |
 
 Highlights:
 
@@ -62,7 +70,7 @@ Highlights:
 - **Hidden footer** that slides up when you scroll or swipe past the end of the page.
 - **Team page** with portraits tinted in the poster palette, name, role and link icons set on each photo.
 - **Small details**: a glowing "New" tag, a glassy waitlist form, a "Beta spots open for …" line that always names next month, and a favicon drawn from the same flower art.
-- **Accessible and responsive**: tested at 360, 390, 768, 1024 and 1440px with no horizontal scrolling; the landing page fits one screen at every size. Respects `prefers-reduced-motion` and keeps keyboard focus visible.
+- **Accessible and responsive**: tested from 320px phones and landscape phones through tablets and laptops to 1920px and 2560px monitors, with no horizontal scrolling; the landing page fits one screen on everything except the very smallest phones. Respects `prefers-reduced-motion` and keeps keyboard focus visible.
 
 ---
 
@@ -193,8 +201,6 @@ To deploy your own copy:
 ## Team
 
 Built by **Fantastic 4**.
-
-![Team page](docs/team.jpg)
 
 | Name | Role | Links |
 |---|---|---|

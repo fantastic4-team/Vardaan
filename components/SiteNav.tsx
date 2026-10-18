@@ -40,17 +40,17 @@ export default function SiteNav() {
           className="nav-grid ml-[max(1rem,6vw)] flex items-center gap-3 border-x px-4 py-3.5 sm:px-7"
           aria-label="Vardaan Beta home"
         >
-          <span className="font-poster text-[21px] font-semibold uppercase leading-none tracking-[0.02em] text-ink">Vardaan</span>
+          <span className="font-poster text-[19px] font-semibold uppercase leading-none tracking-[0.02em] text-ink sm:text-[21px] 2xl:text-[24px]">Vardaan</span>
           <span className="beta-glass">Beta</span>
         </Link>
 
         <div className="mx-auto hidden items-stretch lg:flex">
-          {links("nav-grid relative flex items-center whitespace-nowrap border-r px-5 text-[14px] first:border-l xl:px-6")}
+          {links("nav-grid relative flex items-center whitespace-nowrap border-r px-5 text-[14px] first:border-l xl:px-6 2xl:px-8 2xl:text-[15px]")}
         </div>
 
         <Link
           href="/#join"
-          className="waitlist-button my-auto ml-auto mr-[max(1rem,6vw)] flex h-8 items-center whitespace-nowrap rounded-[8px] px-3 text-[12px] lg:ml-0 sm:h-[34px] sm:px-4 sm:text-[13px]"
+          className="waitlist-button my-auto ml-auto mr-[max(1rem,6vw)] flex h-8 items-center whitespace-nowrap rounded-[8px] px-3 text-[12px] lg:ml-0 sm:h-[34px] sm:px-4 sm:text-[13px] 2xl:h-10 2xl:px-5 2xl:text-[14px]"
         >
           Join waitlist
         </Link>

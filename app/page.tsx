@@ -23,7 +23,7 @@ export default function Home() {
 
         <SiteNav />
 
-        {/* Split screen: the letter on the left, the full poster on a graph-paper panel on the right. */}
+        {/* Split screen: the letter on the left, the full poster on the right. */}
         <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-2 lg:grid-rows-1">
           <div className="flex min-h-0 min-w-0 flex-col justify-between gap-6 px-[max(1.5rem,calc(6vw+1.75rem))] py-7 lg:py-[clamp(28px,7vh,72px)] lg:pr-12">
             <div className="lg:pt-[clamp(8px,4vh,40px)]">
@@ -51,7 +51,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div id="join" className="reveal max-w-[440px] scroll-mt-24" style={step(3)}>
+            <div id="join" className="reveal max-w-[440px] scroll-mt-24 2xl:max-w-[480px]" style={step(3)}>
               <WaitlistForm id="hero" />
               <p className="mt-3 pl-1 text-[13px] text-mute">
                 Beta spots open for <span className="text-ink"><NextMonth /></span>
