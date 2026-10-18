@@ -201,7 +201,7 @@ Built by **Fantastic 4**.
 | Sampurna | AI/ML Engineer | |
 | Sattwik | Database Manager | |
 
-Each member's website, GitHub and LinkedIn are set in `app/team/page.tsx`; a link icon appears on the team page once its URL is filled in.
+Each member's website, GitHub and LinkedIn are set in `app/team/page.tsx`; empty links are placeholders (`#`) until filled in.
 
 Questions or feedback: [fantastic4.team.dev@gmail.com](mailto:fantastic4.team.dev@gmail.com)
 

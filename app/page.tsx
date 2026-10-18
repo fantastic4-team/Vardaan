@@ -24,7 +24,7 @@ export default function Home() {
         <SiteNav />
 
         {/* Split screen: the letter on the left, the full poster on a graph-paper panel on the right. */}
-        <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
+        <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-2 lg:grid-rows-1">
           <div className="flex min-h-0 min-w-0 flex-col justify-between gap-6 px-[max(1.5rem,calc(6vw+1.75rem))] py-7 lg:py-[clamp(28px,7vh,72px)] lg:pr-12">
             <div className="lg:pt-[clamp(8px,4vh,40px)]">
               <a
@@ -61,7 +61,7 @@ export default function Home() {
 
           {/* The poster art fills the whole right panel: the full composition sits in the middle and
               the scene continues out to the panel's edges. */}
-          <figure className="poster-art-in nav-grid relative h-[clamp(120px,calc(100svh-575px),40svh)] min-h-0 overflow-hidden border-t lg:h-auto lg:border-l lg:border-t-0">
+          <figure className="poster-art-in nav-grid relative min-h-[120px] overflow-hidden lg:min-h-0 border-t lg:h-auto lg:border-l lg:border-t-0">
             <PosterArt className="absolute inset-0 h-full w-full" />
             <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             <figcaption className="sr-only">Vardaan Beta</figcaption>

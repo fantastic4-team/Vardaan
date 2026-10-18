@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 type Links = { website?: string; github?: string; linkedin?: string };
 
-// Photos live in public/images/team. Fill in each member's links; an icon only appears once its
-// URL is set, so there are never dead links on the page.
+// Photos live in public/images/team. Links left empty point to "#" as placeholders until the real
+// URLs are filled in.
 const TEAM: { name: string; role: string; photo: string; links: Links }[] = [
   {
     name: "Souradeep Pradhan",
@@ -86,21 +86,19 @@ const ICONS: Record<keyof Links, { label: string; path: React.ReactNode }> = {
 };
 
 function SocialLinks({ name, links }: { name: string; links: Links }) {
-  const items = (Object.keys(ICONS) as (keyof Links)[]).filter((key) => links[key]);
-  if (!items.length) return null;
+  const items = Object.keys(ICONS) as (keyof Links)[];
   return (
-    <ul className="mt-4 flex items-center gap-2">
+    <ul className="mt-3 flex items-center gap-3.5 sm:mt-4 sm:gap-4">
       {items.map((key) => (
         <li key={key}>
           <a
-            href={links[key]}
-            target="_blank"
-            rel="noreferrer"
+            href={links[key] || "#"}
+            {...(links[key] ? { target: "_blank", rel: "noreferrer" } : {})}
             aria-label={`${name} on ${ICONS[key].label}`}
             title={ICONS[key].label}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-ink/70 transition hover:border-white/25 hover:bg-white/[0.08] hover:text-ink"
+            className="block text-ink/55 transition hover:text-ink"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[17px] w-[17px]">
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
               {ICONS[key].path}
             </svg>
           </a>
@@ -118,22 +116,22 @@ export default function Team() {
       intro="Four engineers across frontend, backend, AI/ML and data, building the agent we wish our own families had."
       scene="poppies"
     >
-      <div className="nav-grid grid border-l border-t sm:grid-cols-2 lg:grid-cols-4">
+      <div className="nav-grid grid grid-cols-2 border-l border-t lg:grid-cols-4">
         {TEAM.map((member, i) => (
-          <div key={member.name} className="nav-grid border-b border-r p-5 lg:p-6">
+          <div key={member.name} className="nav-grid min-w-0 border-b border-r p-3 sm:p-5 lg:p-6">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[12px]" style={{ background: TONES[i % TONES.length] }}>
               <Image
                 src={member.photo}
                 alt={member.name}
                 fill
                 loading="eager"
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                sizes="(min-width: 1024px) 25vw, 50vw"
                 className="object-cover object-top mix-blend-multiply saturate-[0.9] contrast-[1.05]"
               />
               <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             </div>
-            <h2 className="mt-5 text-[18px] font-medium text-ink">{member.name}</h2>
-            <p className="mt-1 text-[14px] text-ink/60">{member.role}</p>
+            <h2 className="mt-4 text-[15px] font-medium leading-snug text-ink sm:mt-5 sm:text-[18px]">{member.name}</h2>
+            <p className="mt-1 text-[12px] leading-snug text-ink/60 sm:text-[14px]">{member.role}</p>
             <SocialLinks name={member.name} links={member.links} />
           </div>
         ))}

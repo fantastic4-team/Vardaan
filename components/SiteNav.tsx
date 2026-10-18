@@ -27,7 +27,7 @@ export default function SiteNav() {
           className={`${className} transition ${active ? "text-ink" : "text-ink/60 hover:text-ink"}`}
         >
           {label}
-          {active && <span aria-hidden="true" className="absolute inset-x-4 bottom-0 h-px bg-ink/70" />}
+          {active && <span aria-hidden="true" className="absolute inset-x-2 bottom-0 h-px bg-ink/70 lg:inset-x-4" />}
         </Link>
       );
     });
@@ -44,20 +44,20 @@ export default function SiteNav() {
           <span className="beta-glass">Beta</span>
         </Link>
 
-        <div className="mx-auto hidden items-stretch md:flex">
-          {links("nav-grid relative flex items-center border-r px-5 text-[14px] first:border-l lg:px-6")}
+        <div className="mx-auto hidden items-stretch lg:flex">
+          {links("nav-grid relative flex items-center whitespace-nowrap border-r px-5 text-[14px] first:border-l xl:px-6")}
         </div>
 
         <Link
           href="/#join"
-          className="waitlist-button ml-auto mr-[max(1rem,6vw)] flex items-center whitespace-nowrap px-4 text-[13px] md:ml-0 sm:px-7 sm:text-[14px]"
+          className="waitlist-button ml-auto mr-[max(1rem,6vw)] flex items-center whitespace-nowrap px-4 text-[13px] lg:ml-0 sm:px-7 sm:text-[14px]"
         >
           Join waitlist
         </Link>
       </nav>
 
-      <div className="nav-grid flex overflow-x-auto border-b [scrollbar-width:none] md:hidden">
-        {links("nav-grid relative flex shrink-0 items-center border-r px-4 py-2.5 text-[13px]")}
+      <div className="nav-grid flex border-b lg:hidden">
+        {links("nav-grid relative flex flex-1 items-center justify-center whitespace-nowrap border-r px-1.5 py-2.5 text-[12px] last:border-r-0 sm:text-[13px]")}
       </div>
     </header>
   );
