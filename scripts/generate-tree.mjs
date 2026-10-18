@@ -11,9 +11,9 @@ let seed = 20261018;
 const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
 
 const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-const LEAF = ["#1c3319", "#2b4f23", "#3f722c", "#5e9635", "#87b743", "#b3d466"].map(hex);
+const LEAF = ["#1f2e1f", "#334932", "#4b6239", "#6b8a45", "#87a454", "#acbe62"].map(hex);
 const BARK = ["#2e1f14", "#4a3220", "#6b4a2e", "#8a6440"].map(hex);
-const GRASS = ["#2f5a26", "#4a7f2f", "#6fa23a", "#9cc94f"].map(hex);
+const GRASS = ["#334932", "#4b6239", "#87a454", "#acbe62"].map(hex);
 
 const set = (x, y, c) => {
   x = Math.round(x);

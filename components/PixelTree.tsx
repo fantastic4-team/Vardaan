@@ -4,9 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const W = 73;
 const H = 81;
-const GROUND = 77;
 const MAX_HOLD_MS = 1200;
-const LEAF_COLORS = ["#2b4f23", "#3f722c", "#5e9635", "#87b743", "#b3d466"];
+const LEAF_COLORS = ["#334932", "#4B6239", "#87A454", "#ACBE62"];
 
 type Leaf = {
   id: number;
@@ -17,27 +16,25 @@ type Leaf = {
 let leafId = 0;
 
 function makeLeaf(burst: boolean, strength = 0.5): Leaf {
-  const startTop = 10 + Math.random() * 40;
-  const swayAmp = 1.5 + Math.random() * (burst ? 4 + strength * 8 : 6);
-  const drift = burst
-    ? (Math.random() - 0.5) * (30 + strength * 70)
-    : Math.random() < 0.2
-      ? (Math.random() - 0.5) * 70
-      : 0;
+  const startTop = 11 + Math.random() * 29;
+  // A leaf either drifts sideways in a straight line, or wanders with a random-walk sway.
+  const drifts = Math.random() < 0.35;
+  const drift = drifts ? (Math.random() - 0.5) * (burst ? 40 + strength * 40 : 70) : 0;
   const style: Record<string, string> = {
-    "--x": `${18 + Math.random() * 64}%`,
+    "--x": `${20 + Math.random() * 52}%`,
     "--startTop": `${startTop}px`,
-    "--fallDistance": `${GROUND - startTop + Math.random() * 3}px`,
-    "--dur": `${burst ? 1.8 + Math.random() * 2.2 : 4.5 + Math.random() * 5}s`,
+    "--fallDistance": `${H + 2 - startTop}px`,
+    "--dur": `${burst ? 2 + Math.random() * 2.5 : 4.5 + Math.random() * 5}s`,
     "--delay": burst ? `${Math.random() * 0.3}s` : `${-Math.random() * 9}s`,
-    "--rotation": `${(Math.random() < 0.5 ? -1 : 1) * (360 + Math.random() * 640)}deg`,
+    "--rotation": `${(Math.random() < 0.5 ? -1 : 1) * (400 + Math.random() * 600)}deg`,
     "--drift": `${drift}px`,
     "--color": LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)],
   };
-  let phase = Math.random() * Math.PI * 2;
+  let sway = 0;
+  const bias = (Math.random() - 0.5) * (burst ? 2 + strength * 3 : 3);
   for (let i = 1; i <= 10; i++) {
-    phase += 0.6 + Math.random() * 0.4;
-    style[`--sway${i}`] = drift && !burst ? "0px" : `${Math.sin(phase) * swayAmp}px`;
+    sway += bias + (Math.random() - 0.5) * 6;
+    style[`--sway${i}`] = drifts ? "0px" : `${sway}px`;
   }
   return { id: leafId++, burst, style: style as React.CSSProperties };
 }

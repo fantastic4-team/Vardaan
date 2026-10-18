@@ -88,9 +88,7 @@ export default function Home() {
 
             <div className="fade-up [animation-delay:120ms]">
               <div className="flex aspect-[13/9] w-full items-center justify-center overflow-hidden rounded-xl border border-black/6 bg-white">
-                <div className="scale-150 sm:scale-[1.75]">
-                  <PixelTree />
-                </div>
+                <PixelTree />
               </div>
               <p className="mt-3 text-center text-xs text-black/40">Press and hold the tree</p>
             </div>
