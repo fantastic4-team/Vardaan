@@ -18,14 +18,15 @@ export default function WaitlistForm({ id }: { id?: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please try again.");
       setStatus("success");
       setMessage("You're on the list. We'll be in touch soon.");
       setEmail("");
     } catch (err) {
       setStatus("error");
-      setMessage(err instanceof Error ? err.message : "Something went wrong.");
+      // fetch rejects with a TypeError when offline; don't show its raw text.
+      setMessage(err instanceof TypeError ? "Couldn't reach the server. Check your connection." : (err as Error).message);
     }
   }
 
@@ -55,7 +56,10 @@ export default function WaitlistForm({ id }: { id?: string }) {
           autoComplete="email"
           placeholder="you@company.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (status === "error") setStatus("idle");
+          }}
           className="h-9 min-w-0 flex-1 bg-transparent px-3.5 text-sm text-ink outline-none placeholder:text-black/35"
         />
         <button

@@ -77,11 +77,15 @@ export default function PixelTree() {
         type="button"
         aria-label="Shake the tree"
         onPointerDown={(e) => {
+          if (e.button !== 0) return;
           e.currentTarget.setPointerCapture(e.pointerId);
           press();
         }}
         onPointerUp={release}
         onPointerCancel={release}
+        onLostPointerCapture={release}
+        onBlur={release}
+        onContextMenu={(e) => e.preventDefault()}
         onKeyDown={(e) => {
           if ((e.key === " " || e.key === "Enter") && !e.repeat) {
             e.preventDefault();

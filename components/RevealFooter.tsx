@@ -7,6 +7,10 @@ const WHEEL_THRESHOLD = 140;
 const TOUCH_THRESHOLD = 60;
 const WHEEL_RESET_MS = 250;
 
+function isTyping(target: EventTarget | null) {
+  return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+}
+
 function atBottom() {
   return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
 }
@@ -34,18 +38,30 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
     // Once it crosses the threshold the footer is shown or hidden.
     let wheelDistance = 0;
     let wheelTimer: ReturnType<typeof setTimeout> | undefined;
+    // A wheel gesture only counts if it started at the bottom, so trackpad momentum from
+    // flinging down the page doesn't pop the footer open the moment the end is reached.
+    let gestureActive = false;
+    let gestureFromBottom = false;
     // touchStartY is where the current swipe began; the swipe length decides the same thing on mobile.
     let touchStartY: number | null = null;
 
     const onWheel = (e: WheelEvent) => {
       const isOpen = openRef.current;
-      if (!isOpen && !(e.deltaY > 0 && atBottom())) return;
-      if (isOpen && e.deltaY > 0) return;
+      if (!gestureActive) {
+        gestureActive = true;
+        gestureFromBottom = atBottom();
+      }
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(() => {
+        gestureActive = false;
+        wheelDistance = 0;
+      }, WHEEL_RESET_MS);
+
+      if (!isOpen && !(e.deltaY > 0 && gestureFromBottom && atBottom())) return;
+      if (isOpen && e.deltaY >= 0) return;
 
       if (Math.sign(e.deltaY) !== Math.sign(wheelDistance)) wheelDistance = 0;
       wheelDistance += e.deltaY;
-      clearTimeout(wheelTimer);
-      wheelTimer = setTimeout(() => (wheelDistance = 0), WHEEL_RESET_MS);
 
       if (!isOpen && wheelDistance > WHEEL_THRESHOLD) {
         setOpen(true);
@@ -78,6 +94,8 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && openRef.current) setOpen(false);
+      // Arrow/Home/End keys move the caret while typing in the waitlist form; leave those alone.
+      if (isTyping(e.target)) return;
       if (["End", "PageDown", "ArrowDown"].includes(e.key) && atBottom() && !openRef.current) setOpen(true);
       if (["Home", "PageUp", "ArrowUp"].includes(e.key) && openRef.current) setOpen(false);
     };
@@ -119,7 +137,8 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
           onClick={() => setOpen(true)}
           aria-expanded={open}
           aria-controls="site-footer"
-          className={`mx-auto flex cursor-pointer items-center gap-1.5 pb-6 text-xs text-black/40 transition hover:text-black/70 ${open ? "opacity-0" : "opacity-100"}`}
+          tabIndex={open ? -1 : 0}
+          className={`mx-auto flex cursor-pointer items-center gap-1.5 pb-6 text-xs text-black/40 transition hover:text-black/70 ${open ? "pointer-events-none opacity-0" : "opacity-100"}`}
         >
           <span className="inline-block animate-bounce">↓</span> Keep scrolling
         </button>
