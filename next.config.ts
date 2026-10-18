@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
-const nextConfig: NextConfig = {};
-
-export default nextConfig;
+export default function config(phase: string): NextConfig {
+  return {
+    // `next dev` gets its own output folder so running `next build` alongside it
+    // can't delete files the dev server is still serving.
+    distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
+  };
+}
