@@ -1,5 +1,5 @@
 import Link from "next/link";
-import PosterArt from "@/components/PosterArt";
+import GardenScene, { type Scene } from "@/components/GardenScene";
 import RevealFooter from "@/components/RevealFooter";
 import SiteNav from "@/components/SiteNav";
 
@@ -9,46 +9,50 @@ type Props = {
   eyebrow: string;
   title: string;
   intro: string;
-  /** Which part of the flower scene to show beside the header, and whether to flip it. */
-  art: { view: [number, number, number, number]; mirror?: boolean };
+  /** The garden scene behind the header. */
+  scene: Scene;
   children: React.ReactNode;
 };
 
 // Shared shell for the section pages: navbar, a short header, the content, and a closing call
 // to join the waitlist.
-export default function SectionPage({ eyebrow, title, intro, art, children }: Props) {
+export default function SectionPage({ eyebrow, title, intro, scene, children }: Props) {
   return (
     <RevealFooter>
       <div id="top" className="min-h-svh">
         <SiteNav />
 
-        <main className="px-[max(1.5rem,calc(6vw+1.75rem))] pb-24 pt-14 lg:pt-20">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16">
-            <div>
-              <p className="reveal text-[12px] uppercase tracking-[0.18em] text-mute" style={step(0)}>
-                {eyebrow}
-              </p>
-              <h1
-                className="reveal mt-4 max-w-[760px] text-[clamp(36px,5.4vw,64px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink"
-                style={step(1)}
-              >
-                {title}
-              </h1>
-              <p
-                className="reveal mt-6 max-w-[560px] text-[16px] leading-[26px] text-ink/70 lg:text-[17px] lg:leading-[28px]"
-                style={step(2)}
-              >
-                {intro}
-              </p>
-            </div>
-
-            <figure className="poster-art-in relative aspect-[4/5] w-full max-w-[340px] overflow-hidden rounded-[14px] shadow-[0_30px_70px_-30px_rgba(0,0,0,0.8)] lg:w-[340px]">
-              <PosterArt view={art.view} mirror={art.mirror} className="absolute inset-0 h-full w-full" />
-              <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
-            </figure>
+        {/* Header band: a garden scene as a background, darkened on the left for the text and
+            fading into the page at the bottom. */}
+        <section className="relative overflow-hidden">
+          <div aria-hidden="true" className="poster-art-in absolute inset-0">
+            <GardenScene scene={scene} className="absolute inset-0 h-full w-full" />
+            <div className="poster-grain absolute inset-0" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(20,19,18,0.92)_0%,rgba(20,19,18,0.75)_38%,rgba(20,19,18,0.15)_75%,rgba(20,19,18,0)_100%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(180deg,rgba(20,19,18,0)_0%,#141312_100%)]" />
           </div>
 
-          <div className="reveal mt-14 lg:mt-20" style={step(3)}>
+          <div className="relative px-[max(1.5rem,calc(6vw+1.75rem))] pb-28 pt-16 lg:pb-36 lg:pt-24">
+            <p className="reveal text-[12px] uppercase tracking-[0.18em] text-ink/70" style={step(0)}>
+              {eyebrow}
+            </p>
+            <h1
+              className="reveal mt-4 max-w-[720px] text-[clamp(36px,5.4vw,64px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink"
+              style={step(1)}
+            >
+              {title}
+            </h1>
+            <p
+              className="reveal mt-6 max-w-[540px] text-[16px] leading-[26px] text-ink/80 lg:text-[17px] lg:leading-[28px]"
+              style={step(2)}
+            >
+              {intro}
+            </p>
+          </div>
+        </section>
+
+        <main className="px-[max(1.5rem,calc(6vw+1.75rem))] pb-24 pt-4">
+          <div className="reveal" style={step(3)}>
             {children}
           </div>
 
@@ -80,3 +84,4 @@ export function CardGrid({ items }: { items: { title: string; body: string }[] }
     </div>
   );
 }
+

@@ -44,7 +44,7 @@ export default function Faq() {
       eyebrow="FAQ"
       title="Questions, answered."
       intro="Everything you need to know about Vardaan and the private beta. Can't find what you're looking for? Join the waitlist and ask us directly."
-      art={{ view: [300, -60, 720, 900], mirror: true }}
+      scene="daisies"
     >
       <div className="nav-grid max-w-[880px] border-t">
         {FAQS.map(({ q, a }) => (

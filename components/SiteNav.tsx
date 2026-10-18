@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logo from "@/components/Logo";
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -40,7 +39,7 @@ export default function SiteNav() {
           className="nav-grid ml-[max(1rem,6vw)] flex items-center gap-3 border-x px-4 py-3.5 sm:px-7"
           aria-label="Vardaan Beta home"
         >
-          <Logo height={22} priority className="invert" />
+          <span className="font-poster text-[24px] font-semibold leading-none tracking-[-0.045em] text-ink">vardaan</span>
           <span className="beta-glass">Beta</span>
         </Link>
 

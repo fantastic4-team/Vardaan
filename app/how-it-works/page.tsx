@@ -40,7 +40,7 @@ export default function HowItWorks() {
       eyebrow="How it works"
       title="One phone call, start to finish."
       intro="Vardaan turns a phone call into a capable personal agent. You describe the task, it plans the steps, confirms the details and takes the work off your hands."
-      art={{ view: [80, 260, 720, 900] }}
+      scene="tulips"
     >
       <CardGrid items={STEPS} />
 
@@ -56,10 +56,12 @@ export default function HowItWorks() {
 
       <div className="nav-grid mt-20 grid gap-10 border-t pt-12 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <h2 className="text-[clamp(26px,3vw,36px)] font-medium tracking-[-0.02em] text-ink">It asks before it acts</h2>
-        <p className="text-[16px] leading-[26px] text-ink/70">
+        <div>
+          <p className="text-[16px] leading-[26px] text-ink/70">
           Vardaan remembers your preferences and context, so every call gets faster. When information is missing or a
-          decision carries real consequences, it calls you back for approval instead of guessing.
-        </p>
+            decision carries real consequences, it calls you back for approval instead of guessing.
+          </p>
+        </div>
       </div>
     </SectionPage>
   );
