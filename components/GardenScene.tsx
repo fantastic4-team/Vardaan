@@ -1,10 +1,10 @@
 // Wide, soft-focus garden scenes for the section page headers, drawn in the same grainy style as the
-// home poster but each with its own subject: a tulip field, a lotus pond and a daisy meadow at dusk.
+// home poster but each with its own subject: a tulip field, a lotus pond, a daisy meadow and poppies.
 // Layers are blurred by depth; grain is added on top in CSS (see .poster-grain).
 const W = 1600;
 const H = 700;
 
-export type Scene = "tulips" | "lotus" | "daisies";
+export type Scene = "tulips" | "lotus" | "daisies" | "poppies";
 
 // A fat, round-tipped petal standing on (x, base), pointing up to `top`.
 function petal(x: number, base: number, top: number, w: number) {
@@ -47,6 +47,19 @@ function Lotus({ x, y, s }: { x: number; y: number; s: number }) {
   );
 }
 
+function Poppy({ x, y, s, tilt }: { x: number; y: number; s: number; tilt: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${tilt}) scale(${s})`}>
+      <path d="M0 10 C 10 120 -8 220 4 380" stroke="url(#gs-stem)" strokeWidth="10" fill="none" strokeLinecap="round" />
+      {[-70, 70, -25, 25].map((a, k) => (
+        <ellipse key={k} cx="0" cy="-48" rx="46" ry="58" fill="url(#gs-coral)" transform={`rotate(${a})`} />
+      ))}
+      <circle r="18" fill="#2b1a2e" />
+      <circle r="8" fill="#f6e27a" opacity="0.8" />
+    </g>
+  );
+}
+
 function Daisy({ x, y, s, tilt }: { x: number; y: number; s: number; tilt: number }) {
   return (
     <g transform={`translate(${x} ${y}) rotate(${tilt}) scale(${s})`}>
@@ -60,9 +73,15 @@ function Daisy({ x, y, s, tilt }: { x: number; y: number; s: number; tilt: numbe
 }
 
 export default function GardenScene({ scene, className = "" }: { scene: Scene; className?: string }) {
-  const rand = rng(scene === "tulips" ? 7 : scene === "lotus" ? 19 : 31);
+  const rand = rng(scene === "tulips" ? 7 : scene === "lotus" ? 19 : scene === "daisies" ? 31 : 43);
   const sky =
-    scene === "tulips" ? ["#5560e6", "#8a93f4"] : scene === "lotus" ? ["#3b46b8", "#7f6fd6"] : ["#5a4fc8", "#f19aa8"];
+    scene === "tulips"
+      ? ["#5560e6", "#8a93f4"]
+      : scene === "lotus"
+        ? ["#3b46b8", "#7f6fd6"]
+        : scene === "daisies"
+          ? ["#5a4fc8", "#f19aa8"]
+          : ["#4c58dc", "#b9b4f6"];
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true" className={className}>
@@ -208,6 +227,28 @@ export default function GardenScene({ scene, className = "" }: { scene: Scene; c
           </g>
           <g filter="url(#gs-front)">
             <Daisy x={1540} y={480} s={1.6} tilt={-14} />
+          </g>
+        </>
+      )}
+      {scene === "poppies" && (
+        <>
+          <g filter="url(#gs-far)">
+            <path d={hill(360, 70, 0.8)} fill="url(#gs-hill-far)" />
+            {Array.from({ length: 26 }, (_, k) => (
+              <Poppy key={k} x={30 + k * 62 + rand() * 30} y={350 + rand() * 60} s={0.3} tilt={(rand() - 0.5) * 24} />
+            ))}
+          </g>
+          <g filter="url(#gs-mid)">
+            <path d={hill(500, 40, 2.4)} fill="url(#gs-hill-near)" />
+            {Array.from({ length: 9 }, (_, k) => (
+              <Poppy key={k} x={160 + k * 165 + rand() * 50} y={460 + rand() * 40} s={0.6} tilt={(rand() - 0.5) * 20} />
+            ))}
+          </g>
+          <g filter="url(#gs-near)">
+            <Poppy x={1160} y={300} s={1.05} tilt={-10} />
+          </g>
+          <g filter="url(#gs-front)">
+            <Poppy x={1450} y={260} s={1.7} tilt={12} />
           </g>
         </>
       )}

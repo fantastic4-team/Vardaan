@@ -8,6 +8,7 @@ export const NAV_LINKS = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/use-cases", label: "Use cases" },
   { href: "/faq", label: "FAQ" },
+  { href: "/team", label: "Team" },
 ];
 
 // Dotted-grid navbar: brand cell on the left, section links boxed in the middle, and a solid
