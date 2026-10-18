@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-oxygen), ui-sans-serif, system-ui, sans-serif;
+  --font-logo: var(--font-garamond), "Times New Roman", serif;
+  --color-ink: #0b0b0b;
+  --color-leaf-dark: #334932;
+  --color-leaf: #87a454;
+  --color-leaf-light: #acbe62;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* ---------- Pixel tree ---------- */
+
+.tree-shake {
+  transform-origin: center bottom;
+  animation: tree-shake 700ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes tree-shake {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(calc(-6deg * var(--bounce-intensity, 0.5))) scaleY(0.98); }
+  30% { transform: rotate(calc(5deg * var(--bounce-intensity, 0.5))); }
+  45% { transform: rotate(calc(-3.5deg * var(--bounce-intensity, 0.5))) scaleY(1.01); }
+  60% { transform: rotate(calc(2deg * var(--bounce-intensity, 0.5))); }
+  80% { transform: rotate(calc(-1deg * var(--bounce-intensity, 0.5))); }
+  100% { transform: rotate(0deg); }
+}
+
+.tree-leaf {
+  position: absolute;
+  left: var(--x);
+  top: var(--startTop);
+  width: 3px;
+  height: 3px;
+  background: var(--color);
+  image-rendering: pixelated;
+  opacity: 0;
+  animation: leaf-fall var(--dur) linear var(--delay) infinite;
+}
+
+.tree-leaf.burst {
+  animation: leaf-fall var(--dur) cubic-bezier(0.3, 0.1, 0.6, 1) var(--delay) 1 forwards;
+}
+
+@keyframes leaf-fall {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+  6% { opacity: 1; }
+  10% { transform: translate(var(--sway1), calc(var(--fallDistance) * 0.1)) rotate(calc(var(--rotation) * 0.1)); }
+  20% { transform: translate(var(--sway2), calc(var(--fallDistance) * 0.2)) rotate(calc(var(--rotation) * 0.2)); }
+  30% { transform: translate(var(--sway3), calc(var(--fallDistance) * 0.3)) rotate(calc(var(--rotation) * 0.3)); }
+  40% { transform: translate(var(--sway4), calc(var(--fallDistance) * 0.4)) rotate(calc(var(--rotation) * 0.4)); }
+  50% { transform: translate(calc(var(--sway5) + var(--drift) * 0.5), calc(var(--fallDistance) * 0.5)) rotate(calc(var(--rotation) * 0.5)); }
+  60% { transform: translate(calc(var(--sway6) + var(--drift) * 0.6), calc(var(--fallDistance) * 0.6)) rotate(calc(var(--rotation) * 0.6)); }
+  70% { transform: translate(calc(var(--sway7) + var(--drift) * 0.7), calc(var(--fallDistance) * 0.7)) rotate(calc(var(--rotation) * 0.7)); }
+  80% { transform: translate(calc(var(--sway8) + var(--drift) * 0.8), calc(var(--fallDistance) * 0.8)) rotate(calc(var(--rotation) * 0.8)); }
+  90% { opacity: 1; transform: translate(calc(var(--sway9) + var(--drift) * 0.9), calc(var(--fallDistance) * 0.9)) rotate(calc(var(--rotation) * 0.9)); }
+  100% { opacity: 0; transform: translate(calc(var(--sway10) + var(--drift)), var(--fallDistance)) rotate(var(--rotation)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-shake,
+  .tree-leaf {
+    animation: none !important;
+  }
+}
+
+/* ---------- Entrance ---------- */
+
+.fade-up {
+  animation: fade-up 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
