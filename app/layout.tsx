@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Inter, Inter_Tight, Poppins } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -15,10 +15,10 @@ const interTight = Inter_Tight({
   variable: "--font-inter-tight",
 });
 
-const mono = JetBrains_Mono({
+const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-jetbrains",
+  weight: ["600"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -54,7 +54,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable} ${mono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${interTight.variable} ${poppins.variable}`}>
       <body>{children}</body>
     </html>
   );

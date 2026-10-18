@@ -1,9 +1,8 @@
-import AsciiArt from "@/components/AsciiArt";
 import Logo from "@/components/Logo";
 import NextMonth from "@/components/NextMonth";
+import PosterArt from "@/components/PosterArt";
 import RevealFooter from "@/components/RevealFooter";
 import WaitlistForm from "@/components/WaitlistForm";
-import { ASCII_TREE } from "@/lib/ascii-tree";
 import { site } from "@/lib/site";
 
 const JSON_LD = {
@@ -22,17 +21,17 @@ export default function Home() {
       <div id="top" className="relative flex min-h-svh flex-col overflow-hidden">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
-        <nav aria-label="Main" className="reveal flex justify-center pt-7" style={step(0)}>
+        <nav aria-label="Main" className="reveal relative z-10 flex justify-center pt-7" style={step(0)}>
           <a href="#top" className="flex items-center gap-2.5">
             <Logo height={20} priority className="invert" />
             <span className="beta-glass">Beta</span>
           </a>
         </nav>
 
-        <main className="mx-auto grid w-full max-w-[1200px] flex-1 items-center gap-12 px-6 pb-16 pt-12 sm:px-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8 lg:pt-6">
-          <div className="max-w-[640px]">
+        <main className="mx-auto grid w-full max-w-[1200px] flex-1 items-center gap-12 px-6 pb-16 pt-12 sm:px-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-10 lg:pt-6">
+          <div className="max-w-[600px]">
             <h1
-              className="reveal font-display text-[44px] font-semibold leading-[0.98] tracking-[-0.035em] text-ink sm:text-[64px] lg:text-[80px]"
+              className="reveal font-display text-[44px] font-semibold leading-[0.98] tracking-[-0.035em] text-ink sm:text-[64px] lg:text-[76px]"
               style={step(1)}
             >
               The AI agent you can call for anything.
@@ -55,19 +54,20 @@ export default function Home() {
             </div>
           </div>
 
-          {/* The full ASCII tree on the black page, with a stepped blue panel as a window onto it (the
-              same tree shows in lime inside) and a slim maroon strip behind its left edge. Sizes are in
-              em of the character size, so every layer stays aligned at every breakpoint. */}
-          <div className="reveal justify-self-center text-[5.2px] sm:text-[7.4px] lg:text-[9px] lg:justify-self-end" style={step(4)}>
-            <AsciiArt art={ASCII_TREE} className="ascii" wrapperClassName="ascii-stage">
-              <div aria-hidden="true" className="ascii-strip" />
-              <div className="ascii-panel">
-                <pre data-ascii-mirror aria-hidden="true" className="ascii ascii-on-blue ascii-mirror">
-                  {ASCII_TREE}
-                </pre>
-              </div>
-            </AsciiArt>
-          </div>
+          {/* A portrait poster card: soft-focus botanical art, grain, and the wordmark set into the petals. */}
+          <figure
+            className="poster-card poster-art-in relative aspect-[3/4] w-[min(100%,340px)] justify-self-center overflow-hidden sm:w-[400px] lg:w-[440px] lg:justify-self-end"
+            style={{ animationDelay: "250ms" }}
+          >
+            <PosterArt className="absolute inset-0 h-full w-full" />
+            <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
+            <p aria-hidden="true" className="poster-wordmark poster-wordmark-in absolute inset-x-0 top-[60%] text-center text-[60px] sm:text-[78px] lg:text-[86px]">
+              vardaan
+            </p>
+            <figcaption className="absolute inset-x-0 bottom-5 text-center text-[10px] uppercase tracking-[0.24em] text-white/90">
+              Vardaan &middot; Beta
+            </figcaption>
+          </figure>
         </main>
       </div>
     </RevealFooter>

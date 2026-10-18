@@ -32,7 +32,7 @@ export default function WaitlistForm({ id }: { id?: string }) {
 
   if (status === "success") {
     return (
-      <div className="waitlist-field h-12 w-full items-center gap-2 px-4 text-ink">
+      <div className="waitlist-field h-12 w-full items-center gap-2 px-5 text-white">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-leaf" />
         {message}
       </div>
@@ -60,17 +60,17 @@ export default function WaitlistForm({ id }: { id?: string }) {
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          className="h-12 min-w-0 flex-1 bg-transparent px-4 text-ink caret-ink outline-none placeholder:text-mute"
+          className="h-12 min-w-0 flex-1 bg-transparent px-5 text-white caret-white outline-none"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="waitlist-button shrink-0 cursor-pointer px-5 disabled:cursor-wait disabled:opacity-70"
+          className="waitlist-button m-1 shrink-0 cursor-pointer rounded-full px-5 disabled:cursor-wait disabled:opacity-70"
         >
           {status === "loading" ? "Joining…" : "Join waitlist"}
         </button>
       </form>
-      {status === "error" && <p className="mt-2 text-[13px] text-[#ff8a7a]">{message}</p>}
+      {status === "error" && <p className="mt-2 pl-5 text-[13px] text-[#ffd2c8]">{message}</p>}
     </div>
   );
 }
