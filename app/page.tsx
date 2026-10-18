@@ -1,8 +1,9 @@
-import DotMatrix from "@/components/DotMatrix";
+import AsciiArt from "@/components/AsciiArt";
 import Logo from "@/components/Logo";
 import NextMonth from "@/components/NextMonth";
 import RevealFooter from "@/components/RevealFooter";
 import WaitlistForm from "@/components/WaitlistForm";
+import { ASCII_TREE } from "@/lib/ascii-tree";
 import { site } from "@/lib/site";
 
 const JSON_LD = {
@@ -54,12 +55,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Dot-matrix voice spectrogram: a blue block with a stepped corner and a dark red bar behind it. */}
-          <div className="reveal relative justify-self-center lg:justify-self-end" style={step(4)}>
-            <div aria-hidden="true" className="absolute -left-5 bottom-0 top-[14%] w-5 bg-[#5a2620] sm:-left-7 sm:w-7" />
-            <div className="dot-panel relative h-[400px] w-[300px] bg-[#3b7bf2] sm:h-[500px] sm:w-[380px] lg:h-[560px] lg:w-[420px]">
-              <DotMatrix />
-            </div>
+          {/* The ASCII tree in a thin blue frame. */}
+          <div className="ascii-frame reveal justify-self-center lg:justify-self-end" style={step(4)}>
+            <AsciiArt art={ASCII_TREE} className="ascii text-[3.6px] sm:text-[5.6px] lg:text-[7.4px]" />
           </div>
         </main>
       </div>
