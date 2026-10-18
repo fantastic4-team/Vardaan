@@ -23,7 +23,8 @@ function arch(x0: number, x1: number, top: number, base = H + 60) {
 function crownLeaf(cx: number, cy: number, dir: number, reach: number, drop: number) {
   const ex = cx + dir * reach;
   const ey = cy + drop;
-  return `M${cx} ${cy} C${cx + dir * reach * 0.35} ${cy - 70} ${ex - dir * 10} ${cy - 40} ${ex} ${ey} C${ex - dir * 30} ${cy + 10} ${cx + dir * reach * 0.35} ${cy - 20} ${cx} ${cy + 18} Z`;
+  // The tip hooks back inward, like a curling frond.
+  return `M${cx} ${cy} C${cx + dir * reach * 0.3} ${cy - 95} ${ex + dir * 25} ${cy - 70} ${ex} ${ey} C${ex - dir * 22} ${ey - 30} ${ex - dir * 20} ${cy - 25} ${cx + dir * reach * 0.3} ${cy - 22} C${cx + dir * 25} ${cy - 18} ${cx + dir * 10} ${cy} ${cx} ${cy + 18} Z`;
 }
 
 const BLOOM_X = 450;
@@ -36,14 +37,23 @@ const BLOOM = [
   { angle: 0, top: 470, w: 255 },
 ];
 
-// `fit="contain"` shows the whole poster; `fit="cover"` fills the box, cropping the edges.
-export default function PosterArt({ className = "", fit = "contain" }: { className?: string; fit?: "contain" | "cover" }) {
+// The full 3:4 poster is always visible in the middle (the viewBox is fitted with "meet"), and
+// the scene carries on past its edges with overflow visible, so the art fills a box of any shape
+// without cropping or stretching. The wordmark and signature are drawn in, so they stay aligned.
+export default function PosterArt({ className = "" }: { className?: string }) {
   return (
-    <svg aria-hidden="true" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio={fit === "cover" ? "xMidYMid slice" : "xMidYMid meet"} className={className}>
+    <svg
+      role="img"
+      aria-label="Vardaan"
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="xMidYMid meet"
+      overflow="visible"
+      className={className}
+    >
       <defs>
         <linearGradient id="pa-sky" x1="0" y1="0" x2="0.3" y2="1">
-          <stop offset="0" stopColor="#5d63e4" />
-          <stop offset="1" stopColor="#7a86f0" />
+          <stop offset="0" stopColor="#535ce6" />
+          <stop offset="1" stopColor="#6f7cf2" />
         </linearGradient>
         {/* Volume shading: lit from the upper left, darkening toward the far rim. */}
         <radialGradient id="pa-stalk" cx="0.3" cy="0.2" r="1">
@@ -51,10 +61,10 @@ export default function PosterArt({ className = "", fit = "contain" }: { classNa
           <stop offset="0.55" stopColor="#4c9c3e" />
           <stop offset="1" stopColor="#24622b" />
         </radialGradient>
-        <radialGradient id="pa-arch" cx="0.35" cy="0.15" r="0.9">
-          <stop offset="0" stopColor="#3d8a3a" />
-          <stop offset="0.5" stopColor="#235a28" />
-          <stop offset="1" stopColor="#123a1f" />
+        <radialGradient id="pa-arch" cx="0.35" cy="0.12" r="0.95">
+          <stop offset="0" stopColor="#2f7330" />
+          <stop offset="0.45" stopColor="#174a1f" />
+          <stop offset="1" stopColor="#0b2b16" />
         </radialGradient>
         <radialGradient id="pa-leaf" cx="0.3" cy="0.2" r="1">
           <stop offset="0" stopColor="#a6e05e" />
@@ -99,6 +109,14 @@ export default function PosterArt({ className = "", fit = "contain" }: { classNa
           <stop offset="1" stopColor="#d9a4ff" />
         </radialGradient>
 
+        <filter id="pa-glow" x="-10%" y="-30%" width="120%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="glow" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="soft" />
+          <feMerge>
+            <feMergeNode in="glow" />
+            <feMergeNode in="soft" />
+          </feMerge>
+        </filter>
         <filter id="pa-far" x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur stdDeviation="7" />
         </filter>
@@ -113,7 +131,32 @@ export default function PosterArt({ className = "", fit = "contain" }: { classNa
         </filter>
       </defs>
 
+      {/* Sky well past every edge, so wide or tall boxes never show a gap. */}
+      <rect x={-1600} y={-1600} width={W + 3200} height={H + 3200} fill="#5f6bec" />
       <rect width={W} height={H} fill="url(#pa-sky)" />
+
+      {/* Extension: stalks, lavender petals and arches carrying the scene out to the sides. */}
+      <g filter="url(#pa-far)">
+        <path d={arch(-420, -250, -200)} fill="url(#pa-stalk)" />
+        <path d={arch(1080, 1230, -180)} fill="url(#pa-stalk)" />
+        <path d={arch(1500, 1640, -150)} fill="url(#pa-stalk)" opacity="0.9" />
+        <path d={arch(-760, -620, -120)} fill="url(#pa-stalk)" opacity="0.9" />
+      </g>
+      <g filter="url(#pa-mid)">
+        {[
+          [1080, 560, 150, 12],
+          [1210, 520, 160, 0],
+          [-180, 520, 150, -10],
+          [-320, 560, 150, 4],
+        ].map(([x, base, w, a], k) => (
+          <path key={k} d={petal(x, base, base - 330, w)} fill="url(#pa-lilac)" transform={`rotate(${a} ${x} ${base})`} />
+        ))}
+        <path d={arch(-700, -120, 420)} fill="url(#pa-arch)" />
+        <path d={arch(980, 1560, 400)} fill="url(#pa-arch)" />
+        <path d={arch(1450, 2000, 480)} fill="url(#pa-arch)" opacity="0.9" />
+        <path d={arch(-1150, -600, 470)} fill="url(#pa-arch)" opacity="0.9" />
+        <rect x={-1600} y={H - 40} width={W + 3200} height={1700} fill="#173f24" />
+      </g>
 
       {/* Far: tall stalks reaching out of the top of the frame. */}
       <g filter="url(#pa-far)">
@@ -183,6 +226,28 @@ export default function PosterArt({ className = "", fit = "contain" }: { classNa
           <path key={k} d={petal(x, base, base - 290, w)} fill="url(#pa-coral)" transform={`rotate(${a} ${x} ${base})`} />
         ))}
       </g>
+      {/* Extension in front: bushes along the bottom on both sides. */}
+      <g filter="url(#pa-front)">
+        <path d={arch(-700, -140, 840)} fill="url(#pa-bush)" />
+        <path d={arch(1020, 1600, 860)} fill="url(#pa-bush)" />
+        <path d={arch(-1300, -650, 900)} fill="url(#pa-bush)" />
+        <path d={arch(1500, 2200, 900)} fill="url(#pa-bush)" />
+      </g>
+
+      {/* Wordmark set softly into the bloom, and the logo as a signature. */}
+      <g className="poster-wordmark-in">
+        <text
+          x={W / 2}
+          y={888}
+          textAnchor="middle"
+          fill="#ecf7b4"
+          filter="url(#pa-glow)"
+          style={{ fontFamily: "var(--font-poster)", fontWeight: 600, fontSize: 171, letterSpacing: "-0.035em" }}
+        >
+          vardaan
+        </text>
+      </g>
+      <image href="/images/logo.png" x={W / 2 - 52} y={1140} width={104} height={18} style={{ filter: "invert(1)", opacity: 0.9 }} />
     </svg>
   );
 }

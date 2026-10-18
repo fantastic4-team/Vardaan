@@ -45,7 +45,16 @@ export default function Home() {
         {/* Split screen: the letter on the left, the full poster on a graph-paper panel on the right. */}
         <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
           <div className="flex min-h-0 min-w-0 flex-col justify-between gap-6 px-[max(1.5rem,calc(6vw+1.75rem))] py-7 lg:py-[clamp(28px,7vh,72px)] lg:pr-12">
-            <div>
+            <div className="lg:pt-[clamp(8px,4vh,40px)]">
+              <a
+                href="#join"
+                className="reveal mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/12 bg-white/[0.04] py-1 pl-1 pr-3.5 text-[13px] text-ink/80 transition hover:border-white/25 hover:text-ink lg:mb-7"
+                style={step(1)}
+              >
+                <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-medium text-[#0b1626]">New</span>
+                Private beta is now open
+                <span aria-hidden="true" className="text-ink/50">&rarr;</span>
+              </a>
               <h1
                 className="reveal text-[clamp(34px,5.4vh,46px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink sm:text-[clamp(46px,7.4vh,66px)] lg:text-[clamp(50px,8.4vh,76px)]"
                 style={step(1)}
@@ -74,27 +83,13 @@ export default function Home() {
             </div>
           </div>
 
-          {/* The whole poster, uncropped (3:4), as large as the panel allows. Behind it, a blurred and
-              darkened copy of the same art fills the rest of the panel. */}
-          <div className="nav-grid relative flex h-[clamp(170px,calc(100svh-500px),42svh)] min-h-0 items-center justify-center overflow-hidden border-t p-3 lg:h-auto lg:border-l lg:border-t-0 lg:p-5">
-            <div aria-hidden="true" className="absolute inset-0 scale-110 blur-2xl brightness-[0.55] saturate-[1.2]">
-              <PosterArt fit="cover" className="h-full w-full" />
-            </div>
-            <figure className="poster-art-in @container relative aspect-[3/4] h-full max-w-full overflow-hidden rounded-[4px] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)]">
-              <PosterArt className="absolute inset-0 h-full w-full" />
-              <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
-              <p
-                aria-hidden="true"
-                className="poster-wordmark poster-wordmark-in absolute inset-x-0 top-[64%] text-center text-[19cqw]"
-              >
-                vardaan
-              </p>
-              <figcaption className="absolute inset-x-0 bottom-[3.5%] flex justify-center">
-                <Logo height={12} className="invert opacity-90" />
-                <span className="sr-only">Vardaan Beta</span>
-              </figcaption>
-            </figure>
-          </div>
+          {/* The poster art fills the whole right panel: the full composition sits in the middle and
+              the scene continues out to the panel's edges. */}
+          <figure className="poster-art-in nav-grid relative h-[clamp(140px,calc(100svh-540px),40svh)] min-h-0 overflow-hidden border-t lg:h-auto lg:border-l lg:border-t-0">
+            <PosterArt className="absolute inset-0 h-full w-full" />
+            <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
+            <figcaption className="sr-only">Vardaan Beta</figcaption>
+          </figure>
         </main>
       </div>
     </RevealFooter>
