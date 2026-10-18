@@ -54,11 +54,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Dot-matrix panel: a blue block with a stepped corner and a dark red bar behind it. */}
+          {/* Dot-matrix voice spectrogram: a blue block with a stepped corner and a dark red bar behind it. */}
           <div className="reveal relative justify-self-center lg:justify-self-end" style={step(4)}>
             <div aria-hidden="true" className="absolute -left-5 bottom-0 top-[14%] w-5 bg-[#5a2620] sm:-left-7 sm:w-7" />
             <div className="dot-panel relative h-[400px] w-[300px] bg-[#3b7bf2] sm:h-[500px] sm:w-[380px] lg:h-[560px] lg:w-[420px]">
-              <DotMatrix src="/images/tree.png" />
+              <DotMatrix />
             </div>
           </div>
         </main>

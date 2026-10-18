@@ -2,28 +2,55 @@
 
 import { useEffect, useRef } from "react";
 
+// A dot-matrix voice spectrogram on a blue panel. Columns are frequencies and rows are time:
+// speech shows up as bright bands (formants) with fine vertical harmonic streaks, arriving in
+// syllable-sized bursts with quiet gaps, and the whole thing drifts slowly upward like a live call.
 const SPACING = 7; // px between dot centres
 const DOT = "#ecf8a8";
-const GROW_MS = 1500; // the tree grows in from the base of its trunk
-const FADE_MS = 420; // each dot's own grow-in
+const SCROLL = 0.0045; // rows per millisecond
+const INTRO_MS = 1100; // rows fade in from the bottom
 const FRAME_MS = 33;
 const POINTER_RADIUS = 9; // in cells
-const CROWN = 0.68; // rows above this fraction of the tree are foliage and catch the wind
-// The panel's top part is narrower than its stepped base (see .dot-panel), so the tree is fitted
-// inside that narrower width.
-const USABLE_WIDTH = 0.84;
+// Frequencies span slightly wider than the panel so the right edge never looks cut off.
+const USABLE_WIDTH = 0.95;
 
-type Cell = { level: number; reveal: number; crown: boolean };
-
-function hash(a: number, b: number) {
-  let h = (a * 374761393 + b * 668265263) | 0;
-  h = (h ^ (h >>> 13)) * 1274126177;
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+function hash(n: number) {
+  const s = Math.sin(n * 127.1) * 43758.5453;
+  return s - Math.floor(s);
 }
 
-// A blue dot-matrix panel: the whole panel is a faint grid of dots, and the image (the tree)
-// is drawn into it as larger, brighter dots sampled from its pixels.
-export default function DotMatrix({ src, className = "" }: { src: string; className?: string }) {
+// Smooth 1D value noise in [0, 1].
+function noise(x: number) {
+  const i = Math.floor(x);
+  const f = x - i;
+  const u = f * f * (3 - 2 * f);
+  return hash(i) * (1 - u) + hash(i + 1) * u;
+}
+
+function smoothstep(a: number, b: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+}
+
+// Loudness of the "voice" at frequency x (0..1 across the usable width) and time y (in rows).
+function intensity(x: number, y: number, col: number) {
+  // Syllables: frequent bursts of sound over a quiet floor, so no part of the panel goes blank.
+  const speech = 0.22 + 0.78 * smoothstep(0.3, 0.56, noise(y * 0.16)) * (0.6 + 0.4 * noise(y * 0.37 + 50));
+  // Three formants whose centres glide slowly, like vowels changing.
+  const f1 = 0.16 + 0.07 * noise(y * 0.05 + 10);
+  const f2 = 0.43 + 0.13 * noise(y * 0.05 + 20);
+  const f3 = 0.72 + 0.07 * noise(y * 0.05 + 30);
+  const band = (c: number, w: number) => Math.exp(-(((x - c) / w) ** 2));
+  const formants = band(f1, 0.07) + 0.8 * band(f2, 0.08) + 0.55 * band(f3, 0.06);
+  // Harmonics: fine vertical streaks across the spectrum, a little stronger at low frequencies.
+  const harmonics = 0.5 * (0.5 + 0.5 * Math.cos(col * 1.05)) * Math.exp(-x * 0.55);
+  // Each column (frequency bin) has its own gain, which breaks the bands into distinct streaks.
+  const gain = 0.45 + 0.85 * hash(col * 3.1 + 0.5) ** 2;
+  const grain = 0.14 * hash(col * 31.7 + Math.floor(y) * 7.3);
+  return speech * (formants + harmonics) * gain + grain * speech;
+}
+
+export default function DotMatrix({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -34,13 +61,11 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
 
     let cols = 0;
     let rows = 0;
-    let cells: Cell[] = [];
-    let image: HTMLImageElement | null = null;
-    let start = performance.now();
     let pointer: { c: number; r: number } | null = null;
     let visible = true;
     let raf = 0;
     let last = 0;
+    const start = performance.now();
 
     const layout = () => {
       const { width, height } = canvas.getBoundingClientRect();
@@ -50,46 +75,6 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.floor(width / SPACING);
       rows = Math.floor(height / SPACING);
-      cells = new Array(cols * rows).fill(null).map(() => ({ level: 0, reveal: 0, crown: false }));
-      if (!image) return;
-
-      // Fit the tree into the panel's narrower top part, standing near the bottom edge.
-      const ratio = image.naturalWidth / image.naturalHeight;
-      const usable = Math.floor(cols * USABLE_WIDTH);
-      let th = Math.round(rows * 0.84);
-      let tw = Math.round(th * ratio);
-      if (tw > usable * 0.92) {
-        tw = Math.round(usable * 0.92);
-        th = Math.round(tw / ratio);
-      }
-      const ox = Math.round((usable - tw) / 2);
-      const oy = rows - th - Math.max(2, Math.round(rows * 0.05));
-
-      const off = document.createElement("canvas");
-      off.width = cols;
-      off.height = rows;
-      const octx = off.getContext("2d", { willReadFrequently: true });
-      if (!octx) return;
-      octx.imageSmoothingQuality = "high";
-      octx.drawImage(image, ox, oy, tw, th);
-      const px = octx.getImageData(0, 0, cols, rows).data;
-
-      const baseC = ox + tw / 2;
-      const baseR = oy + th;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const i = (r * cols + c) * 4;
-          const a = px[i + 3] / 255;
-          if (a < 0.3) continue;
-          const lum = (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255 / a;
-          const dist = Math.hypot((c - baseC) / cols, (baseR - r) / rows);
-          cells[r * cols + c] = {
-            level: Math.min(1, Math.max(0.15, (lum - 0.1) / 0.6)),
-            reveal: dist * GROW_MS + hash(r, c) * 260,
-            crown: r < oy + th * CROWN,
-          };
-        }
-      }
     };
 
     const draw = (t: number) => {
@@ -98,27 +83,24 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
       ctx.fillStyle = DOT;
       const offX = (width - (cols - 1) * SPACING) / 2;
       const offY = (height - (rows - 1) * SPACING) / 2;
+      const usable = cols * USABLE_WIDTH;
+      const scroll = reduced ? 0 : t * SCROLL;
 
       for (let r = 0; r < rows; r++) {
+        // Rows are sampled in threes so edges step like the reference's blocky clusters.
+        const y = Math.floor((r + scroll) / 3) * 3;
+        const intro = reduced ? 1 : smoothstep(0, 1, (t - ((rows - r) / rows) * INTRO_MS * 0.7) / 400);
         for (let c = 0; c < cols; c++) {
-          const cell = cells[r * cols + c];
-          const x = offX + c * SPACING;
-          const y = offY + r * SPACING;
+          const x = c / usable;
+          let level = x > 1.05 ? 0 : intensity(x, y, c);
           let radius = 0.75;
           let alpha = 0.38;
 
-          if (cell.level > 0) {
-            const p = reduced ? 1 : Math.min(1, Math.max(0, (t - cell.reveal) / FADE_MS));
-            const eased = 1 - (1 - p) ** 3;
-            const full = 0.9 + cell.level * 1.9;
-            radius = 0.75 + (full - 0.75) * eased;
-            alpha = 0.38 + (0.5 + cell.level * 0.5 - 0.38) * eased;
-
-            if (!reduced && p === 1 && cell.crown) {
-              // A slow wind wave rippling through the crown.
-              const wave = Math.sin(c * 0.22 - t * 0.0012 + r * 0.1) * Math.sin(r * 0.06 + t * 0.0005);
-              if (wave > 0.4) radius *= 1 + (wave - 0.4) * 0.45;
-            }
+          if (level > 0.18) {
+            level = Math.min(1, (level - 0.18) / 0.8);
+            const full = 0.9 + level * 1.9;
+            radius = 0.75 + (full - 0.75) * intro;
+            alpha = 0.38 + (0.55 + level * 0.45 - 0.38) * intro;
           }
 
           if (pointer && !reduced) {
@@ -132,7 +114,7 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
 
           ctx.globalAlpha = alpha;
           ctx.beginPath();
-          ctx.arc(x, y, Math.min(radius, SPACING * 0.48), 0, Math.PI * 2);
+          ctx.arc(offX + c * SPACING, offY + r * SPACING, Math.min(radius, SPACING * 0.48), 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -156,7 +138,7 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
 
     const ro = new ResizeObserver(() => {
       layout();
-      if (reduced) draw(Infinity);
+      if (reduced) draw(0);
     });
     ro.observe(canvas);
     const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
@@ -164,15 +146,9 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerleave", onLeave);
 
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      image = img;
-      layout();
-      start = performance.now();
-      if (reduced) draw(Infinity);
-      else raf = requestAnimationFrame(frame);
-    };
+    layout();
+    if (reduced) draw(0);
+    else raf = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(raf);
@@ -181,7 +157,7 @@ export default function DotMatrix({ src, className = "" }: { src: string; classN
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerleave", onLeave);
     };
-  }, [src]);
+  }, []);
 
   return <canvas ref={canvasRef} aria-hidden="true" className={`block h-full w-full ${className}`} />;
 }
