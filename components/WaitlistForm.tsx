@@ -32,7 +32,7 @@ export default function WaitlistForm({ id }: { id?: string }) {
 
   if (status === "success") {
     return (
-      <div className="flex h-11 w-full items-center gap-2 rounded-full bg-card px-4 text-ink">
+      <div className="glass-field flex h-12 w-full items-center gap-2 rounded-full px-5 text-white">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-leaf" />
         {message}
       </div>
@@ -44,7 +44,7 @@ export default function WaitlistForm({ id }: { id?: string }) {
       <form
         id={id}
         onSubmit={onSubmit}
-        className="flex w-full items-center gap-1 rounded-full bg-card p-1 ring-1 ring-transparent transition focus-within:ring-black/10"
+        className="glass-field flex w-full items-center gap-1 rounded-full p-1.5"
       >
         <label htmlFor={`${id ?? "waitlist"}-email`} className="sr-only">
           Email address
@@ -60,12 +60,12 @@ export default function WaitlistForm({ id }: { id?: string }) {
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          className="h-9 min-w-0 flex-1 bg-transparent px-3 text-ink outline-none placeholder:text-mute"
+          className="h-10 min-w-0 flex-1 bg-transparent px-3.5 text-white caret-white outline-none placeholder:text-white/40"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="h-9 shrink-0 cursor-pointer rounded-full bg-white px-4 text-ink shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] disabled:cursor-wait disabled:opacity-70"
+          className="glass-button h-10 shrink-0 cursor-pointer rounded-full px-5 disabled:cursor-wait disabled:opacity-70"
         >
           {status === "loading" ? "Joining…" : "Join"}
         </button>

@@ -1,5 +1,5 @@
 import FlowLines from "@/components/FlowLines";
-import CurrentMonth from "@/components/CurrentMonth";
+import NextMonth from "@/components/NextMonth";
 import Logo from "@/components/Logo";
 import RevealFooter from "@/components/RevealFooter";
 import WaitlistForm from "@/components/WaitlistForm";
@@ -42,7 +42,7 @@ export default function Home() {
           <p className="reveal mt-[22px] text-mute" style={{ "--i": 4 } as React.CSSProperties}>
             We&apos;re letting people in slowly. Beta spots open for{" "}
             <a href="#join" className="text-ink underline underline-offset-2">
-              <CurrentMonth />
+              <NextMonth />
             </a>
             .
           </p>
