@@ -49,7 +49,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${figtree.variable} ${poppins.variable}`}>
+    // Browser extensions often add attributes to <html> before React loads; ignore those differences here.
+    <html lang="en" className={`${figtree.variable} ${poppins.variable}`} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );
