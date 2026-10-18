@@ -127,7 +127,7 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
       <div
         className="reveal-shift relative z-10 bg-white transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
         style={{
-          transform: open ? `translateY(-${height}px)` : "translateY(0)",
+          transform: open ? `translateY(-${height}px)` : undefined,
           boxShadow: open ? "0 24px 48px -24px rgba(0,0,0,0.18)" : "none",
         }}
       >
@@ -138,9 +138,9 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
           aria-expanded={open}
           aria-controls="site-footer"
           tabIndex={open ? -1 : 0}
-          className={`mx-auto flex cursor-pointer items-center gap-1.5 pb-6 text-xs text-black/40 transition hover:text-black/70 ${open ? "pointer-events-none opacity-0" : "opacity-100"}`}
+          className={`absolute bottom-5 left-1/2 flex -translate-x-1/2 cursor-pointer items-center gap-1.5 text-[11px] text-black/35 transition hover:text-black/70 ${open ? "pointer-events-none opacity-0" : "opacity-100"}`}
         >
-          <span className="inline-block animate-bounce">↓</span> Keep scrolling
+          <span className="inline-block animate-bounce">↓</span> More
         </button>
       </div>
 

@@ -1,17 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Oxygen, EB_Garamond } from "next/font/google";
+import { Inter, EB_Garamond } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const oxygen = Oxygen({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "700"],
-  variable: "--font-oxygen",
+  weight: ["400", "500"],
+  variable: "--font-inter",
 });
 
 const garamond = EB_Garamond({
   subsets: ["latin"],
-  weight: ["400", "700", "800"],
+  weight: ["700", "800"],
   variable: "--font-garamond",
 });
 
@@ -48,7 +48,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${oxygen.variable} ${garamond.variable}`}>
+    <html lang="en" className={`${inter.variable} ${garamond.variable}`}>
       <body>{children}</body>
     </html>
   );

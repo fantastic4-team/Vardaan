@@ -32,19 +32,19 @@ export default function WaitlistForm({ id }: { id?: string }) {
 
   if (status === "success") {
     return (
-      <div className="flex h-12 w-full max-w-md items-center justify-center gap-2 rounded-full border border-black/8 bg-black/[0.02] px-5 text-sm text-ink">
-        <span className="inline-block h-2 w-2 rounded-full bg-leaf" />
+      <div className="flex h-11 w-full items-center gap-2 rounded-full bg-card px-4 text-ink">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-leaf" />
         {message}
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full">
       <form
         id={id}
         onSubmit={onSubmit}
-        className="flex w-full items-center gap-1.5 rounded-full border border-black/10 bg-white p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition focus-within:border-black/25"
+        className="flex w-full items-center gap-1 rounded-full bg-card p-1 ring-1 ring-transparent transition focus-within:ring-black/10"
       >
         <label htmlFor={`${id ?? "waitlist"}-email`} className="sr-only">
           Email address
@@ -60,17 +60,17 @@ export default function WaitlistForm({ id }: { id?: string }) {
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          className="h-9 min-w-0 flex-1 bg-transparent px-3.5 text-sm text-ink outline-none placeholder:text-black/35"
+          className="h-9 min-w-0 flex-1 bg-transparent px-3 text-ink outline-none placeholder:text-mute"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="h-9 shrink-0 cursor-pointer rounded-full bg-ink px-4 text-sm font-bold text-white transition hover:bg-black/80 disabled:cursor-wait disabled:opacity-70"
+          className="h-9 shrink-0 cursor-pointer rounded-full bg-white px-4 text-ink shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition hover:shadow-[0_2px_8px_rgba(0,0,0,0.12)] disabled:cursor-wait disabled:opacity-70"
         >
-          {status === "loading" ? "Joining…" : "Join waitlist"}
+          {status === "loading" ? "Joining…" : "Join"}
         </button>
       </form>
-      {status === "error" && <p className="mt-2 pl-4 text-xs text-red-600">{message}</p>}
+      {status === "error" && <p className="mt-2 pl-3 text-red-600">{message}</p>}
     </div>
   );
 }

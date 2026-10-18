@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-oxygen), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-logo: var(--font-garamond), "Times New Roman", serif;
-  --color-ink: #0b0b0b;
+  --color-ink: #000000;
+  --color-mute: #a9a9a9;
+  --color-card: #f5f5f5;
   --color-leaf-dark: #334932;
   --color-leaf: #87a454;
   --color-leaf-light: #acbe62;
@@ -17,31 +19,32 @@ body {
   background: #ffffff;
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
 }
 
-/* ---------- Pixel tree ---------- */
+/* ---------- Pixel plant ---------- */
 
-.tree-img {
+.plant-img {
   display: block;
-  width: 73px;
-  height: 81px;
   transform-origin: center bottom;
   user-select: none;
   pointer-events: none;
   transition: transform 160ms ease-out;
 }
 
-/* While held, the tree slowly squashes; the release spring starts from this pose. */
-.tree-img.is-pressed {
+/* While held, the plant slowly squashes; the release spring starts from this pose. */
+.plant-img.is-pressed {
   transform: scale(1.06, 0.86);
   transition: transform 1200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.tree-img.is-bouncing {
-  animation: tree-spring 900ms cubic-bezier(0.3, 0.6, 0.4, 1);
+.plant-img.is-bouncing {
+  animation: plant-spring 900ms cubic-bezier(0.3, 0.6, 0.4, 1);
 }
 
-@keyframes tree-spring {
+@keyframes plant-spring {
   0% { transform: scale(calc(1 + 0.06 * var(--bounce-intensity)), calc(1 - 0.14 * var(--bounce-intensity))); }
   18% { transform: scale(calc(1 - 0.07 * var(--bounce-intensity)), calc(1 + 0.13 * var(--bounce-intensity))); }
   36% { transform: scale(calc(1 + 0.045 * var(--bounce-intensity)), calc(1 - 0.08 * var(--bounce-intensity))); }
@@ -50,19 +53,19 @@ body {
   100% { transform: scale(1, 1); }
 }
 
-.tree-leaf {
+.plant-piece {
   position: absolute;
   left: var(--x);
   top: var(--startTop);
-  width: 2px;
-  height: 2px;
+  width: var(--size, 2px);
+  height: var(--size, 2px);
   background: var(--color);
   image-rendering: pixelated;
   opacity: 0;
   animation: leaf-fall var(--dur) linear var(--delay) infinite;
 }
 
-.tree-leaf.burst {
+.plant-piece.burst {
   animation: leaf-fall var(--dur) cubic-bezier(0.3, 0.1, 0.6, 1) var(--delay) 1 forwards;
 }
 
@@ -82,8 +85,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tree-img,
-  .tree-leaf,
+  .plant-img,
+  .plant-piece,
   .reveal-shift {
     animation: none !important;
     transition: none !important;

@@ -1,25 +1,14 @@
+import CurrentMonth from "@/components/CurrentMonth";
 import Logo from "@/components/Logo";
-import PixelTree from "@/components/PixelTree";
+import PixelPlant from "@/components/PixelPlant";
 import RevealFooter from "@/components/RevealFooter";
 import WaitlistForm from "@/components/WaitlistForm";
 import { site } from "@/lib/site";
 
-const PERKS = [
-  {
-    title: "First in line",
-    body: "Early-access members get into the Vardaan beta before public launch, in small, considered cohorts.",
-  },
-  {
-    title: "Shape the product",
-    body: "A direct line to the team. Your feedback decides what we build next — not a roadmap written in a vacuum.",
-  },
-  {
-    title: "Founding pricing",
-    body: "Everyone who joins during beta keeps founding-member pricing, locked in for as long as you stay.",
-  },
-];
-
-const AVATARS = ["#334932", "#87A454", "#ACBE62", "#0b0b0b"];
+// The flower is 40x60 art drawn at 5x, so every art pixel is a crisp 5px square.
+const FLOWER_SCALE = 5;
+const PETAL_COLORS = ["#f5cf4f", "#f9df6e", "#fcea98", "#e89a74", "#efb48c"];
+const LEAF_COLORS = ["#334932", "#4B6239", "#87A454", "#ACBE62"];
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -29,128 +18,91 @@ const JSON_LD = {
   ],
 };
 
+function Card({ title, note, children }: { title: string; note: string; children: React.ReactNode }) {
+  return (
+    <figure className="shrink-0 snap-start">
+      <div className="flex aspect-square w-[min(420px,calc(100vw-2.5rem))] items-center justify-center overflow-hidden rounded-[28px] bg-card">
+        {children}
+      </div>
+      <figcaption className="mt-3 flex gap-1.5 px-1">
+        <span>{title}</span>
+        <span className="text-mute">{note}</span>
+      </figcaption>
+    </figure>
+  );
+}
+
 export default function Home() {
   return (
     <RevealFooter>
-      <div id="top" className="flex min-h-screen flex-col">
+      <div id="top" className="min-h-svh pb-28">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
-        <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-          <a href="#" className="flex items-center gap-2.5">
-            <Logo className="text-[26px]" />
-            <span className="rounded-full border border-black/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-black/60">
-              Beta
-            </span>
+
+        <nav
+          aria-label="Main"
+          className="fixed left-1/2 top-6 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full bg-card/90 p-1 shadow-[0_8px_24px_rgba(0,0,0,0.06)] backdrop-blur"
+        >
+          <a href="#top" className="flex h-9 items-center rounded-full bg-white px-4 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+            <Logo className="text-[15px]" />
           </a>
-          <a
-            href="#join"
-            className="rounded-full border border-black/10 px-4 py-2 text-sm font-bold text-ink transition hover:border-black/25"
-          >
-            Join waitlist
+          <a href="#join" className="flex h-9 items-center rounded-full px-4 text-mute transition hover:text-ink">
+            Beta
           </a>
-        </header>
+        </nav>
 
-        <main className="flex-1">
-          <section className="mx-auto grid w-full max-w-6xl items-center gap-14 px-5 pb-20 pt-10 sm:px-8 md:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-            <div className="fade-up">
-              <div className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-black/[0.02] py-1 pl-1.5 pr-3 text-xs text-black/70">
-                <span className="rounded-full bg-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
-                  New
-                </span>
-                Vardaan Beta — early access is open
-              </div>
+        <main>
+          <section className="fade-up mx-auto w-full max-w-[360px] px-5 pt-[200px] sm:px-0 sm:pt-[225px]">
+            <h1 className="sr-only">Vardaan — private beta</h1>
+            <p>Dear friend,</p>
+            <p className="mt-[22px] text-mute">
+              Vardaan &mdash; Sanskrit for &ldquo;boon&rdquo; &mdash; is a small, quiet tool we&apos;re building for
+              doing your best work, without the noise.
+            </p>
+            <p className="mt-[22px] text-mute">
+              We&apos;re letting people in slowly. Beta spots open for{" "}
+              <a href="#join" className="text-ink underline underline-offset-2">
+                <CurrentMonth />
+              </a>
+              .
+            </p>
 
-              <h1 className="mt-6 text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-ink sm:text-[56px]">
-                Grow something
-                <br />
-                worth keeping.
-              </h1>
-
-              <p className="mt-5 max-w-md text-[17px] leading-relaxed text-black/60">
-                Vardaan is in private beta. Join the waitlist to get early access, help shape the product, and
-                lock in founding-member pricing.
-              </p>
-
-              <div id="join" className="mt-8 scroll-mt-24">
-                <WaitlistForm id="hero" />
-              </div>
-
-              <div className="mt-6 flex items-center gap-3">
-                <div className="flex -space-x-2">
-                  {AVATARS.map((c) => (
-                    <span key={c} className="h-7 w-7 rounded-full border-2 border-white" style={{ background: c }} />
-                  ))}
-                </div>
-                <p className="text-sm text-black/55">
-                  Joined by early adopters from teams around the world
-                </p>
-              </div>
-            </div>
-
-            <div className="fade-up [animation-delay:120ms]">
-              <div className="flex aspect-[13/9] w-full items-center justify-center overflow-hidden rounded-xl border border-black/6 bg-white">
-                <PixelTree />
-              </div>
-              <p className="mt-3 text-center text-xs text-black/40">Press and hold the tree</p>
+            <div id="join" className="mt-8 scroll-mt-32">
+              <WaitlistForm id="hero" />
             </div>
           </section>
 
-          <section className="border-t border-black/6">
-            <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:grid-cols-[auto_1fr] md:gap-20 md:py-28">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+          <section
+            aria-label="Things to play with"
+            className="fade-up mt-40 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [animation-delay:120ms] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ paddingInline: "max(1.25rem, calc((100vw - 360px) / 2))", scrollPaddingInline: "max(1.25rem, calc((100vw - 360px) / 2))" }}
+          >
+            <Card title="Flower" note="Press and hold">
+              <PixelPlant
                 src="/images/flower.png"
                 alt="Pixel-art flower"
-                width={40}
-                height={60}
-                className="mx-auto h-[270px] w-[180px] select-none [image-rendering:pixelated] sm:h-[360px] sm:w-[240px]"
-                draggable={false}
+                label="Shake the flower"
+                width={40 * FLOWER_SCALE}
+                height={60 * FLOWER_SCALE}
+                colors={PETAL_COLORS}
+                spawnX={[12, 82]}
+                spawnY={[1 * FLOWER_SCALE, 16 * FLOWER_SCALE]}
+                pieceSize={FLOWER_SCALE}
+                pixelated
               />
-              <div className="max-w-xl">
-                <div className="max-w-sm space-y-4 text-sm leading-relaxed text-black/55">
-                  <p>
-                    We believe the most useful things in life are the ones that quietly make everything else easier.
-                  </p>
-                  <p>
-                    Vardaan &mdash; from the Sanskrit for &ldquo;boon&rdquo; &mdash; is our attempt at building one: a
-                    tool that gets out of your way and lets good work grow.
-                  </p>
-                </div>
-                <h2 className="mt-12 font-logo text-[36px] font-normal leading-[1.12] tracking-[-0.01em] text-ink sm:text-[48px]">
-                  Where doing your best work feels as natural as something growing in the sun.
-                </h2>
-              </div>
-            </div>
-          </section>
-
-          <section className="border-t border-black/6">
-            <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Early access</p>
-              <h2 className="mt-3 max-w-lg text-3xl font-bold tracking-[-0.02em] text-ink sm:text-4xl">
-                Why join the beta now
-              </h2>
-              <div className="mt-10 grid gap-4 md:grid-cols-3">
-                {PERKS.map((perk, i) => (
-                  <div key={perk.title} className="rounded-xl border border-black/6 p-6">
-                    <span className="font-logo text-lg font-extrabold text-black/25">0{i + 1}</span>
-                    <h3 className="mt-6 text-lg font-bold text-ink">{perk.title}</h3>
-                    <p className="mt-2 text-[15px] leading-relaxed text-black/55">{perk.body}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="border-t border-black/6">
-            <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-5 py-24 text-center sm:px-8">
-              <Logo className="text-5xl sm:text-7xl" />
-              <p className="mt-5 max-w-md text-[17px] leading-relaxed text-black/60">
-                Spots in each beta cohort are limited. Get on the list and we&apos;ll let you in as soon as there&apos;s
-                room.
-              </p>
-              <div className="mt-8 flex w-full justify-center">
-                <WaitlistForm id="footer" />
-              </div>
-            </div>
+            </Card>
+            <Card title="Tree" note="Press and hold">
+              <PixelPlant
+                src="/images/tree.png"
+                alt="Pixel-art tree"
+                label="Shake the tree"
+                width={146}
+                height={162}
+                colors={LEAF_COLORS}
+                spawnX={[15, 80]}
+                spawnY={[20, 90]}
+                pieceSize={3}
+              />
+            </Card>
           </section>
         </main>
       </div>
