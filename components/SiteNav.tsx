@@ -39,7 +39,7 @@ export default function SiteNav() {
           className="nav-grid ml-[max(1rem,6vw)] flex items-center gap-3 border-x px-4 py-3.5 sm:px-7"
           aria-label="Vardaan Beta home"
         >
-          <span className="font-poster text-[24px] font-semibold leading-none tracking-[-0.045em] text-ink">vardaan</span>
+          <span className="font-poster text-[21px] font-semibold uppercase leading-none tracking-[0.02em] text-ink">Vardaan</span>
           <span className="beta-glass">Beta</span>
         </Link>
 
