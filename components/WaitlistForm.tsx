@@ -32,7 +32,7 @@ export default function WaitlistForm({ id }: { id?: string }) {
 
   if (status === "success") {
     return (
-      <div className="waitlist-field h-12 w-full items-center gap-2 px-5 text-white">
+      <div className="waitlist-field h-[56px] w-full px-4 text-ink">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-leaf" />
         {message}
       </div>
@@ -54,23 +54,23 @@ export default function WaitlistForm({ id }: { id?: string }) {
           type="email"
           required
           autoComplete="email"
-          placeholder="you@company.com"
+          placeholder="Enter your email"
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          className="h-12 min-w-0 flex-1 bg-transparent px-5 text-white caret-white outline-none"
+          className="h-11 min-w-0 flex-1 bg-transparent px-3 text-[15px] text-ink caret-ink outline-none"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="waitlist-button m-1 shrink-0 cursor-pointer rounded-full px-5 disabled:cursor-wait disabled:opacity-70"
+          className="waitlist-button h-11 shrink-0 cursor-pointer rounded-[10px] px-5 text-[14px] disabled:cursor-wait disabled:opacity-70"
         >
           {status === "loading" ? "Joining…" : "Join waitlist"}
         </button>
       </form>
-      {status === "error" && <p className="mt-2 pl-5 text-[13px] text-[#ffd2c8]">{message}</p>}
+      {status === "error" && <p className="mt-2 pl-1 text-[13px] text-[#ffb4a8]">{message}</p>}
     </div>
   );
 }

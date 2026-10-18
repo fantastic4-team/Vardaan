@@ -75,12 +75,8 @@ export default function Home() {
 
             <div id="join" className="reveal max-w-[440px] scroll-mt-24" style={step(3)}>
               <WaitlistForm id="hero" />
-              <p className="mt-3 text-[13px] text-mute">
-                Beta spots open for{" "}
-                <a href="#join" className="text-ink underline underline-offset-2">
-                  <NextMonth />
-                </a>
-                .
+              <p className="mt-3 pl-1 text-[13px] text-mute">
+                Beta spots open for <span className="text-ink"><NextMonth /></span>
               </p>
             </div>
           </div>
