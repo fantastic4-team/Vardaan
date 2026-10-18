@@ -15,6 +15,12 @@
 
 html {
   -webkit-font-smoothing: antialiased;
+  /* Scrolling still works; the scrollbar itself is hidden. */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {

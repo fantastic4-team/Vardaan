@@ -2,52 +2,40 @@
 
 import { useEffect, useRef } from "react";
 
-// A dot-matrix voice spectrogram on a blue panel. Columns are frequencies and rows are time:
-// speech shows up as bright bands (formants) with fine vertical harmonic streaks, arriving in
-// syllable-sized bursts with quiet gaps, and the whole thing drifts slowly upward like a live call.
-const SPACING = 7; // px between dot centres
-const DOT = "#ecf8a8";
-const SCROLL = 0.0045; // rows per millisecond
-const INTRO_MS = 1100; // rows fade in from the bottom
-const FRAME_MS = 33;
-const POINTER_RADIUS = 9; // in cells
-// Frequencies span slightly wider than the panel so the right edge never looks cut off.
-const USABLE_WIDTH = 0.95;
+// A fine dot-matrix panel in the style of the reference: every cell holds a small dot, and each
+// column is made of blocky runs of brightness (a few discrete levels), so the panel reads as
+// vertical streaks of data. Columns drift slowly at slightly different speeds.
+const SPACING = 5; // px between dot centres
+const DOT = "#e6f6a2";
+const LEVELS = 5;
+const FRAME_MS = 50;
+const POINTER_RADIUS = 8; // in cells
+const LOOP = 4; // each column's pattern repeats every LOOP panel heights
 
-function hash(n: number) {
-  const s = Math.sin(n * 127.1) * 43758.5453;
-  return s - Math.floor(s);
+function rng(seed: number) {
+  let s = seed >>> 0;
+  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
 }
 
-// Smooth 1D value noise in [0, 1].
-function noise(x: number) {
-  const i = Math.floor(x);
-  const f = x - i;
-  const u = f * f * (3 - 2 * f);
-  return hash(i) * (1 - u) + hash(i + 1) * u;
-}
-
-function smoothstep(a: number, b: number, x: number) {
-  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-  return t * t * (3 - 2 * t);
-}
-
-// Loudness of the "voice" at frequency x (0..1 across the usable width) and time y (in rows).
-function intensity(x: number, y: number, col: number) {
-  // Syllables: frequent bursts of sound over a quiet floor, so no part of the panel goes blank.
-  const speech = 0.22 + 0.78 * smoothstep(0.3, 0.56, noise(y * 0.16)) * (0.6 + 0.4 * noise(y * 0.37 + 50));
-  // Three formants whose centres glide slowly, like vowels changing.
-  const f1 = 0.16 + 0.07 * noise(y * 0.05 + 10);
-  const f2 = 0.43 + 0.13 * noise(y * 0.05 + 20);
-  const f3 = 0.72 + 0.07 * noise(y * 0.05 + 30);
-  const band = (c: number, w: number) => Math.exp(-(((x - c) / w) ** 2));
-  const formants = band(f1, 0.07) + 0.8 * band(f2, 0.08) + 0.55 * band(f3, 0.06);
-  // Harmonics: fine vertical streaks across the spectrum, a little stronger at low frequencies.
-  const harmonics = 0.5 * (0.5 + 0.5 * Math.cos(col * 1.05)) * Math.exp(-x * 0.55);
-  // Each column (frequency bin) has its own gain, which breaks the bands into distinct streaks.
-  const gain = 0.45 + 0.85 * hash(col * 3.1 + 0.5) ** 2;
-  const grain = 0.14 * hash(col * 31.7 + Math.floor(y) * 7.3);
-  return speech * (formants + harmonics) * gain + grain * speech;
+// Pre-rendered dot sprites, one per brightness level, so a frame is just thousands of blits.
+// The extra top level is only reached under the pointer.
+function makeSprites(dpr: number) {
+  return Array.from({ length: LEVELS + 1 }, (_, level) => {
+    const t = Math.min(1, level / (LEVELS - 1));
+    const radius = (0.55 + t * 1.05) * (level >= LEVELS ? 1.25 : 1);
+    const alpha = 0.32 + t * 0.68;
+    const size = Math.ceil(SPACING * dpr);
+    const c = document.createElement("canvas");
+    c.width = size;
+    c.height = size;
+    const g = c.getContext("2d")!;
+    g.fillStyle = DOT;
+    g.globalAlpha = alpha;
+    g.beginPath();
+    g.arc(size / 2, size / 2, radius * dpr, 0, Math.PI * 2);
+    g.fill();
+    return c;
+  });
 }
 
 export default function DotMatrix({ className = "" }: { className?: string }) {
@@ -61,6 +49,9 @@ export default function DotMatrix({ className = "" }: { className?: string }) {
 
     let cols = 0;
     let rows = 0;
+    let dpr = 1;
+    let sprites: HTMLCanvasElement[] = [];
+    let columns: { runs: Uint8Array; speed: number }[] = [];
     let pointer: { c: number; r: number } | null = null;
     let visible = true;
     let raf = 0;
@@ -69,56 +60,55 @@ export default function DotMatrix({ className = "" }: { className?: string }) {
 
     const layout = () => {
       const { width, height } = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.floor(width / SPACING);
       rows = Math.floor(height / SPACING);
+      sprites = makeSprites(dpr);
+
+      // Each column gets its own "temperature" and is filled with runs of a few rows to a dozen,
+      // each run holding one brightness level biased by that temperature.
+      const rand = rng(20261018);
+      columns = Array.from({ length: cols }, () => {
+        const heat = rand() < 0.22 ? 0.75 + rand() * 0.25 : rand() * 0.55;
+        const length = rows * LOOP;
+        const runs = new Uint8Array(length);
+        for (let i = 0; i < length; ) {
+          const run = 2 + Math.floor(rand() ** 1.6 * 16);
+          const v = Math.min(1, Math.max(0, heat + (rand() - 0.5) * 0.7));
+          const level = rand() < 0.18 ? 0 : Math.round(v * (LEVELS - 1));
+          runs.fill(level, i, Math.min(length, i + run));
+          i += run;
+        }
+        return { runs, speed: 0.6 + rand() * 1.2 };
+      });
     };
 
     const draw = (t: number) => {
-      const { width, height } = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = DOT;
-      const offX = (width - (cols - 1) * SPACING) / 2;
-      const offY = (height - (rows - 1) * SPACING) / 2;
-      const usable = cols * USABLE_WIDTH;
-      const scroll = reduced ? 0 : t * SCROLL;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const step = SPACING * dpr;
+      const offX = (canvas.width - cols * step) / 2;
+      const offY = (canvas.height - rows * step) / 2;
+      const intro = reduced ? 1 : Math.min(1, t / 900);
 
-      for (let r = 0; r < rows; r++) {
-        // Rows are sampled in threes so edges step like the reference's blocky clusters.
-        const y = Math.floor((r + scroll) / 3) * 3;
-        const intro = reduced ? 1 : smoothstep(0, 1, (t - ((rows - r) / rows) * INTRO_MS * 0.7) / 400);
-        for (let c = 0; c < cols; c++) {
-          const x = c / usable;
-          let level = x > 1.05 ? 0 : intensity(x, y, c);
-          let radius = 0.75;
-          let alpha = 0.38;
-
-          if (level > 0.18) {
-            level = Math.min(1, (level - 0.18) / 0.8);
-            const full = 0.9 + level * 1.9;
-            radius = 0.75 + (full - 0.75) * intro;
-            alpha = 0.38 + (0.55 + level * 0.45 - 0.38) * intro;
-          }
-
-          if (pointer && !reduced) {
+      for (let c = 0; c < cols; c++) {
+        const { runs, speed } = columns[c];
+        const length = runs.length;
+        // Columns slide downward at their own pace (about one row per second on average).
+        const shift = reduced ? 0 : Math.floor((t / 1000) * speed);
+        for (let r = 0; r < rows; r++) {
+          let level = runs[(((r - shift) % length) + length) % length];
+          // On load the pattern sweeps in from the top; below the sweep only base dots show.
+          if (r / rows > intro) level = 0;
+          if (pointer) {
             const d = Math.hypot(c - pointer.c, r - pointer.r);
-            if (d < POINTER_RADIUS) {
-              const k = 1 - d / POINTER_RADIUS;
-              radius *= 1 + k * k * 1.4;
-              alpha = Math.min(1, alpha + k * 0.5);
-            }
+            if (d < POINTER_RADIUS) level = Math.min(LEVELS, level + Math.round((1 - d / POINTER_RADIUS) * 3));
           }
-
-          ctx.globalAlpha = alpha;
-          ctx.beginPath();
-          ctx.arc(offX + c * SPACING, offY + r * SPACING, Math.min(radius, SPACING * 0.48), 0, Math.PI * 2);
-          ctx.fill();
+          ctx.drawImage(sprites[level], offX + c * step, offY + r * step);
         }
       }
-      ctx.globalAlpha = 1;
     };
 
     const frame = (now: number) => {
@@ -130,9 +120,9 @@ export default function DotMatrix({ className = "" }: { className?: string }) {
 
     const onMove = (e: PointerEvent) => {
       const box = canvas.getBoundingClientRect();
-      const offX = (box.width - (cols - 1) * SPACING) / 2;
-      const offY = (box.height - (rows - 1) * SPACING) / 2;
-      pointer = { c: (e.clientX - box.left - offX) / SPACING, r: (e.clientY - box.top - offY) / SPACING };
+      const offX = (box.width - cols * SPACING) / 2;
+      const offY = (box.height - rows * SPACING) / 2;
+      pointer = { c: (e.clientX - box.left - offX) / SPACING - 0.5, r: (e.clientY - box.top - offY) / SPACING - 0.5 };
     };
     const onLeave = () => (pointer = null);
 
