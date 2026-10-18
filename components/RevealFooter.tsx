@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Logo from "@/components/Logo";
+import { NAV_LINKS } from "@/components/SiteNav";
 
 const WHEEL_THRESHOLD = 140;
 const TOUCH_THRESHOLD = 60;
@@ -152,8 +154,18 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">Product</p>
                 <ul className="mt-4 space-y-2.5">
-                  <li><a href="#join" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">Join waitlist</a></li>
-                  <li><a href="#top" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">Vardaan Beta</a></li>
+                  {NAV_LINKS.slice(1).map(({ href, label }) => (
+                    <li key={href}>
+                      <Link href={href} onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    <Link href="/#join" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">
+                      Join waitlist
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>

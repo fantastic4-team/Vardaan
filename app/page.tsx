@@ -1,7 +1,7 @@
-import Logo from "@/components/Logo";
 import NextMonth from "@/components/NextMonth";
 import PosterArt from "@/components/PosterArt";
 import RevealFooter from "@/components/RevealFooter";
+import SiteNav from "@/components/SiteNav";
 import WaitlistForm from "@/components/WaitlistForm";
 import { site } from "@/lib/site";
 
@@ -21,26 +21,7 @@ export default function Home() {
       <div id="top" className="relative flex min-h-svh flex-col overflow-hidden lg:h-svh">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
-        {/* Navbar: a dotted grid across the full width. The brand sits in its own cell on the left and
-            Join waitlist is a solid block flush to the top right. */}
-        <header className="reveal relative z-10" style={step(0)}>
-          <nav aria-label="Main" className="nav-grid flex items-stretch border-b">
-            <a
-              href="#top"
-              className="nav-grid ml-[max(1rem,6vw)] flex items-center gap-3 border-x px-4 py-3.5 sm:px-7"
-              aria-label="Vardaan Beta home"
-            >
-              <Logo height={22} priority className="invert" />
-              <span className="beta-glass">Beta</span>
-            </a>
-            <a
-              href="#join"
-              className="waitlist-button ml-auto mr-[max(1rem,6vw)] flex items-center whitespace-nowrap px-4 text-[13px] sm:px-7 sm:text-[14px]"
-            >
-              Join waitlist
-            </a>
-          </nav>
-        </header>
+        <SiteNav />
 
         {/* Split screen: the letter on the left, the full poster on a graph-paper panel on the right. */}
         <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
@@ -80,7 +61,7 @@ export default function Home() {
 
           {/* The poster art fills the whole right panel: the full composition sits in the middle and
               the scene continues out to the panel's edges. */}
-          <figure className="poster-art-in nav-grid relative h-[clamp(140px,calc(100svh-540px),40svh)] min-h-0 overflow-hidden border-t lg:h-auto lg:border-l lg:border-t-0">
+          <figure className="poster-art-in nav-grid relative h-[clamp(120px,calc(100svh-575px),40svh)] min-h-0 overflow-hidden border-t lg:h-auto lg:border-l lg:border-t-0">
             <PosterArt className="absolute inset-0 h-full w-full" />
             <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             <figcaption className="sr-only">Vardaan Beta</figcaption>
