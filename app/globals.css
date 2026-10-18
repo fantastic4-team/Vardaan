@@ -7,7 +7,7 @@
   --color-page: #141312;
   --color-ink: #f4f2ee;
   --color-mute: #8f8b85;
-  --color-accent: #f0561d;
+  --color-accent: #8ccbff;
   --color-leaf-dark: #334932;
   --color-leaf: #87a454;
   --color-leaf-light: #acbe62;
@@ -39,21 +39,16 @@ body {
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-/* ---------- ASCII art ---------- */
+/* ---------- Dot-matrix panel ---------- */
 
-.ascii {
-  font-family: var(--font-mono);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: 0;
-  white-space: pre;
-  color: rgba(244, 242, 238, 0.5);
-  user-select: none;
+/* A stepped silhouette: the lower part of the block juts out to the right. */
+.dot-panel {
+  clip-path: polygon(0 0, 84% 0, 84% 80%, 100% 80%, 100% 100%, 0 100%);
 }
 
 /* ---------- Waitlist field ---------- */
 
-/* A hairline field with a square orange call to action, in the style of the reference. */
+/* A hairline field with a square light-blue call to action. */
 .waitlist-field {
   display: flex;
   align-items: stretch;
@@ -69,18 +64,18 @@ body {
 }
 
 .waitlist-button {
-  color: #fff;
+  color: #0b1626;
   font-weight: 500;
   background: var(--color-accent);
   transition: background 200ms ease;
 }
 
 .waitlist-button:hover {
-  background: #ff6a2e;
+  background: #a6d7ff;
 }
 
 .waitlist-button:focus-visible {
-  outline: 2px solid #ffb08f;
+  outline: 2px solid #cfe8ff;
   outline-offset: 2px;
 }
 

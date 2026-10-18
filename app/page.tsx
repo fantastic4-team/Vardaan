@@ -1,8 +1,8 @@
+import DotMatrix from "@/components/DotMatrix";
 import Logo from "@/components/Logo";
 import NextMonth from "@/components/NextMonth";
 import RevealFooter from "@/components/RevealFooter";
 import WaitlistForm from "@/components/WaitlistForm";
-import { ASCII_TREE } from "@/lib/ascii-tree";
 import { site } from "@/lib/site";
 
 const JSON_LD = {
@@ -54,13 +54,13 @@ export default function Home() {
             </div>
           </div>
 
-          <pre
-            aria-hidden="true"
-            className="ascii reveal justify-self-center text-[3.9px] sm:text-[6px] lg:justify-self-end lg:text-[8px]"
-            style={step(4)}
-          >
-            {ASCII_TREE}
-          </pre>
+          {/* Dot-matrix panel: a blue block with a stepped corner and a dark red bar behind it. */}
+          <div className="reveal relative justify-self-center lg:justify-self-end" style={step(4)}>
+            <div aria-hidden="true" className="absolute -left-5 bottom-0 top-[14%] w-5 bg-[#5a2620] sm:-left-7 sm:w-7" />
+            <div className="dot-panel relative h-[400px] w-[300px] bg-[#3b7bf2] sm:h-[500px] sm:w-[380px] lg:h-[560px] lg:w-[420px]">
+              <DotMatrix src="/images/tree.png" />
+            </div>
+          </div>
         </main>
       </div>
     </RevealFooter>
