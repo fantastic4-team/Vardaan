@@ -47,7 +47,7 @@ export default async function OpengraphImage() {
             color: "rgba(0,0,0,0.6)",
           }}
         >
-          Beta · Join the waitlist
+          The AI agent you can call for anything
         </div>
       </div>
     ),

@@ -153,9 +153,9 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
         <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-12 sm:px-8">
           <div className="flex flex-col justify-between gap-10 md:flex-row">
             <div className="max-w-xs">
-              <Logo className="text-4xl" />
+              <Logo height={26} />
               <p className="mt-4 text-sm leading-relaxed text-black/55">
-                Vardaan is in private beta. Early-access cohorts open on a rolling basis.
+                The AI agent you can call for anything. Now in private beta.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-10 text-sm sm:gap-16">

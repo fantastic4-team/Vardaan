@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, EB_Garamond } from "next/font/google";
+import { Inter } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -9,18 +9,12 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const garamond = EB_Garamond({
-  subsets: ["latin"],
-  weight: ["700", "800"],
-  variable: "--font-garamond",
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: { default: site.title, template: `%s | ${site.name}` },
   description: site.description,
   applicationName: site.name,
-  keywords: ["Vardaan", "Vardaan beta", "early access", "waitlist"],
+  keywords: ["Vardaan", "AI agent", "voice AI", "AI phone assistant", "Hindi AI assistant", "Hinglish", "Vardaan beta"],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -48,7 +42,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${garamond.variable}`}>
+    <html lang="en" className={inter.variable}>
       <body>{children}</body>
     </html>
   );

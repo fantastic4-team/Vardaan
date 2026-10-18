@@ -4,8 +4,8 @@ const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCE
 
 export const site = {
   name: "Vardaan",
-  title: "Vardaan — Beta | Join the waitlist",
+  title: "Vardaan — The AI agent you can call for anything",
   description:
-    "Vardaan is in private beta. Join the waitlist to get early access, help shape the product, and lock in founding-member pricing.",
+    "Vardaan is a voice-first AI agent. Call, say what you need in Hindi, English or Hinglish, and it gets done, in the background or live on the call. Join the beta waitlist.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? (vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000")).replace(/\/$/, ""),
 };

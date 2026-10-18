@@ -69,19 +69,28 @@ export default function Home() {
 
         <main className="fade-up relative z-10 w-full max-w-[360px] px-5 py-24 sm:px-0">
           <h1 className="flex items-center gap-2.5">
-            <Logo className="text-[34px]" />
+            <Logo height={26} priority />
             <span className="rounded-full bg-card px-2.5 py-0.5 text-[11px] uppercase tracking-[0.14em] text-mute">
               Beta
             </span>
+            <span className="sr-only"> &mdash; the AI agent you can call for anything</span>
           </h1>
 
           <p className="mt-8">Dear friend,</p>
           <p className="mt-[22px] text-mute">
-            Vardaan &mdash; Sanskrit for &ldquo;boon&rdquo; &mdash; is a small, quiet tool we&apos;re building for
-            doing your best work, without the noise.
+            Vardaan is an AI agent you can call for anything. Say what you need in Hindi, English or Hinglish, and
+            it gets done. No apps, no screens, no typing.
           </p>
           <p className="mt-[22px] text-mute">
-            We&apos;re letting people in slowly. Beta spots open for{" "}
+            <span className="text-ink">Call &amp; Cut.</span> Hang up, and Vardaan finishes the task in the
+            background, then reports back by call, SMS or WhatsApp.
+          </p>
+          <p className="mt-[22px] text-mute">
+            <span className="text-ink">Talk &amp; Help.</span> Stay on the line for live help with a decision, a
+            document or a reply.
+          </p>
+          <p className="mt-[22px] text-mute">
+            Beta spots open for{" "}
             <a href="#join" className="text-ink underline underline-offset-2">
               <CurrentMonth />
             </a>
