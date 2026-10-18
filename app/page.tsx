@@ -95,6 +95,34 @@ export default function Home() {
           </section>
 
           <section className="border-t border-black/6">
+            <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:grid-cols-[auto_1fr] md:gap-20 md:py-28">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/flower.png"
+                alt="Pixel-art flower"
+                width={56}
+                height={84}
+                className="mx-auto h-[294px] w-[196px] select-none [image-rendering:pixelated] sm:h-[378px] sm:w-[252px]"
+                draggable={false}
+              />
+              <div className="max-w-xl">
+                <div className="max-w-sm space-y-4 text-sm leading-relaxed text-black/55">
+                  <p>
+                    We believe the most useful things in life are the ones that quietly make everything else easier.
+                  </p>
+                  <p>
+                    Vardaan &mdash; from the Sanskrit for &ldquo;boon&rdquo; &mdash; is our attempt at building one: a
+                    tool that gets out of your way and lets good work grow.
+                  </p>
+                </div>
+                <h2 className="mt-12 font-logo text-[36px] font-normal leading-[1.12] tracking-[-0.01em] text-ink sm:text-[48px]">
+                  Where doing your best work feels as natural as something growing in the sun.
+                </h2>
+              </div>
+            </div>
+          </section>
+
+          <section className="border-t border-black/6">
             <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8">
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/45">Early access</p>
               <h2 className="mt-3 max-w-lg text-3xl font-bold tracking-[-0.02em] text-ink sm:text-4xl">

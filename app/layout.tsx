@@ -11,7 +11,7 @@ const oxygen = Oxygen({
 
 const garamond = EB_Garamond({
   subsets: ["latin"],
-  weight: ["700", "800"],
+  weight: ["400", "700", "800"],
   variable: "--font-garamond",
 });
 
