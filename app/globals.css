@@ -85,28 +85,14 @@ body {
   top: -4em;
 }
 
-/* A deep red window behind the blue one, offset to the lower left, with its own dot grid. */
-.ascii-panel-red {
+/* A slim, plain maroon strip peeking out from behind the blue panel's left edge. */
+.ascii-strip {
   position: absolute;
-  left: 2em;
-  top: 14em;
-  width: 25em;
-  height: 46em;
-  overflow: hidden;
-  background-color: #8f2a1f;
-  background-image: radial-gradient(circle, rgba(255, 194, 176, 0.28) 0.75px, transparent 1.25px);
-  background-size: 6px 6px;
-  background-position: 3px 3px;
-}
-
-.ascii-mirror-red {
-  position: absolute;
-  left: -2em;
-  top: -14em;
-}
-
-.ascii-on-red {
-  color: #ffc2b0;
+  left: 5.6em;
+  top: 12em;
+  width: 2.4em;
+  height: 42em;
+  background: #5a2620;
 }
 
 /* Lime characters on the blue panel. */

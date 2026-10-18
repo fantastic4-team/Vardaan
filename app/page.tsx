@@ -55,16 +55,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* The full ASCII tree on the black page, with two windows onto it: a red panel behind and
-              a stepped blue panel in front, each showing the same tree in its own colour. Sizes are in
+          {/* The full ASCII tree on the black page, with a stepped blue panel as a window onto it (the
+              same tree shows in lime inside) and a slim maroon strip behind its left edge. Sizes are in
               em of the character size, so every layer stays aligned at every breakpoint. */}
           <div className="reveal justify-self-center text-[5.2px] sm:text-[7.4px] lg:text-[9px] lg:justify-self-end" style={step(4)}>
             <AsciiArt art={ASCII_TREE} className="ascii" wrapperClassName="ascii-stage">
-              <div className="ascii-panel-red">
-                <pre data-ascii-mirror aria-hidden="true" className="ascii ascii-on-red ascii-mirror-red">
-                  {ASCII_TREE}
-                </pre>
-              </div>
+              <div aria-hidden="true" className="ascii-strip" />
               <div className="ascii-panel">
                 <pre data-ascii-mirror aria-hidden="true" className="ascii ascii-on-blue ascii-mirror">
                   {ASCII_TREE}
