@@ -194,12 +194,14 @@ Built by **Fantastic 4**.
 
 ![Team page](docs/team.jpg)
 
-| Name | Role |
-|---|---|
-| Souradeep Pradhan ([@pradhan-not-found](https://github.com/pradhan-not-found)) | Team Lead & Frontend Engineering |
-| Aniruddha Das | Backend Engineering & Systems |
-| Sampurna | |
-| Sattwik | |
+| Name | Role | Links |
+|---|---|---|
+| Souradeep Pradhan | Frontend Developer | [GitHub](https://github.com/pradhan-not-found) |
+| Aniruddha Das | Backend & Full Stack Engineer | |
+| Sampurna | AI/ML Engineer | |
+| Sattwik | Database Manager | |
+
+Each member's website, GitHub and LinkedIn are set in `app/team/page.tsx`; a link icon appears on the team page once its URL is filled in.
 
 Questions or feedback: [fantastic4.team.dev@gmail.com](mailto:fantastic4.team.dev@gmail.com)
 

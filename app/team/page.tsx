@@ -4,22 +4,40 @@ import SectionPage from "@/components/SectionPage";
 
 export const metadata: Metadata = {
   title: "Team",
-  description: "Vardaan is built by Fantastic 4, a small team working across frontend, backend, cloud and applied AI.",
+  description:
+    "Vardaan is built by Fantastic 4: frontend, backend and full stack, AI/ML, and database engineering under one roof.",
   alternates: { canonical: "/team" },
 };
 
-// Photos live in public/images/team. Roles come from the Fantastic 4 team README; add the
-// missing ones here when they're confirmed.
-const TEAM: { name: string; role?: string; photo: string; github?: string }[] = [
+type Links = { website?: string; github?: string; linkedin?: string };
+
+// Photos live in public/images/team. Fill in each member's links; an icon only appears once its
+// URL is set, so there are never dead links on the page.
+const TEAM: { name: string; role: string; photo: string; links: Links }[] = [
   {
     name: "Souradeep Pradhan",
-    role: "Team Lead & Frontend Engineering",
+    role: "Frontend Developer",
     photo: "/images/team/souradeep (2).png",
-    github: "https://github.com/pradhan-not-found",
+    links: { website: "", github: "https://github.com/pradhan-not-found", linkedin: "" },
   },
-  { name: "Aniruddha Das", role: "Backend Engineering & Systems", photo: "/images/team/aniruddha.png" },
-  { name: "Sampurna", photo: "/images/team/sampurna.png" },
-  { name: "Sattwik", photo: "/images/team/sattwik.png" },
+  {
+    name: "Aniruddha Das",
+    role: "Backend & Full Stack Engineer",
+    photo: "/images/team/aniruddha.png",
+    links: { website: "", github: "", linkedin: "" },
+  },
+  {
+    name: "Sampurna",
+    role: "AI/ML Engineer",
+    photo: "/images/team/sampurna.png",
+    links: { website: "", github: "", linkedin: "" },
+  },
+  {
+    name: "Sattwik",
+    role: "Database Manager",
+    photo: "/images/team/sattwik.png",
+    links: { website: "", github: "", linkedin: "" },
+  },
 ];
 
 // The photos have white backgrounds; multiplying them over a poster colour turns the white into
@@ -31,12 +49,73 @@ const TONES = [
   "linear-gradient(180deg, #ece2ff 0%, #b79df0 100%)",
 ];
 
+const ICONS: Record<keyof Links, { label: string; path: React.ReactNode }> = {
+  website: {
+    label: "Website",
+    path: (
+      <>
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.6" />
+        <path
+          d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </>
+    ),
+  },
+  github: {
+    label: "GitHub",
+    path: (
+      <path
+        fill="currentColor"
+        d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.32 6.84 9.67.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.72-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.66.35-1.12.64-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.36 9.36 0 0 1 12 6.84c.85 0 1.71.12 2.51.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.2 10.2 0 0 0 22 12.22C22 6.58 17.52 2 12 2Z"
+      />
+    ),
+  },
+  linkedin: {
+    label: "LinkedIn",
+    path: (
+      <path
+        fill="currentColor"
+        d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"
+      />
+    ),
+  },
+};
+
+function SocialLinks({ name, links }: { name: string; links: Links }) {
+  const items = (Object.keys(ICONS) as (keyof Links)[]).filter((key) => links[key]);
+  if (!items.length) return null;
+  return (
+    <ul className="mt-4 flex items-center gap-2">
+      {items.map((key) => (
+        <li key={key}>
+          <a
+            href={links[key]}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${name} on ${ICONS[key].label}`}
+            title={ICONS[key].label}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-ink/70 transition hover:border-white/25 hover:bg-white/[0.08] hover:text-ink"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[17px] w-[17px]">
+              {ICONS[key].path}
+            </svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function Team() {
   return (
     <SectionPage
       eyebrow="Team"
       title="Built by Fantastic 4."
-      intro="A small team working across frontend, backend, cloud and applied AI, building the agent we wish our own families had."
+      intro="Four engineers across frontend, backend, AI/ML and data, building the agent we wish our own families had."
       scene="poppies"
     >
       <div className="nav-grid grid border-l border-t sm:grid-cols-2 lg:grid-cols-4">
@@ -54,17 +133,8 @@ export default function Team() {
               <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             </div>
             <h2 className="mt-5 text-[18px] font-medium text-ink">{member.name}</h2>
-            {member.role && <p className="mt-1 text-[14px] text-ink/60">{member.role}</p>}
-            {member.github && (
-              <a
-                href={member.github}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-block text-[13px] text-ink/70 underline underline-offset-2 transition hover:text-ink"
-              >
-                GitHub
-              </a>
-            )}
+            <p className="mt-1 text-[14px] text-ink/60">{member.role}</p>
+            <SocialLinks name={member.name} links={member.links} />
           </div>
         ))}
       </div>
