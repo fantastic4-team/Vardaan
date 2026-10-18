@@ -50,7 +50,7 @@ export default function SiteNav() {
 
         <Link
           href="/#join"
-          className="waitlist-button ml-auto mr-[max(1rem,6vw)] flex items-center whitespace-nowrap px-4 text-[13px] lg:ml-0 sm:px-7 sm:text-[14px]"
+          className="waitlist-button my-auto ml-auto mr-[max(1rem,6vw)] flex h-8 items-center whitespace-nowrap rounded-[8px] px-3 text-[12px] lg:ml-0 sm:h-[34px] sm:px-4 sm:text-[13px]"
         >
           Join waitlist
         </Link>
