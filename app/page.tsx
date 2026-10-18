@@ -53,9 +53,6 @@ export default function Home() {
               >
                 <span className="new-glow">New</span>
                 Private beta is now open
-                <span aria-hidden="true" className="text-ink/50 transition-transform group-hover:translate-x-0.5">
-                  &rarr;
-                </span>
               </a>
               <h1
                 className="reveal text-[clamp(34px,5.4vh,46px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink sm:text-[clamp(46px,7.4vh,66px)] lg:text-[clamp(50px,8.4vh,76px)]"
