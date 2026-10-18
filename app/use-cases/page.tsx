@@ -30,6 +30,7 @@ export default function UseCases() {
       eyebrow="Use cases"
       title="Hand it off. Hear back when it's done."
       intro="Getting things done today means switching between apps, navigating confusing websites and waiting on hold. Vardaan is one place you can turn to and say: handle this for me."
+      art={{ view: [420, 60, 720, 900], mirror: true }}
     >
       <CardGrid items={TASKS} />
 

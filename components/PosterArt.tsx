@@ -40,18 +40,28 @@ const BLOOM = [
 // The full 3:4 poster is always visible in the middle (the viewBox is fitted with "meet"), and
 // the scene carries on past its edges with overflow visible, so the art fills a box of any shape
 // without cropping or stretching. The wordmark and signature are drawn in, so they stay aligned.
-export default function PosterArt({ className = "" }: { className?: string }) {
+type Props = {
+  className?: string;
+  /** Draw the "vardaan" wordmark and logo signature into the art. */
+  signed?: boolean;
+  /** Which part of the scene to frame, as a viewBox; defaults to the full poster. */
+  view?: [x: number, y: number, w: number, h: number];
+  /** Flip the scene horizontally. */
+  mirror?: boolean;
+};
+
+export default function PosterArt({ className = "", signed = false, view = [0, 0, W, H], mirror = false }: Props) {
   return (
     <svg
       role="img"
       aria-label="Vardaan"
-      viewBox={`0 0 ${W} ${H}`}
+      viewBox={view.join(" ")}
       preserveAspectRatio="xMidYMid meet"
       overflow="visible"
       className={className}
     >
       <defs>
-        <linearGradient id="pa-sky" x1="0" y1="0" x2="0.3" y2="1">
+        <linearGradient id="pa-sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={H}>
           <stop offset="0" stopColor="#535ce6" />
           <stop offset="1" stopColor="#6f7cf2" />
         </linearGradient>
@@ -131,9 +141,9 @@ export default function PosterArt({ className = "" }: { className?: string }) {
         </filter>
       </defs>
 
+      <g transform={mirror ? `translate(${W} 0) scale(-1 1)` : undefined}>
       {/* Sky well past every edge, so wide or tall boxes never show a gap. */}
-      <rect x={-1600} y={-1600} width={W + 3200} height={H + 3200} fill="#5f6bec" />
-      <rect width={W} height={H} fill="url(#pa-sky)" />
+      <rect x={-1600} y={-1600} width={W + 3200} height={H + 3200} fill="url(#pa-sky)" />
 
       {/* Extension: stalks, lavender petals and arches carrying the scene out to the sides. */}
       <g filter="url(#pa-far)">
@@ -234,20 +244,26 @@ export default function PosterArt({ className = "" }: { className?: string }) {
         <path d={arch(1500, 2200, 900)} fill="url(#pa-bush)" />
       </g>
 
-      {/* Wordmark set softly into the bloom, and the logo as a signature. */}
-      <g className="poster-wordmark-in">
-        <text
-          x={W / 2}
-          y={888}
-          textAnchor="middle"
-          fill="#ecf7b4"
-          filter="url(#pa-glow)"
-          style={{ fontFamily: "var(--font-poster)", fontWeight: 600, fontSize: 171, letterSpacing: "-0.035em" }}
-        >
-          vardaan
-        </text>
       </g>
-      <image href="/images/logo.png" x={W / 2 - 52} y={1140} width={104} height={18} style={{ filter: "invert(1)", opacity: 0.9 }} />
+
+      {signed && (
+        <>
+          {/* Wordmark set softly into the bloom, and the logo as a signature. */}
+          <g className="poster-wordmark-in">
+            <text
+              x={W / 2}
+              y={888}
+              textAnchor="middle"
+              fill="#ecf7b4"
+              filter="url(#pa-glow)"
+              style={{ fontFamily: "var(--font-poster)", fontWeight: 600, fontSize: 171, letterSpacing: "-0.035em" }}
+            >
+              vardaan
+            </text>
+          </g>
+          <image href="/images/logo.png" x={W / 2 - 52} y={1140} width={104} height={18} style={{ filter: "invert(1)", opacity: 0.9 }} />
+        </>
+      )}
     </svg>
   );
 }

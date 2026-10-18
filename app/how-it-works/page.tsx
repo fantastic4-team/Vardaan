@@ -40,6 +40,7 @@ export default function HowItWorks() {
       eyebrow="How it works"
       title="One phone call, start to finish."
       intro="Vardaan turns a phone call into a capable personal agent. You describe the task, it plans the steps, confirms the details and takes the work off your hands."
+      art={{ view: [80, 260, 720, 900] }}
     >
       <CardGrid items={STEPS} />
 
