@@ -144,7 +144,10 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
         <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-12 sm:px-8">
           <div className="flex flex-col justify-between gap-10 md:flex-row">
             <div className="max-w-xs">
-              <span className="font-poster text-[30px] font-semibold uppercase leading-none tracking-[0.02em] text-ink">Vardaan</span>
+              <div className="flex items-center gap-3">
+                <span className="font-poster text-[30px] font-semibold uppercase leading-none tracking-[0.02em] text-ink">Vardaan</span>
+                <span className="beta-glass">Beta</span>
+              </div>
               <p className="mt-4 text-sm leading-relaxed text-white/55">
                 The AI agent you can call for anything. Now in private beta.
               </p>
