@@ -78,19 +78,15 @@ export default function Home() {
 
           <p className="mt-8">Dear friend,</p>
           <p className="mt-[22px] text-mute">
-            Vardaan is an AI agent you can call for anything. Say what you need in Hindi, English or Hinglish, and
-            it gets done. No apps, no screens, no typing.
+            Most everyday tasks still ask for an app, a screen and your patience. We think they should only take a
+            phone call.
           </p>
           <p className="mt-[22px] text-mute">
-            <span className="text-ink">Call &amp; Cut.</span> Hang up, and Vardaan finishes the task in the
-            background, then reports back by call, SMS or WhatsApp.
+            Vardaan is an AI agent you can call for anything. Tell it what you need, in Hindi, English or Hinglish.
+            Hang up and it quietly finishes the work, or stay on the line and think it through together.
           </p>
           <p className="mt-[22px] text-mute">
-            <span className="text-ink">Talk &amp; Help.</span> Stay on the line for live help with a decision, a
-            document or a reply.
-          </p>
-          <p className="mt-[22px] text-mute">
-            Beta spots open for{" "}
+            We&apos;re letting people in slowly. Beta spots open for{" "}
             <a href="#join" className="text-ink underline underline-offset-2">
               <CurrentMonth />
             </a>
