@@ -48,12 +48,14 @@ export default function Home() {
             <div className="lg:pt-[clamp(8px,4vh,40px)]">
               <a
                 href="#join"
-                className="reveal mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/12 bg-white/[0.04] py-1 pl-1 pr-3.5 text-[13px] text-ink/80 transition hover:border-white/25 hover:text-ink lg:mb-7"
+                className="group reveal mb-5 inline-flex items-center gap-3 text-[13px] text-ink/80 transition hover:text-ink lg:mb-7"
                 style={step(1)}
               >
-                <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-medium text-[#0b1626]">New</span>
+                <span className="new-glow">New</span>
                 Private beta is now open
-                <span aria-hidden="true" className="text-ink/50">&rarr;</span>
+                <span aria-hidden="true" className="text-ink/50 transition-transform group-hover:translate-x-0.5">
+                  &rarr;
+                </span>
               </a>
               <h1
                 className="reveal text-[clamp(34px,5.4vh,46px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink sm:text-[clamp(46px,7.4vh,66px)] lg:text-[clamp(50px,8.4vh,76px)]"

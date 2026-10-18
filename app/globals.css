@@ -144,6 +144,73 @@ body {
   outline-offset: 2px;
 }
 
+/* ---------- "New" tag with a light travelling around its edge ---------- */
+
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.new-glow {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #cfe8ff;
+  background: rgba(140, 203, 255, 0.1);
+}
+
+/* The moving edge: a conic gradient ring, masked to a 1px border. */
+.new-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--glow-angle),
+    rgba(140, 203, 255, 0.15) 0deg,
+    rgba(140, 203, 255, 0.15) 220deg,
+    #8ccbff 300deg,
+    #ffffff 330deg,
+    rgba(140, 203, 255, 0.15) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: glow-spin 3s linear infinite;
+}
+
+/* A soft bloom that follows the same light. */
+.new-glow::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -2;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle), transparent 0deg 260deg, rgba(140, 203, 255, 0.55) 320deg, transparent 360deg);
+  filter: blur(6px);
+  animation: glow-spin 3s linear infinite;
+}
+
+@keyframes glow-spin {
+  to { --glow-angle: 360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-glow::before,
+  .new-glow::after {
+    animation: none;
+  }
+}
+
 /* ---------- Beta badge: light glass with a slow light sweep ---------- */
 
 .beta-glass {
