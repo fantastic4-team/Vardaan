@@ -1,4 +1,4 @@
-import CircleLines from "@/components/CircleLines";
+import FlowLines from "@/components/FlowLines";
 import CurrentMonth from "@/components/CurrentMonth";
 import Logo from "@/components/Logo";
 import RevealFooter from "@/components/RevealFooter";
@@ -19,7 +19,7 @@ export default function Home() {
       <div id="top" className="relative flex min-h-svh items-center justify-center overflow-hidden">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
-        <CircleLines />
+        <FlowLines />
 
         <main className="relative z-10 w-full max-w-[360px] px-5 py-24 sm:px-0">
           <h1 className="reveal flex items-center gap-2.5" style={{ "--i": 0 } as React.CSSProperties}>
