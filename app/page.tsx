@@ -5,10 +5,23 @@ import RevealFooter from "@/components/RevealFooter";
 import WaitlistForm from "@/components/WaitlistForm";
 import { site } from "@/lib/site";
 
-// The flower is 40x60 art drawn at 5x, so every art pixel is a crisp 5px square.
-const FLOWER_SCALE = 5;
-const PETAL_COLORS = ["#f5cf4f", "#f9df6e", "#fcea98", "#e89a74", "#efb48c"];
 const LEAF_COLORS = ["#334932", "#4B6239", "#87A454", "#ACBE62"];
+// tree.png is 604x672; keep that ratio at every size.
+const TREE_RATIO = 672 / 604;
+
+// Trees scattered around the letter. Higher on the page reads as farther away, so those are
+// smaller and lighter. Positions keep clear of the 360px text column in the middle.
+const TREES = [
+  { className: "left-[5%] top-[58%] hidden md:block", width: 150, opacity: 1, delay: 160 },
+  { className: "left-[15%] top-[24%] hidden lg:block", width: 76, opacity: 0.8, delay: 240 },
+  { className: "left-[22%] top-[76%] hidden lg:block", width: 64, opacity: 0.9, delay: 320 },
+  { className: "right-[6%] top-[50%] hidden md:block", width: 128, opacity: 1, delay: 200 },
+  { className: "right-[17%] top-[18%] hidden lg:block", width: 64, opacity: 0.75, delay: 280 },
+  { className: "right-[23%] top-[74%] hidden lg:block", width: 92, opacity: 0.95, delay: 360 },
+  // Phones: a small pair at the foot of the page.
+  { className: "bottom-14 left-[8%] md:hidden", width: 72, opacity: 1, delay: 200 },
+  { className: "bottom-20 right-[10%] md:hidden", width: 54, opacity: 0.85, delay: 280 },
+];
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -18,92 +31,61 @@ const JSON_LD = {
   ],
 };
 
-function Card({ title, note, children }: { title: string; note: string; children: React.ReactNode }) {
-  return (
-    <figure className="shrink-0 snap-start">
-      <div className="flex aspect-square w-[min(420px,calc(100vw-2.5rem))] items-center justify-center overflow-hidden rounded-[28px] bg-card">
-        {children}
-      </div>
-      <figcaption className="mt-3 flex gap-1.5 px-1">
-        <span>{title}</span>
-        <span className="text-mute">{note}</span>
-      </figcaption>
-    </figure>
-  );
-}
-
 export default function Home() {
   return (
     <RevealFooter>
-      <div id="top" className="min-h-svh pb-28">
+      <div id="top" className="relative flex min-h-svh items-center justify-center overflow-hidden">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
-        <nav
-          aria-label="Main"
-          className="fixed left-1/2 top-6 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full bg-card/90 p-1 shadow-[0_8px_24px_rgba(0,0,0,0.06)] backdrop-blur"
-        >
-          <a href="#top" className="flex h-9 items-center rounded-full bg-white px-4 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-            <Logo className="text-[15px]" />
-          </a>
-          <a href="#join" className="flex h-9 items-center rounded-full px-4 text-mute transition hover:text-ink">
-            Beta
-          </a>
-        </nav>
-
-        <main>
-          <section className="fade-up mx-auto w-full max-w-[360px] px-5 pt-[200px] sm:px-0 sm:pt-[225px]">
-            <h1 className="sr-only">Vardaan — private beta</h1>
-            <p>Dear friend,</p>
-            <p className="mt-[22px] text-mute">
-              Vardaan &mdash; Sanskrit for &ldquo;boon&rdquo; &mdash; is a small, quiet tool we&apos;re building for
-              doing your best work, without the noise.
-            </p>
-            <p className="mt-[22px] text-mute">
-              We&apos;re letting people in slowly. Beta spots open for{" "}
-              <a href="#join" className="text-ink underline underline-offset-2">
-                <CurrentMonth />
-              </a>
-              .
-            </p>
-
-            <div id="join" className="mt-8 scroll-mt-32">
-              <WaitlistForm id="hero" />
-            </div>
-          </section>
-
-          <section
-            aria-label="Things to play with"
-            className="fade-up mt-40 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 [animation-delay:120ms] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{ paddingInline: "max(1.25rem, calc((100vw - 360px) / 2))", scrollPaddingInline: "max(1.25rem, calc((100vw - 360px) / 2))" }}
-          >
-            <Card title="Flower" note="Press and hold">
-              <PixelPlant
-                src="/images/flower.png"
-                alt="Pixel-art flower"
-                label="Shake the flower"
-                width={40 * FLOWER_SCALE}
-                height={60 * FLOWER_SCALE}
-                colors={PETAL_COLORS}
-                spawnX={[12, 82]}
-                spawnY={[1 * FLOWER_SCALE, 16 * FLOWER_SCALE]}
-                pieceSize={FLOWER_SCALE}
-                pixelated
-              />
-            </Card>
-            <Card title="Tree" note="Press and hold">
+        {TREES.map((tree, i) => {
+          const height = Math.round(tree.width * TREE_RATIO);
+          return (
+            <div
+              key={i}
+              className={`fade-up absolute ${tree.className}`}
+              style={{ opacity: tree.opacity, animationDelay: `${tree.delay}ms` }}
+            >
               <PixelPlant
                 src="/images/tree.png"
-                alt="Pixel-art tree"
+                alt=""
                 label="Shake the tree"
-                width={146}
-                height={162}
+                width={tree.width}
+                height={height}
                 colors={LEAF_COLORS}
                 spawnX={[15, 80]}
-                spawnY={[20, 90]}
-                pieceSize={3}
+                spawnY={[height * 0.1, height * 0.55]}
+                pieceSize={Math.max(2, Math.round(tree.width / 50))}
               />
-            </Card>
-          </section>
+            </div>
+          );
+        })}
+
+        <main className="fade-up relative z-10 w-full max-w-[360px] px-5 py-24 sm:px-0">
+          <h1 className="flex items-center gap-2.5">
+            <Logo className="text-[34px]" />
+            <span className="rounded-full bg-card px-2.5 py-0.5 text-[11px] uppercase tracking-[0.14em] text-mute">
+              Beta
+            </span>
+          </h1>
+
+          <p className="mt-8">Dear friend,</p>
+          <p className="mt-[22px] text-mute">
+            Vardaan &mdash; Sanskrit for &ldquo;boon&rdquo; &mdash; is a small, quiet tool we&apos;re building for
+            doing your best work, without the noise.
+          </p>
+          <p className="mt-[22px] text-mute">
+            We&apos;re letting people in slowly. Beta spots open for{" "}
+            <a href="#join" className="text-ink underline underline-offset-2">
+              <CurrentMonth />
+            </a>
+            .
+          </p>
+
+          <div id="join" className="mt-8 scroll-mt-32">
+            <WaitlistForm id="hero" />
+          </div>
+
+          <p className="mt-4 pl-3 text-[13px] text-mute">Press and hold any tree.</p>
         </main>
       </div>
     </RevealFooter>
