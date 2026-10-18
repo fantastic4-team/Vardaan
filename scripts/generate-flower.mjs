@@ -1,109 +1,105 @@
-// Generates the pixel-art flower for the vision section: public/images/flower.png (56x84).
+// Generates the pixel-art flower for the vision section: public/images/flower.png (40x60).
 // Run with `node scripts/generate-flower.mjs [scale] [previewPath]`.
 import { writeFileSync, mkdirSync } from "fs";
 import { encodePng } from "./png.mjs";
 
-const W = 56;
-const H = 84;
+const W = 40;
+const H = 60;
 const px = new Array(W * H).fill(null);
 
-let seed = 7041993;
+let seed = 3127;
 const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
 
 const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-const PETAL = ["#c4573a", "#de7d4f", "#eba55c", "#f4c656", "#f9dc72", "#fdeea6", "#fff8d6"].map(hex);
-const STEM = ["#3d5229", "#4b6239", "#6b8a45", "#c99a3c"].map(hex);
-const LEAF = ["#3d5229", "#5a7a35", "#7fa443", "#a5c95a", "#c9e07d"].map(hex);
+// Bloom: warm streak tones, then yellows from deep to pale.
+const STREAK = ["#d9785a", "#e89a74", "#efb48c"].map(hex);
+const PETAL = ["#e9b546", "#f5cf4f", "#f9df6e", "#fcea98", "#fff5c8"].map(hex);
+const STEM = { dark: hex("#4f6b2c"), mid: hex("#7a9a3a"), gold: hex("#d9a63e") };
+const LEAF = ["#4f7a2c", "#6f9a36", "#93bd48", "#b5d55e", "#d2e88a"].map(hex);
 
 const set = (x, y, c) => {
   x = Math.round(x);
   y = Math.round(y);
   if (x >= 0 && x < W && y >= 0 && y < H) px[y * W + x] = c;
 };
+const pick = (arr, v) => arr[Math.max(0, Math.min(arr.length - 1, Math.round(v)))];
 
-// ---- Leaves: tapered blades growing out from the stem ----
-function leaf(x0, y0, len, angle, width, droop) {
-  for (let t = 0; t <= 1; t += 0.5 / len) {
-    const bend = droop * t * t;
-    const cx = x0 + Math.cos(angle) * len * t;
-    const cy = y0 + Math.sin(angle) * len * t + bend;
-    const w = width * Math.sin(Math.PI * Math.min(1, t * 1.15)) * (1 - t * 0.35);
-    // Perpendicular to the blade direction.
-    const nx = -Math.sin(angle);
-    const ny = Math.cos(angle);
-    for (let s = -w; s <= w; s += 0.5) {
-      if (rand() < 0.06 && Math.abs(s) > w - 1.2) continue; // ragged edge
-      const side = s / Math.max(w, 0.01); // -1 top edge .. 1 bottom edge
-      let v = 3 - side * 1.6 - t * 0.6 + (rand() - 0.5) * 1.2;
-      if (Math.abs(s) < 0.5) v = 1.5; // midrib
-      set(cx + nx * s, cy + ny * s, LEAF[Math.max(0, Math.min(4, Math.round(v)))]);
+// ---- Stem: two pixels wide, green on the left with a gold highlight on the right ----
+for (let y = 17; y <= 56; y++) {
+  set(19, y, rand() < 0.85 ? STEM.mid : STEM.dark);
+  set(20, y, y > 22 && rand() < 0.8 ? STEM.gold : STEM.mid);
+}
+
+// ---- Leaves: broad, lush blades low on the stem ----
+function leaf(x0, y0, dir, len, width, lift) {
+  for (let i = 0; i <= len; i++) {
+    const t = i / len;
+    const cx = x0 + dir * i;
+    const cy = y0 - lift * Math.sin(t * Math.PI * 0.8) + t * t * 2;
+    const w = width * Math.sin(Math.PI * Math.min(1, 0.15 + t)) * (1 - t * 0.3);
+    for (let s = -w; s <= w; s += 1) {
+      if (Math.abs(s) > w - 1 && rand() < 0.3) continue;
+      // Lighter on the upper side, darker underneath and toward the stem.
+      const v = 1.9 - (s / Math.max(w, 1)) * 1.5 + t * 0.5 + (rand() - 0.5) * 1.6;
+      set(cx, cy + s, pick(LEAF, v));
     }
   }
 }
+leaf(18, 40, -1, 15, 4.2, 3);
+leaf(21, 38, 1, 14, 4, 4);
+leaf(18, 46, -1, 11, 3.2, 1);
+leaf(18, 20, -1, 4, 1.2, 1);
+leaf(21, 21, 1, 5, 1.4, 1.5);
 
-// ---- Stem ----
-const stemX = (y) => 29 + Math.sin(y / 9) * 0.8;
-for (let y = 30; y <= 80; y++) {
-  const x = stemX(y);
-  set(x - 1, y, STEM[rand() < 0.7 ? 1 : 0]);
-  set(x, y, STEM[y > 40 && rand() < 0.6 ? 3 : 2]);
-  if (rand() < 0.25) set(x + 1, y, STEM[0]);
+// Ground tufts.
+for (let x = 11; x <= 29; x++) {
+  if (rand() < 0.45) set(x, 57 + (rand() < 0.5 ? 0 : 1), pick(LEAF, 1 + rand() * 3));
 }
+set(16, 56, LEAF[2]);
+set(23, 56, LEAF[3]);
 
-leaf(28, 62, 22, Math.PI + 0.3, 6, 5);
-leaf(30, 58, 22, -0.28, 5.5, 6);
-leaf(28, 71, 14, Math.PI + 0.15, 3.8, 3);
-leaf(30, 42, 9, -0.55, 2.2, 1.5);
-leaf(28, 38, 8, Math.PI + 0.5, 2, 1.5);
+// ---- Bloom: a dense dome of petals fanning out from a point under its centre ----
+const bx = 19.5;
+const by = 14;
+const PETALS = 26;
+const petalLen = Array.from({ length: PETALS }, () => rand());
+const petalStreak = Array.from({ length: PETALS }, (_, i) => (i % 3 === 0 ? 2 : i % 4 === 1 ? 1 : 0));
 
-// Ground: a few scattered tufts at the base.
-for (let x = 16; x <= 42; x++) {
-  if (rand() < 0.4) set(x, 81 + Math.floor(rand() * 2), LEAF[1 + Math.floor(rand() * 3)]);
-  if (rand() < 0.15) set(x, 80, LEAF[2 + Math.floor(rand() * 2)]);
-}
-
-// ---- Sepals cupping the bloom ----
-for (let x = 21; x <= 37; x++) {
-  const d = Math.abs(x - 29) / 8;
-  const y = 29 + Math.round(d * 1.5);
-  if (rand() < 0.75) set(x, y, LEAF[1 + Math.floor(rand() * 2)]);
-  if (d < 0.5 && rand() < 0.7) set(x, y + 1, LEAF[1]);
-}
-
-// ---- Bloom: a dome of thin petals radiating from a point just below its centre ----
-const bx = 28.5;
-const by = 20;
-const petals = 40;
-const phases = Array.from({ length: petals }, () => rand());
-for (let y = 0; y < 36; y++) {
+for (let y = 0; y < 22; y++) {
   for (let x = 0; x < W; x++) {
     const dx = x + 0.5 - bx;
     const dy = y + 0.5 - by;
-    const a = Math.atan2(dy, dx); // -PI..PI, upper half is negative
-    const r = Math.hypot(dx / 1.05, dy);
-    if (dy > 9) continue;
+    const a = Math.atan2(dy, dx); // upper half is negative
+    const p = ((a + Math.PI) / (2 * Math.PI)) * PETALS;
+    const idx = Math.floor(p) % PETALS;
+    const across = Math.abs((p % 1) - 0.5) * 2;
 
-    // Which petal strand this pixel sits on, and how far along it.
-    const p = ((a + Math.PI) / (2 * Math.PI)) * petals;
-    const idx = Math.floor(p) % petals;
-    const across = Math.abs((p % 1) - 0.5) * 2; // 0 centre of petal .. 1 gap
-    const reach = 14 + phases[idx] * 6 - (dy > 0 ? dy * 0.9 : 0);
-    if (r > reach || (across > 0.9 && r > 7) || (r > reach - 1.5 && across > 0.6)) continue;
+    // Top of the dome reaches higher; the underside droops a little below the centre.
+    const upper = dy <= 0;
+    const reach = upper ? 11 + petalLen[idx] * 4 - across * 2.2 : 13 - dy * 1.6 + petalLen[idx] * 2 - across * 2;
+    const r = Math.hypot(dx * 0.92, dy);
+    if (r > reach || dy > 5) continue;
 
-    // Petals are warm orange at the base, pale yellow toward the tips; lit from the top.
-    const along = r / reach;
-    // Every few petals carries a deeper orange streak, like the reference bloom.
-    const tint = idx % 3 === 0 ? -1.3 : idx % 5 === 0 ? -0.7 : 0;
-    let v = 2 + along * 3.4 - across * 1.6 + tint + (dy < -8 ? 0.5 : 0) + (dy > 2 ? -0.8 : 0) + (rand() - 0.5) * 1.2;
-    if (r < 4) v = 1 + rand();
-    set(x, y, PETAL[Math.max(0, Math.min(6, Math.round(v)))]);
+    const along = r / Math.max(reach, 1);
+    // Petals carry warm streaks along their centre line, strongest near the base.
+    const streak = petalStreak[idx];
+    if (streak && across < 0.45 && along > 0.25 && rand() < 0.75) {
+      set(x, y, pick(STREAK, (streak === 2 ? 0 : 1) + along * 1.6 + (rand() - 0.5)));
+      continue;
+    }
+    const v = 0.5 + along * 2.6 - across * 0.8 + (upper ? 0.3 : -0.8) + (rand() - 0.5) * 1.4;
+    set(x, y, pick(PETAL, v));
   }
 }
-// A few loose petal tips around the bloom for a soft, hand-made edge.
-for (let i = 0; i < 26; i++) {
-  const a = -Math.PI * (0.03 + rand() * 0.94);
-  const d = 17 + rand() * 5;
-  set(bx + Math.cos(a) * d * 1.05, by + Math.sin(a) * d, PETAL[3 + Math.floor(rand() * 3)]);
+// Petal tips poking out of the silhouette.
+for (let i = 0; i < 14; i++) {
+  const a = -Math.PI * (0.05 + rand() * 0.9);
+  const d = 14 + rand() * 2.5;
+  set(bx + (Math.cos(a) * d) / 0.92, by + Math.sin(a) * d, pick(PETAL, 2 + rand() * 2));
+}
+// Sepals under the bloom.
+for (const [x, y, c] of [[16, 18, 2], [17, 18, 1], [18, 18, 2], [21, 18, 2], [22, 18, 1], [23, 18, 3], [19, 18, 1], [20, 18, 1], [15, 17, 3], [24, 17, 2]]) {
+  set(x, y, LEAF[c]);
 }
 
 mkdirSync("public/images", { recursive: true });

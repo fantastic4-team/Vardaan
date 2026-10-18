@@ -24,7 +24,7 @@ const AVATARS = ["#334932", "#87A454", "#ACBE62", "#0b0b0b"];
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Organization", name: site.name, url: site.url, logo: `${site.url}/icon.svg` },
+    { "@type": "Organization", name: site.name, url: site.url, logo: `${site.url}/images/logo.png` },
     { "@type": "WebSite", name: site.name, url: site.url, description: site.description },
   ],
 };
@@ -100,9 +100,9 @@ export default function Home() {
               <img
                 src="/images/flower.png"
                 alt="Pixel-art flower"
-                width={56}
-                height={84}
-                className="mx-auto h-[294px] w-[196px] select-none [image-rendering:pixelated] sm:h-[378px] sm:w-[252px]"
+                width={40}
+                height={60}
+                className="mx-auto h-[270px] w-[180px] select-none [image-rendering:pixelated] sm:h-[360px] sm:w-[240px]"
                 draggable={false}
               />
               <div className="max-w-xl">
