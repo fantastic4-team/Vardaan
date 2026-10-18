@@ -36,9 +36,10 @@ const BLOOM = [
   { angle: 0, top: 470, w: 255 },
 ];
 
-export default function PosterArt({ className = "" }: { className?: string }) {
+// `fit="contain"` shows the whole poster; `fit="cover"` fills the box, cropping the edges.
+export default function PosterArt({ className = "", fit = "contain" }: { className?: string; fit?: "contain" | "cover" }) {
   return (
-    <svg aria-hidden="true" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className={className}>
+    <svg aria-hidden="true" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio={fit === "cover" ? "xMidYMid slice" : "xMidYMid meet"} className={className}>
       <defs>
         <linearGradient id="pa-sky" x1="0" y1="0" x2="0.3" y2="1">
           <stop offset="0" stopColor="#5d63e4" />

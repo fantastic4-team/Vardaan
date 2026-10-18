@@ -42,12 +42,12 @@ export default function Home() {
           </nav>
         </header>
 
-        {/* Split screen: the letter on the left, the poster filling the right half. */}
+        {/* Split screen: the letter on the left, the full poster on a graph-paper panel on the right. */}
         <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
           <div className="flex min-h-0 min-w-0 flex-col justify-between gap-6 px-[max(1.5rem,calc(6vw+1.75rem))] py-7 lg:py-[clamp(28px,7vh,72px)] lg:pr-12">
             <div>
               <h1
-                className="reveal font-display text-[clamp(32px,5vh,44px)] font-semibold leading-[0.98] tracking-[-0.035em] text-ink sm:text-[clamp(44px,7vh,64px)] lg:text-[clamp(48px,8vh,72px)]"
+                className="reveal text-[clamp(34px,5.4vh,46px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink sm:text-[clamp(46px,7.4vh,66px)] lg:text-[clamp(50px,8.4vh,76px)]"
                 style={step(1)}
               >
                 The AI agent you can call for anything.
@@ -58,7 +58,7 @@ export default function Home() {
                 style={step(2)}
               >
                 Vardaan is a voice-first AI agent. Call, say what you need in Hindi, English or Hinglish, and it gets
-                done &mdash; quietly in the background, or live with you on the line. No apps, no screens, no typing.
+                done, quietly in the background or live with you on the line. No apps, no screens, no typing.
               </p>
             </div>
 
@@ -74,22 +74,27 @@ export default function Home() {
             </div>
           </div>
 
-          {/* The poster fills the whole right half: soft-focus botanical art, grain, and the wordmark
-              set into the petals. */}
-          <figure className="poster-art-in nav-grid @container relative min-h-[34svh] overflow-hidden border-t lg:min-h-0 lg:border-l lg:border-t-0">
-            <PosterArt className="absolute inset-0 h-full w-full" />
-            <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
-            <p
-              aria-hidden="true"
-              className="poster-wordmark poster-wordmark-in absolute inset-x-0 top-[64%] text-center text-[min(17cqw,180px)]"
-            >
-              vardaan
-            </p>
-            <figcaption className="absolute inset-x-0 bottom-6 flex justify-center">
-              <Logo height={12} className="invert opacity-90" />
-              <span className="sr-only">Vardaan Beta</span>
-            </figcaption>
-          </figure>
+          {/* The whole poster, uncropped (3:4), as large as the panel allows. Behind it, a blurred and
+              darkened copy of the same art fills the rest of the panel. */}
+          <div className="nav-grid relative flex h-[clamp(170px,calc(100svh-500px),42svh)] min-h-0 items-center justify-center overflow-hidden border-t p-3 lg:h-auto lg:border-l lg:border-t-0 lg:p-5">
+            <div aria-hidden="true" className="absolute inset-0 scale-110 blur-2xl brightness-[0.55] saturate-[1.2]">
+              <PosterArt fit="cover" className="h-full w-full" />
+            </div>
+            <figure className="poster-art-in @container relative aspect-[3/4] h-full max-w-full overflow-hidden rounded-[4px] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)]">
+              <PosterArt className="absolute inset-0 h-full w-full" />
+              <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
+              <p
+                aria-hidden="true"
+                className="poster-wordmark poster-wordmark-in absolute inset-x-0 top-[64%] text-center text-[19cqw]"
+              >
+                vardaan
+              </p>
+              <figcaption className="absolute inset-x-0 bottom-[3.5%] flex justify-center">
+                <Logo height={12} className="invert opacity-90" />
+                <span className="sr-only">Vardaan Beta</span>
+              </figcaption>
+            </figure>
+          </div>
         </main>
       </div>
     </RevealFooter>

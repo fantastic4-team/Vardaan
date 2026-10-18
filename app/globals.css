@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
-  --font-poster: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-figtree), system-ui, -apple-system, sans-serif;
+  --font-poster: var(--font-poppins), var(--font-figtree), system-ui, sans-serif;
   --color-page: #141312;
   --color-ink: #f4f2ee;
   --color-mute: #8f8b85;
@@ -29,7 +28,7 @@ body {
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 22px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 /* ---------- Navbar ---------- */
@@ -38,6 +37,16 @@ body {
 .nav-grid {
   border-style: dotted;
   border-color: rgba(244, 242, 238, 0.22);
+}
+
+/* Fine graph-paper grid behind the poster, like the reference's right half. */
+.graph-paper {
+  background-color: #171615;
+  background-image:
+    linear-gradient(rgba(244, 242, 238, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 242, 238, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: -1px -1px;
 }
 
 /* ---------- Entrance ---------- */

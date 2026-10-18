@@ -1,18 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Inter_Tight, Poppins } from "next/font/google";
+import { Figtree, Poppins } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const inter = Inter({
+// Figtree: a free stand-in for the reference site's Matter typeface.
+const figtree = Figtree({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-inter",
-});
-
-const interTight = Inter_Tight({
-  subsets: ["latin"],
-  weight: ["600"],
-  variable: "--font-inter-tight",
+  weight: ["400", "500", "600"],
+  variable: "--font-figtree",
 });
 
 const poppins = Poppins({
@@ -54,7 +49,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable} ${poppins.variable}`}>
+    <html lang="en" className={`${figtree.variable} ${poppins.variable}`}>
       <body>{children}</body>
     </html>
   );
