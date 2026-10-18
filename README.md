@@ -2,7 +2,7 @@
 
 **The AI agent you can call for anything.**
 
-Vardaan is a voice-first AI agent. You call it, say what you need in Hindi, English or Hinglish, and it gets done, quietly in the background or live with you on the line. No apps, no screens, no typing.
+Vardaan is a voice-first AI agent. You call it, say what you need in Hindi, English, Hinglish or your own native language, and it gets done, quietly in the background or live with you on the line. No apps, no screens, no typing.
 
 This repository contains the Vardaan website: the beta landing page, the waitlist and the product pages.
 
@@ -50,7 +50,7 @@ Vardaan remembers preferences and context, and when information is missing or a 
 | `/how-it-works` | The three steps of a call and the two modes |
 | `/use-cases` | Tasks you can hand off and who Vardaan is built for |
 | `/faq` | Common questions about the product and the beta |
-| `/team` | The Fantastic 4 team |
+| `/team` | The Fantastic 4 team: photos, roles and website, GitHub and LinkedIn links |
 | `/api/waitlist` | `POST` endpoint that stores waitlist emails |
 
 ![How it works page](docs/how-it-works.jpg)
@@ -60,8 +60,9 @@ Highlights:
 - **Split-screen landing** in the style of a technical spec sheet: dotted-grid navbar, letter on the left, full-height poster on the right.
 - **Original illustrations**, all drawn in SVG with soft focus and film grain: the home poster and a different garden scene for each section page (tulips, lotus pond, daisies, poppies).
 - **Hidden footer** that slides up when you scroll or swipe past the end of the page.
-- **Small details**: a glowing "New" tag, a glassy waitlist form, and a "Beta spots open for …" line that always names next month.
-- **Accessible and responsive**: works from 375px phones to wide desktops, respects `prefers-reduced-motion`, and keeps keyboard focus visible.
+- **Team page** with portraits tinted in the poster palette, name, role and link icons set on each photo.
+- **Small details**: a glowing "New" tag, a glassy waitlist form, a "Beta spots open for …" line that always names next month, and a favicon drawn from the same flower art.
+- **Accessible and responsive**: tested at 360, 390, 768, 1024 and 1440px with no horizontal scrolling; the landing page fits one screen at every size. Respects `prefers-reduced-motion` and keeps keyboard focus visible.
 
 ---
 
@@ -171,7 +172,8 @@ The form posts to `/api/waitlist`, which validates the email, ignores duplicates
 
 - Page titles, descriptions and canonical URLs for every route
 - Generated Open Graph and Twitter images (`/opengraph-image`, `/twitter-image`)
-- `sitemap.xml`, `robots.txt`, web app manifest, favicon and Apple touch icon
+- `sitemap.xml`, `robots.txt` and a web app manifest
+- SVG favicon (`app/icon.svg`) and a matching 180px Apple touch icon generated from it
 - JSON-LD structured data for the organisation and website
 
 ---

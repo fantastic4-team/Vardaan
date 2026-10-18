@@ -6,6 +6,6 @@ export const site = {
   name: "Vardaan",
   title: "Vardaan — The AI agent you can call for anything",
   description:
-    "Vardaan is a voice-first AI agent. Call, say what you need in Hindi, English or Hinglish, and it gets done, in the background or live on the call. Join the beta waitlist.",
+    "Vardaan is a voice-first AI agent. Call, say what you need in Hindi, English, Hinglish or your native language, and it gets done, in the background or live on the call. Join the beta waitlist.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? (vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000")).replace(/\/$/, ""),
 };

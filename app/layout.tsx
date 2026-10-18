@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: { default: site.title, template: `%s | ${site.name}` },
   description: site.description,
   applicationName: site.name,
-  keywords: ["Vardaan", "AI agent", "voice AI", "AI phone assistant", "Hindi AI assistant", "Hinglish", "Vardaan beta"],
+  keywords: ["Vardaan", "AI agent", "voice AI", "AI phone assistant", "Hindi AI assistant", "Hinglish", "Indian languages", "Vardaan beta"],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",

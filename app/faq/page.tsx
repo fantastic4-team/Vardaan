@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     q: "Which languages does it understand?",
-    a: "Hindi, English and Hinglish, including the way people naturally mix them in conversation.",
+    a: "Hindi, English, Hinglish and other native Indian languages, including the way people naturally mix them in conversation.",
   },
   {
     q: "Do I need a smartphone or an app?",

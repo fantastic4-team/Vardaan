@@ -88,7 +88,7 @@ const ICONS: Record<keyof Links, { label: string; path: React.ReactNode }> = {
 function SocialLinks({ name, links }: { name: string; links: Links }) {
   const items = Object.keys(ICONS) as (keyof Links)[];
   return (
-    <ul className="mt-3 flex items-center gap-3.5 sm:mt-4 sm:gap-4">
+    <ul className="mt-2.5 flex items-center gap-3.5 sm:mt-3.5 sm:gap-4">
       {items.map((key) => (
         <li key={key}>
           <a
@@ -96,7 +96,7 @@ function SocialLinks({ name, links }: { name: string; links: Links }) {
             {...(links[key] ? { target: "_blank", rel: "noreferrer" } : {})}
             aria-label={`${name} on ${ICONS[key].label}`}
             title={ICONS[key].label}
-            className="block text-ink/55 transition hover:text-ink"
+            className="block text-white/70 transition hover:text-white"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-[18px] w-[18px]">
               {ICONS[key].path}
@@ -119,20 +119,27 @@ export default function Team() {
       <div className="nav-grid grid grid-cols-2 border-l border-t lg:grid-cols-4">
         {TEAM.map((member, i) => (
           <div key={member.name} className="nav-grid min-w-0 border-b border-r p-3 sm:p-5 lg:p-6">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[12px]" style={{ background: TONES[i % TONES.length] }}>
-              <Image
-                src={member.photo}
-                alt={member.name}
-                fill
-                loading="eager"
-                sizes="(min-width: 1024px) 25vw, 50vw"
-                className="object-cover object-top mix-blend-multiply saturate-[0.9] contrast-[1.05]"
-              />
-              <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
+            <div className="relative overflow-hidden rounded-[12px] bg-[#1c1b1a]">
+              <div className="relative aspect-[4/5]" style={{ background: TONES[i % TONES.length] }}>
+                <Image
+                  src={member.photo}
+                  alt={member.name}
+                  fill
+                  loading="eager"
+                  sizes="(min-width: 1024px) 25vw, 50vw"
+                  className="object-cover object-top mix-blend-multiply saturate-[0.9] contrast-[1.05]"
+                />
+                <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
+              </div>
+              {/* Name, role and links: below the photo on phones, set on it over a soft fade from sm up. */}
+              <div className="px-3 pb-3 pt-3 sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-[linear-gradient(180deg,rgba(10,10,12,0)_0%,rgba(10,10,12,0.55)_45%,rgba(10,10,12,0.85)_100%)] sm:px-5 sm:pb-5 sm:pt-20">
+                <h2 className="text-[14px] font-medium leading-snug text-white sm:text-[19px]">{member.name}</h2>
+                <p className="mt-0.5 text-[10px] uppercase leading-snug tracking-[0.08em] text-white/70 sm:text-[12px] sm:tracking-[0.1em]">
+                  {member.role}
+                </p>
+                <SocialLinks name={member.name} links={member.links} />
+              </div>
             </div>
-            <h2 className="mt-4 text-[15px] font-medium leading-snug text-ink sm:mt-5 sm:text-[18px]">{member.name}</h2>
-            <p className="mt-1 text-[12px] leading-snug text-ink/60 sm:text-[14px]">{member.role}</p>
-            <SocialLinks name={member.name} links={member.links} />
           </div>
         ))}
       </div>
