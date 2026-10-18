@@ -125,10 +125,10 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
   return (
     <>
       <div
-        className="reveal-shift relative z-10 bg-white transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+        className="reveal-shift relative z-10 bg-page transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
         style={{
           transform: open ? `translateY(-${height}px)` : undefined,
-          boxShadow: open ? "0 24px 48px -24px rgba(0,0,0,0.18)" : "none",
+          boxShadow: open ? "0 24px 48px -24px rgba(0,0,0,0.6)" : "none",
         }}
       >
         {children}
@@ -138,29 +138,29 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
         id="site-footer"
         ref={footerRef}
         inert={!open}
-        className={`fixed inset-x-0 bottom-0 z-0 border-t border-black/6 bg-[#fafaf9] transition-opacity duration-500 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-x-0 bottom-0 z-0 border-t border-white/10 bg-[#0e0d0c] transition-opacity duration-500 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
       >
         <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-12 sm:px-8">
           <div className="flex flex-col justify-between gap-10 md:flex-row">
             <div className="max-w-xs">
-              <Logo height={26} />
-              <p className="mt-4 text-sm leading-relaxed text-black/55">
+              <Logo height={26} className="invert" />
+              <p className="mt-4 text-sm leading-relaxed text-white/55">
                 The AI agent you can call for anything. Now in private beta.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-10 text-sm sm:gap-16">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/40">Product</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">Product</p>
                 <ul className="mt-4 space-y-2.5">
-                  <li><a href="#join" onClick={() => setOpen(false)} className="text-black/70 hover:text-ink">Join waitlist</a></li>
-                  <li><a href="#top" onClick={() => setOpen(false)} className="text-black/70 hover:text-ink">Vardaan Beta</a></li>
+                  <li><a href="#join" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">Join waitlist</a></li>
+                  <li><a href="#top" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">Vardaan Beta</a></li>
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-black/40">Team</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">Team</p>
                 <ul className="mt-4 space-y-2.5">
                   <li>
-                    <a href="https://github.com/fantastic4-team/Vardaan" target="_blank" rel="noreferrer" className="text-black/70 hover:text-ink">
+                    <a href="https://github.com/fantastic4-team/Vardaan" target="_blank" rel="noreferrer" className="text-white/70 hover:text-ink">
                       GitHub
                     </a>
                   </li>
@@ -168,7 +168,7 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
               </div>
             </div>
           </div>
-          <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-black/6 pt-6 text-xs text-black/45 sm:flex-row sm:items-center">
+          <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/45 sm:flex-row sm:items-center">
             <p>© {new Date().getFullYear()} Vardaan. All rights reserved.</p>
             <button
               type="button"

@@ -2,9 +2,12 @@
 
 @theme {
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --color-ink: #000000;
-  --color-mute: #a9a9a9;
-  --color-card: #f5f5f5;
+  --font-display: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --color-page: #141312;
+  --color-ink: #f4f2ee;
+  --color-mute: #8f8b85;
+  --color-accent: #f0561d;
   --color-leaf-dark: #334932;
   --color-leaf: #87a454;
   --color-leaf-light: #acbe62;
@@ -15,81 +18,12 @@ html {
 }
 
 body {
-  background: #ffffff;
+  background: var(--color-page);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 22px;
   font-weight: 500;
-}
-
-/* ---------- Pixel plant ---------- */
-
-.plant-img {
-  display: block;
-  transform-origin: center bottom;
-  user-select: none;
-  pointer-events: none;
-  transition: transform 160ms ease-out;
-}
-
-/* While held, the plant slowly squashes; the release spring starts from this pose. */
-.plant-img.is-pressed {
-  transform: scale(1.06, 0.86);
-  transition: transform 1200ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.plant-img.is-bouncing {
-  animation: plant-spring 900ms cubic-bezier(0.3, 0.6, 0.4, 1);
-}
-
-@keyframes plant-spring {
-  0% { transform: scale(calc(1 + 0.06 * var(--bounce-intensity)), calc(1 - 0.14 * var(--bounce-intensity))); }
-  18% { transform: scale(calc(1 - 0.07 * var(--bounce-intensity)), calc(1 + 0.13 * var(--bounce-intensity))); }
-  36% { transform: scale(calc(1 + 0.045 * var(--bounce-intensity)), calc(1 - 0.08 * var(--bounce-intensity))); }
-  54% { transform: scale(calc(1 - 0.025 * var(--bounce-intensity)), calc(1 + 0.045 * var(--bounce-intensity))); }
-  72% { transform: scale(calc(1 + 0.012 * var(--bounce-intensity)), calc(1 - 0.02 * var(--bounce-intensity))); }
-  100% { transform: scale(1, 1); }
-}
-
-.plant-piece {
-  position: absolute;
-  left: var(--x);
-  top: var(--startTop);
-  width: var(--size, 2px);
-  height: var(--size, 2px);
-  background: var(--color);
-  image-rendering: pixelated;
-  opacity: 0;
-  animation: leaf-fall var(--dur) linear var(--delay) infinite;
-}
-
-.plant-piece.burst {
-  animation: leaf-fall var(--dur) cubic-bezier(0.3, 0.1, 0.6, 1) var(--delay) 1 forwards;
-}
-
-@keyframes leaf-fall {
-  0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
-  6% { opacity: 1; }
-  10% { transform: translate(var(--sway1), calc(var(--fallDistance) * 0.1)) rotate(calc(var(--rotation) * 0.1)); }
-  20% { transform: translate(var(--sway2), calc(var(--fallDistance) * 0.2)) rotate(calc(var(--rotation) * 0.2)); }
-  30% { transform: translate(var(--sway3), calc(var(--fallDistance) * 0.3)) rotate(calc(var(--rotation) * 0.3)); }
-  40% { transform: translate(var(--sway4), calc(var(--fallDistance) * 0.4)) rotate(calc(var(--rotation) * 0.4)); }
-  50% { transform: translate(calc(var(--sway5) + var(--drift) * 0.5), calc(var(--fallDistance) * 0.5)) rotate(calc(var(--rotation) * 0.5)); }
-  60% { transform: translate(calc(var(--sway6) + var(--drift) * 0.6), calc(var(--fallDistance) * 0.6)) rotate(calc(var(--rotation) * 0.6)); }
-  70% { transform: translate(calc(var(--sway7) + var(--drift) * 0.7), calc(var(--fallDistance) * 0.7)) rotate(calc(var(--rotation) * 0.7)); }
-  80% { transform: translate(calc(var(--sway8) + var(--drift) * 0.8), calc(var(--fallDistance) * 0.8)) rotate(calc(var(--rotation) * 0.8)); }
-  90% { opacity: 1; transform: translate(calc(var(--sway9) + var(--drift) * 0.9), calc(var(--fallDistance) * 0.9)) rotate(calc(var(--rotation) * 0.9)); }
-  100% { opacity: 0; transform: translate(calc(var(--sway10) + var(--drift)), var(--fallDistance)) rotate(var(--rotation)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .plant-img,
-  .plant-piece,
-  .reveal-shift {
-    animation: none !important;
-    transition: none !important;
-  }
 }
 
 /* ---------- Entrance ---------- */
@@ -105,59 +39,52 @@ body {
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-/* ---------- Background line work ---------- */
+/* ---------- ASCII art ---------- */
 
-/* Static ribbons across the whole page, kept light so they sit behind the content. Behind the
-   letter they soften further (but don't vanish) to keep the text easy to read. */
-.flow-lines {
-  opacity: 0.09;
-  -webkit-mask-image: radial-gradient(ellipse 340px 380px at 50% 50%, rgba(0, 0, 0, 0.35) 55%, #000 100%);
-  mask-image: radial-gradient(ellipse 340px 380px at 50% 50%, rgba(0, 0, 0, 0.35) 55%, #000 100%);
+.ascii {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: pre;
+  color: rgba(244, 242, 238, 0.5);
+  user-select: none;
 }
 
-/* ---------- Glass waitlist field ---------- */
+/* ---------- Waitlist field ---------- */
 
-/* Dark frosted glass, matching the Beta badge, so the form stands out from the light line work. */
-.glass-field {
-  background: linear-gradient(180deg, rgba(44, 44, 44, 0.9) 0%, rgba(14, 14, 14, 0.92) 60%, rgba(0, 0, 0, 0.94) 100%);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  backdrop-filter: blur(14px) saturate(150%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    0 16px 36px -14px rgba(0, 0, 0, 0.55);
-  transition: box-shadow 200ms ease;
+/* A hairline field with a square orange call to action, in the style of the reference. */
+.waitlist-field {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid rgba(244, 242, 238, 0.18);
+  background: rgba(244, 242, 238, 0.04);
+  border-radius: 2px;
+  transition: border-color 200ms ease, background 200ms ease;
 }
 
-.glass-field:focus-within {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    0 18px 40px -14px rgba(0, 0, 0, 0.6);
+.waitlist-field:focus-within {
+  border-color: rgba(244, 242, 238, 0.45);
+  background: rgba(244, 242, 238, 0.06);
 }
 
-/* Bright pill button inside the dark field. */
-.glass-button {
-  color: #000;
-  background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
-  box-shadow:
-    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    0 4px 12px -4px rgba(0, 0, 0, 0.4);
-  transition: transform 150ms ease, background 200ms ease;
+.waitlist-button {
+  color: #fff;
+  font-weight: 500;
+  background: var(--color-accent);
+  transition: background 200ms ease;
 }
 
-.glass-button:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #e9e9e9 100%);
+.waitlist-button:hover {
+  background: #ff6a2e;
 }
 
-.glass-button:active {
-  transform: translateY(1px);
+.waitlist-button:focus-visible {
+  outline: 2px solid #ffb08f;
+  outline-offset: 2px;
 }
 
-/* ---------- Beta badge: dark glass with a slow light sweep ---------- */
+/* ---------- Beta badge: light glass with a slow light sweep ---------- */
 
 .beta-glass {
   position: relative;
@@ -170,15 +97,14 @@ body {
   font-size: 11px;
   line-height: 1;
   letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(180deg, rgba(58, 58, 58, 0.9) 0%, rgba(12, 12, 12, 0.92) 55%, rgba(0, 0, 0, 0.95) 100%);
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   backdrop-filter: blur(10px) saturate(140%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 1px 2px rgba(0, 0, 0, 0.18),
-    0 8px 18px -8px rgba(0, 0, 0, 0.5);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 6px 16px -8px rgba(0, 0, 0, 0.6);
 }
 
 .beta-glass::after {

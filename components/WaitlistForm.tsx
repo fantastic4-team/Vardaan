@@ -32,7 +32,7 @@ export default function WaitlistForm({ id }: { id?: string }) {
 
   if (status === "success") {
     return (
-      <div className="glass-field flex h-12 w-full items-center gap-2 rounded-full px-5 text-white">
+      <div className="waitlist-field h-12 w-full items-center gap-2 px-4 text-ink">
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-leaf" />
         {message}
       </div>
@@ -44,7 +44,7 @@ export default function WaitlistForm({ id }: { id?: string }) {
       <form
         id={id}
         onSubmit={onSubmit}
-        className="glass-field flex w-full items-center gap-1 rounded-full p-1.5"
+        className="waitlist-field w-full"
       >
         <label htmlFor={`${id ?? "waitlist"}-email`} className="sr-only">
           Email address
@@ -60,17 +60,17 @@ export default function WaitlistForm({ id }: { id?: string }) {
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          className="h-10 min-w-0 flex-1 bg-transparent px-3.5 text-white caret-white outline-none placeholder:text-white/40"
+          className="h-12 min-w-0 flex-1 bg-transparent px-4 text-ink caret-ink outline-none placeholder:text-mute"
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="glass-button h-10 shrink-0 cursor-pointer rounded-full px-5 disabled:cursor-wait disabled:opacity-70"
+          className="waitlist-button shrink-0 cursor-pointer px-5 disabled:cursor-wait disabled:opacity-70"
         >
-          {status === "loading" ? "Joining…" : "Join"}
+          {status === "loading" ? "Joining…" : "Join waitlist"}
         </button>
       </form>
-      {status === "error" && <p className="mt-2 pl-3 text-red-600">{message}</p>}
+      {status === "error" && <p className="mt-2 text-[13px] text-[#ff8a7a]">{message}</p>}
     </div>
   );
 }
