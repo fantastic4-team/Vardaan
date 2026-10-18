@@ -2,7 +2,7 @@
 
 **The AI agent you can call for anything.**
 
-Vardaan is a voice-first AI agent. You call it, say what you need in Hindi, English, Hinglish or your own native language, and it gets done, quietly in the background or live with you on the line. No apps, no screens, no typing.
+Vardaan is a voice-first AI agent. You call it, say what you need in your own language, and it gets done, quietly in the background or live with you on the line. No apps, no screens, no typing.
 
 This repository contains the Vardaan website: the beta landing page, the waitlist and the product pages.
 

@@ -46,7 +46,7 @@ export default function Home() {
                 className="reveal mt-4 max-w-[460px] text-[14px] leading-[21px] text-ink/75 sm:text-[15px] sm:leading-[22px] lg:mt-[clamp(20px,5vh,56px)] lg:text-[17px] lg:leading-[28px]"
                 style={step(2)}
               >
-                Vardaan is a voice-first AI agent. Call, say what you need in Hindi, English, Hinglish or your native language, and it gets
+                Vardaan is a voice-first AI agent. Call, say what you need in your own language, and it gets
                 done, quietly in the background or live with you on the line. No apps, no screens, no typing.
               </p>
             </div>

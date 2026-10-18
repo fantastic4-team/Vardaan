@@ -4,14 +4,14 @@ import SectionPage, { CardGrid } from "@/components/SectionPage";
 export const metadata: Metadata = {
   title: "How it works",
   description:
-    "Call Vardaan, describe what you need in Hindi, English, Hinglish or your native language, and it plans the steps, confirms the details and gets it done.",
+    "Call Vardaan, describe what you need in your own language, and it plans the steps, confirms the details and gets it done.",
   alternates: { canonical: "/how-it-works" },
 };
 
 const STEPS = [
   {
     title: "Call and say what you need",
-    body: "Dial in from any phone and explain the task in your own words, in Hindi, English, Hinglish or your native language. No app, no screen, no typing.",
+    body: "Dial in from any phone and explain the task in your own words and your own language. No app, no screen, no typing.",
   },
   {
     title: "Vardaan plans and confirms",
