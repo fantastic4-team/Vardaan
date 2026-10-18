@@ -17,24 +17,40 @@ function hash(a: number, b: number, c: number) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
-type Props = { art: string; className?: string };
+type Props = {
+  art: string;
+  className?: string;
+  wrapperClassName?: string;
+  /** Extra layers; any <pre data-ascii-mirror> inside receives the same text every frame. */
+  children?: React.ReactNode;
+};
 
 // Animated ASCII art: it grows in from the base of the trunk with each character flickering
 // before it settles, a slow wind ripples through the crown, and characters near the pointer
-// scatter. Text is written straight to the <pre> each frame, so React doesn't re-render.
-export default function AsciiArt({ art, className = "" }: Props) {
+// scatter. Text is written straight to the <pre> (and any mirror layers) each frame, so React
+// doesn't re-render, and every layer stays in perfect step.
+export default function AsciiArt({ art, className = "", wrapperClassName = "", children }: Props) {
+  const wrapRef = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLPreElement>(null);
+
+  const targets = () => [
+    ref.current,
+    ...Array.from(wrapRef.current?.querySelectorAll<HTMLPreElement>("pre[data-ascii-mirror]") ?? []),
+  ];
+  const write = (text: string) => targets().forEach((t) => t && (t.textContent = text));
 
   // Start blank before the first paint so the finished art never flashes ahead of the intro.
   useLayoutEffect(() => {
-    if (ref.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) ref.current.textContent = "";
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) write("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    const wrap = wrapRef.current;
+    if (!el || !wrap) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.textContent = art;
+      write(art);
       return;
     }
 
@@ -61,8 +77,8 @@ export default function AsciiArt({ art, className = "" }: Props) {
       };
     };
     const onLeave = () => (pointer = null);
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerleave", onLeave);
+    wrap.addEventListener("pointermove", onMove);
+    wrap.addEventListener("pointerleave", onLeave);
 
     let visible = true;
     const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
@@ -121,21 +137,25 @@ export default function AsciiArt({ art, className = "" }: Props) {
         }
         if (r < rows - 1) out += "\n";
       }
-      el.textContent = out;
+      write(out);
     };
     raf = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
-      el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerleave", onLeave);
+      wrap.removeEventListener("pointermove", onMove);
+      wrap.removeEventListener("pointerleave", onLeave);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [art]);
 
   return (
-    <pre ref={ref} aria-hidden="true" className={className}>
-      {art}
-    </pre>
+    <div ref={wrapRef} className={`relative ${wrapperClassName}`}>
+      <pre ref={ref} aria-hidden="true" className={className}>
+        {art}
+      </pre>
+      {children}
+    </div>
   );
 }
