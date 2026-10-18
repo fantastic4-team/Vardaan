@@ -94,11 +94,80 @@ body {
 
 /* ---------- Entrance ---------- */
 
-.fade-up {
-  animation: fade-up 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+/* Letter lines arrive one after another: a short rise that comes into focus. */
+.reveal {
+  animation: reveal 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(120ms + var(--i, 0) * 90ms);
 }
 
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(10px); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Trees grow up out of the ground with a little overshoot, after the letter has landed. */
+.tree-grow {
+  transform-origin: 50% 100%;
+  animation: tree-grow 1100ms cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+}
+
+@keyframes tree-grow {
+  0% { opacity: 0; transform: scale(0.55, 0.35); }
+  45% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1, 1); }
+}
+
+.tree-grow > div {
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tree-grow > div:hover {
+  transform: translateY(-3px);
+}
+
+/* ---------- Beta badge: dark glass with a slow light sweep ---------- */
+
+.beta-glass {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(180deg, rgba(58, 58, 58, 0.9) 0%, rgba(12, 12, 12, 0.92) 55%, rgba(0, 0, 0, 0.95) 100%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 8px 18px -8px rgba(0, 0, 0, 0.5);
+}
+
+.beta-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: beta-sheen 5s cubic-bezier(0.4, 0, 0.2, 1) 1.4s infinite;
+}
+
+@keyframes beta-sheen {
+  0% { transform: translateX(-120%); }
+  30%, 100% { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .tree-grow,
+  .beta-glass::after {
+    animation: none !important;
+  }
 }

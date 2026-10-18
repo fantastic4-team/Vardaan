@@ -132,16 +132,6 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
         }}
       >
         {children}
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-expanded={open}
-          aria-controls="site-footer"
-          tabIndex={open ? -1 : 0}
-          className={`absolute bottom-5 left-1/2 flex -translate-x-1/2 cursor-pointer items-center gap-1.5 text-[11px] text-black/35 transition hover:text-black/70 ${open ? "pointer-events-none opacity-0" : "opacity-100"}`}
-        >
-          <span className="inline-block animate-bounce">↓</span> More
-        </button>
       </div>
 
       <footer

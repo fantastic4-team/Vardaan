@@ -47,12 +47,10 @@ export default function Home() {
           const kind = KINDS[tree.kind];
           const height = Math.round(tree.width * kind.ratio);
           return (
-            <div
-              key={i}
-              className={`fade-up absolute ${tree.className}`}
-              style={{ opacity: tree.opacity, animationDelay: `${tree.delay}ms` }}
-            >
-              <PixelPlant
+            // Depth opacity sits on the outer box so the grow-in animation can own the inner one.
+            <div key={i} className={`absolute ${tree.className}`} style={{ opacity: tree.opacity }}>
+              <div className="tree-grow" style={{ animationDelay: `${600 + tree.delay * 1.6}ms` }}>
+                <PixelPlant
                 src={kind.src}
                 alt=""
                 label="Shake the tree"
@@ -61,31 +59,32 @@ export default function Home() {
                 colors={kind.colors}
                 spawnX={[15, 80]}
                 spawnY={[height * 0.1, height * 0.55]}
-                pieceSize={Math.max(2, Math.round(tree.width / 50))}
-              />
+                  pieceSize={Math.max(2, Math.round(tree.width / 50))}
+                />
+              </div>
             </div>
           );
         })}
 
-        <main className="fade-up relative z-10 w-full max-w-[360px] px-5 py-24 sm:px-0">
-          <h1 className="flex items-center gap-2.5">
+        <main className="relative z-10 w-full max-w-[360px] px-5 py-24 sm:px-0">
+          <h1 className="reveal flex items-center gap-2.5" style={{ "--i": 0 } as React.CSSProperties}>
             <Logo height={26} priority />
-            <span className="rounded-full bg-card px-2.5 py-0.5 text-[11px] uppercase tracking-[0.14em] text-mute">
-              Beta
-            </span>
+            <span className="beta-glass">Beta</span>
             <span className="sr-only"> &mdash; the AI agent you can call for anything</span>
           </h1>
 
-          <p className="mt-8">Dear friend,</p>
-          <p className="mt-[22px] text-mute">
+          <p className="reveal mt-8" style={{ "--i": 1 } as React.CSSProperties}>
+            Dear friend,
+          </p>
+          <p className="reveal mt-[22px] text-mute" style={{ "--i": 2 } as React.CSSProperties}>
             Most everyday tasks still ask for an app, a screen and your patience. We think they should only take a
             phone call.
           </p>
-          <p className="mt-[22px] text-mute">
+          <p className="reveal mt-[22px] text-mute" style={{ "--i": 3 } as React.CSSProperties}>
             Vardaan is an AI agent you can call for anything. Tell it what you need, in Hindi, English or Hinglish.
             Hang up and it quietly finishes the work, or stay on the line and think it through together.
           </p>
-          <p className="mt-[22px] text-mute">
+          <p className="reveal mt-[22px] text-mute" style={{ "--i": 4 } as React.CSSProperties}>
             We&apos;re letting people in slowly. Beta spots open for{" "}
             <a href="#join" className="text-ink underline underline-offset-2">
               <CurrentMonth />
@@ -93,11 +92,13 @@ export default function Home() {
             .
           </p>
 
-          <div id="join" className="mt-8 scroll-mt-32">
+          <div id="join" className="reveal mt-8 scroll-mt-32" style={{ "--i": 5 } as React.CSSProperties}>
             <WaitlistForm id="hero" />
           </div>
 
-          <p className="mt-4 pl-3 text-[13px] text-mute">Press and hold any tree.</p>
+          <p className="reveal mt-4 pl-3 text-[13px] text-mute" style={{ "--i": 6 } as React.CSSProperties}>
+            Press and hold any tree.
+          </p>
         </main>
       </div>
     </RevealFooter>
