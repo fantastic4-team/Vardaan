@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Logo from "@/components/Logo";
 import { NAV_LINKS } from "@/components/SiteNav";
 
 const WHEEL_THRESHOLD = 140;
@@ -145,7 +144,7 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
         <div className="mx-auto w-full max-w-6xl px-5 pb-8 pt-12 sm:px-8">
           <div className="flex flex-col justify-between gap-10 md:flex-row">
             <div className="max-w-xs">
-              <Logo height={26} className="invert" />
+              <span className="font-poster text-[30px] font-semibold uppercase leading-none tracking-[0.02em] text-ink">Vardaan</span>
               <p className="mt-4 text-sm leading-relaxed text-white/55">
                 The AI agent you can call for anything. Now in private beta.
               </p>
