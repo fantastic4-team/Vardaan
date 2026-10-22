@@ -11,6 +11,8 @@ export async function GET() {
     tasks: d.tasks.filter((t) => t.userId === user.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     memories: d.memories.filter((m) => m.userId === user.id),
     reminders: d.reminders.filter((r) => r.userId === user.id),
+    calls: d.calls.filter((c) => c.userId === user.id).sort((a, b) => b.startedAt.localeCompare(a.startedAt)),
+    messages: d.messages.filter((m) => m.userId === user.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
   }));
   return NextResponse.json(data);
 }

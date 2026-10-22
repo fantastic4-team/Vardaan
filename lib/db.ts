@@ -11,6 +11,10 @@ export type User = {
   name: string;
   email: string;
   passwordHash: string;
+  /** Mobile number in E.164 format (+919876543210). Vardaan calls and texts this number. */
+  phone?: string;
+  /** Language for phone calls, e.g. "en-IN" or "hi-IN". */
+  lang?: string;
   createdAt: string;
 };
 
@@ -43,12 +47,60 @@ export type Task = {
 };
 
 export type Memory = { id: string; userId: string; fact: string; createdAt: string };
-export type Reminder = { id: string; userId: string; title: string; dueAt?: string; createdAt: string };
+export type Reminder = {
+  id: string;
+  userId: string;
+  title: string;
+  dueAt?: string;
+  /** When Vardaan phoned the user about this reminder. */
+  calledAt?: string;
+  createdAt: string;
+};
 
-type Data = { users: User[]; tasks: Task[]; memories: Memory[]; reminders: Reminder[] };
+export type CallTurn = { role: "user" | "assistant"; content: string; at: string };
+
+/** A phone call between Vardaan and a user, kept as a log with its transcript. */
+export type CallLog = {
+  id: string;
+  userId: string;
+  direction: "outbound" | "inbound";
+  /** Why Vardaan called: "Call me" from the dashboard, or a reminder. */
+  reason: string;
+  phone: string;
+  status: "queued" | "ringing" | "in-progress" | "completed" | "busy" | "no-answer" | "failed" | "canceled";
+  twilioSid?: string;
+  turns: CallTurn[];
+  silences: number;
+  taskIds: string[];
+  error?: string;
+  startedAt: string;
+  answeredAt?: string;
+  endedAt?: string;
+  durationSec?: number;
+};
+
+/** A text message sent to or received from the user. */
+export type MessageLog = {
+  id: string;
+  userId: string;
+  direction: "outbound" | "inbound";
+  body: string;
+  status: "sent" | "failed" | "received";
+  error?: string;
+  createdAt: string;
+};
+
+type Data = {
+  users: User[];
+  tasks: Task[];
+  memories: Memory[];
+  reminders: Reminder[];
+  calls: CallLog[];
+  messages: MessageLog[];
+};
 
 const FILE = path.join(process.cwd(), "data", "db.json");
-const EMPTY: Data = { users: [], tasks: [], memories: [], reminders: [] };
+const EMPTY: Data = { users: [], tasks: [], memories: [], reminders: [], calls: [], messages: [] };
 
 async function load(): Promise<Data> {
   try {

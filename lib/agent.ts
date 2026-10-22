@@ -1,6 +1,7 @@
 import { chat, type ChatMessage, type ToolSpec } from "@/lib/llm";
 import { mailConfigured } from "@/lib/mail";
 import { newId, now, read, write, type Draft, type Task } from "@/lib/db";
+import { notifyUser } from "@/lib/phone";
 
 // The Vardaan agent. Two entry points, matching the product's two modes:
 //   talk()    – Talk & Help: a live conversation; replies are short and spoken aloud.
@@ -263,9 +264,12 @@ export async function runTask(taskId: string) {
             }
             break;
           }
-          case "ask_user":
-            await updateTask(taskId, { status: "needs_input", question: str(args.question) || "Can you tell me more?" });
+          case "ask_user": {
+            const question = str(args.question) || "Can you tell me more?";
+            await updateTask(taskId, { status: "needs_input", question });
+            await notifyUser(task.userId, `Vardaan: ${question}\nReply to this message with your answer.`);
             return;
+          }
           case "finish":
             await finishTask(taskId, str(args.summary) || "Done.");
             return;
@@ -280,8 +284,19 @@ export async function runTask(taskId: string) {
 }
 
 async function finishTask(taskId: string, summary: string) {
-  await updateTask(taskId, (t) => {
+  const task = await write((d) => {
+    const t = d.tasks.find((x) => x.id === taskId);
+    if (!t) return null;
     t.summary = summary;
-    t.status = t.drafts.some((d) => d.status === "draft") ? "needs_approval" : "done";
+    t.status = t.drafts.some((x) => x.status === "draft") ? "needs_approval" : "done";
+    t.updatedAt = now();
+    return { ...t };
   });
+  if (!task) return;
+  await notifyUser(
+    task.userId,
+    task.status === "needs_approval"
+      ? `Vardaan: ${summary}\nReply YES to approve and send, or open your dashboard to edit it first.`
+      : `Vardaan: Done. ${summary}`,
+  );
 }
