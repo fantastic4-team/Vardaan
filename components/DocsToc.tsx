@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Icon from "@/components/docs/Icon";
+import type { IconName } from "@/lib/docs-content";
 
 // "On this page" menu that highlights the section currently being read.
-export default function DocsToc({ items }: { items: { id: string; label: string }[] }) {
+export default function DocsToc({ items }: { items: { id: string; label: string; icon?: IconName }[] }) {
   const [active, setActive] = useState(items[0]?.id);
 
   useEffect(() => {
@@ -44,10 +46,11 @@ export default function DocsToc({ items }: { items: { id: string; label: string 
                 href={`#${t.id}`}
                 onClick={() => setActive(t.id)}
                 aria-current={on ? "location" : undefined}
-                className={`relative block transition lg:-ml-px lg:border-l lg:py-1 lg:pl-4 ${
+                className={`relative flex items-center gap-2.5 transition lg:-ml-px lg:border-l lg:py-1 lg:pl-4 ${
                   on ? "text-ink lg:border-[#8ccbff]" : "text-ink/55 hover:text-ink lg:border-transparent"
                 }`}
               >
+                {t.icon && <Icon name={t.icon} className={`hidden h-4 w-4 shrink-0 lg:block ${on ? "text-[#8ccbff]" : "text-ink/40"}`} />}
                 {t.label}
               </a>
             </li>
