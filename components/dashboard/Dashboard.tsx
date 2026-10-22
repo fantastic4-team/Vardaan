@@ -127,7 +127,8 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
           <span className="font-poster text-[19px] font-semibold uppercase tracking-[0.02em] text-ink">Vardaan</span>
           <span className="beta-glass">Beta</span>
         </Link>
-        <button onClick={callMe} className="waitlist-button mt-8 flex h-11 cursor-pointer items-center justify-center rounded-[12px] text-[14px]">
+        <button onClick={callMe} className="waitlist-button mt-8 flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[12px] text-[14px]">
+          <NavIcon name="calls" className="h-4 w-4" />
           Call me
         </button>
         <nav aria-label="Dashboard" className="mt-6 space-y-0.5">
@@ -136,10 +137,11 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
               key={n.id}
               onClick={() => setView(n.id)}
               aria-current={view === n.id ? "page" : undefined}
-              className={`relative flex w-full cursor-pointer items-center rounded-[10px] px-3 py-2 text-[14px] transition ${
+              className={`flex w-full cursor-pointer items-center gap-3 rounded-[10px] px-3 py-2 text-[14px] transition ${
                 view === n.id ? "bg-white/[0.07] text-ink" : "text-ink/60 hover:bg-white/[0.035] hover:text-ink"
               }`}
             >
+              <NavIcon name={n.id} className={`h-[17px] w-[17px] shrink-0 ${view === n.id ? "text-[#b9e0ff]" : "text-ink/45"}`} />
               {n.label}
               {!!badge[n.id] && (
                 <span className="ml-auto min-w-[20px] rounded-full bg-[#f6e27a]/15 px-1.5 text-center text-[11px] tabular-nums leading-[18px] text-[#f6e27a]">{badge[n.id]}</span>
@@ -262,7 +264,8 @@ function AccountMenu({
             <button role="menuitem" onClick={() => (setOpen(false), onSettings())} className={`${item} text-ink/80`}>
               Settings
             </button>
-            <button role="menuitem" onClick={onLogout} className={`${item} text-[#ffb4a8]`}>
+            <button role="menuitem" onClick={onLogout} className={`${item} flex items-center gap-2.5 text-[#ffb4a8]`}>
+              <NavIcon name="logout" className="h-4 w-4" />
               Log out
             </button>
           </div>
@@ -284,7 +287,61 @@ function AccountMenu({
   );
 }
 
-const StatusChip =({ ok, label }: { ok: boolean; label: string }) => (
+// Outline icons for the dashboard navigation, drawn on one 24px grid with the same stroke.
+const NAV_ICONS: Record<View | "logout", React.ReactNode> = {
+  overview: (
+    <>
+      <rect x="3" y="3" width="7.5" height="7.5" rx="1.75" />
+      <rect x="13.5" y="3" width="7.5" height="5" rx="1.75" />
+      <rect x="13.5" y="11" width="7.5" height="10" rx="1.75" />
+      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.75" />
+    </>
+  ),
+  calls: (
+    <path d="M21 16.4v2.7a1.9 1.9 0 0 1-2.1 1.9 18.8 18.8 0 0 1-8.2-2.9 18.5 18.5 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.1 4.1 1.9 1.9 0 0 1 4 2h2.7a1.9 1.9 0 0 1 1.9 1.6c.1.9.4 1.8.7 2.7a1.9 1.9 0 0 1-.4 2L7.7 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.1a1.9 1.9 0 0 1 2-.4c.9.3 1.8.6 2.7.7a1.9 1.9 0 0 1 1.8 2.1z" />
+  ),
+  tasks: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="m8 12.2 2.8 2.8L16.5 9.3" />
+    </>
+  ),
+  messages: <path d="M20 15.5a2 2 0 0 1-2 2H8l-4.5 3.5V5.5a2 2 0 0 1 2-2H18a2 2 0 0 1 2 2z" />,
+  memory: (
+    <>
+      <path d="M12 4.5C10.4 3 8 3 6.5 3.5 4.5 4.2 3.5 6 3.5 8c-1 .8-1.5 2-1.5 3.2 0 1.6.9 3 2.2 3.6-.2 2.2 1.4 4.2 3.6 4.4 1.2 1.3 3 1.6 4.2.8" />
+      <path d="M12 4.5c1.6-1.5 4-1.5 5.5-1 2 .7 3 2.5 3 4.5 1 .8 1.5 2 1.5 3.2 0 1.6-.9 3-2.2 3.6.2 2.2-1.4 4.2-3.6 4.4-1.2 1.3-3 1.6-4.2.8" />
+      <path d="M12 4.5V20" />
+    </>
+  ),
+  reminders: (
+    <>
+      <path d="M18 8.5a6 6 0 0 0-12 0c0 6.5-2.5 8.5-2.5 8.5h17S18 15 18 8.5" />
+      <path d="M10.3 20.5a2 2 0 0 0 3.4 0" />
+    </>
+  ),
+  settings: (
+    <>
+      <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="8" cy="17" r="2" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M9.5 20.5H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2h3.5" />
+      <path d="m15.5 16.5 4.5-4.5-4.5-4.5M20 12H9.5" />
+    </>
+  ),
+};
+
+const NavIcon = ({ name, className }: { name: View | "logout"; className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
+    {NAV_ICONS[name]}
+  </svg>
+);
+
+const StatusChip = ({ ok, label }: { ok: boolean; label: string }) => (
   <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-ink/65">
     <span className={`h-1.5 w-1.5 rounded-full ${ok ? "bg-[#8fcf3c]" : "bg-ink/30"}`} />
     {label}
