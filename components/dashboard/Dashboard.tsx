@@ -11,14 +11,14 @@ import type { CallLog, Memory, MessageLog, Reminder, Task } from "@/lib/db";
 
 type View = "overview" | "calls" | "tasks" | "messages" | "memory" | "reminders" | "settings";
 
-const NAV: { id: View; label: string; icon: IconName }[] = [
-  { id: "overview", label: "Overview", icon: "home" },
-  { id: "calls", label: "Calls", icon: "phone" },
-  { id: "tasks", label: "Tasks", icon: "capabilities" },
-  { id: "messages", label: "Messages", icon: "talk" },
-  { id: "memory", label: "Memory", icon: "agent" },
-  { id: "reminders", label: "Reminders", icon: "bell" },
-  { id: "settings", label: "Settings", icon: "config" },
+const NAV: { id: View; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "calls", label: "Calls" },
+  { id: "tasks", label: "Tasks" },
+  { id: "messages", label: "Messages" },
+  { id: "memory", label: "Memory" },
+  { id: "reminders", label: "Reminders" },
+  { id: "settings", label: "Settings" },
 ];
 
 type Data = { tasks: Task[]; memories: Memory[]; reminders: Reminder[]; calls: CallLog[]; messages: MessageLog[] };
@@ -127,8 +127,7 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
           <span className="font-poster text-[19px] font-semibold uppercase tracking-[0.02em] text-ink">Vardaan</span>
           <span className="beta-glass">Beta</span>
         </Link>
-        <button onClick={callMe} className="waitlist-button mt-8 flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[12px] text-[14px]">
-          <Icon name="phone" className="h-[18px] w-[18px]" />
+        <button onClick={callMe} className="waitlist-button mt-8 flex h-11 cursor-pointer items-center justify-center rounded-[12px] text-[14px]">
           Call me
         </button>
         <nav aria-label="Dashboard" className="mt-7 space-y-0.5">
@@ -138,32 +137,27 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
               key={n.id}
               onClick={() => setView(n.id)}
               aria-current={view === n.id ? "page" : undefined}
-              className={`relative flex w-full cursor-pointer items-center gap-3 rounded-[10px] px-3 py-2 text-[14px] transition ${
+              className={`relative flex w-full cursor-pointer items-center rounded-[10px] px-3 py-2 text-[14px] transition ${
                 view === n.id ? "bg-white/[0.07] text-ink" : "text-ink/60 hover:bg-white/[0.035] hover:text-ink"
               }`}
             >
               {view === n.id && <span className="absolute inset-y-2 left-0 w-[2px] rounded-full bg-[#8ccbff]" />}
-              <Icon name={n.icon} className={`h-[18px] w-[18px] ${view === n.id ? "text-[#b9e0ff]" : ""}`} />
               {n.label}
               {!!badge[n.id] && (
                 <span className="ml-auto min-w-[20px] rounded-full bg-[#f6e27a]/15 px-1.5 text-center text-[11px] tabular-nums leading-[18px] text-[#f6e27a]">{badge[n.id]}</span>
               )}
             </button>
           ))}
-          <p className="px-3 pb-2 pt-6 text-[11px] uppercase tracking-[0.16em] text-ink/35">Help</p>
-          <Link href="/docs" className="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[14px] text-ink/60 transition hover:bg-white/[0.035] hover:text-ink">
-            <Icon name="roadmap" className="h-[18px] w-[18px]" />
-            Docs
-          </Link>
         </nav>
-        <div className="mt-auto flex items-center gap-3 rounded-[12px] border border-white/[0.07] bg-white/[0.02] p-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#8ccbff]/15 text-[13px] font-medium text-[#b9e0ff]">{initials(user.name)}</span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] text-ink">{user.name}</p>
-            <p className="truncate text-[12px] text-ink/45">{profile.phone || user.email}</p>
+        <div className="mt-auto border-t border-white/[0.07] px-3 pt-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8ccbff]/15 text-[12px] font-medium text-[#b9e0ff]">{initials(user.name)}</span>
+            <p className="min-w-0 break-words text-[14px] leading-[18px] text-ink">{user.name}</p>
           </div>
-          <button onClick={logout} aria-label="Log out" title="Log out" className="shrink-0 cursor-pointer rounded-[8px] p-1.5 text-ink/50 transition hover:bg-white/[0.06] hover:text-ink">
-            <Icon name="logout" className="h-4 w-4" />
+          <p className="mt-2 break-all text-[12px] leading-[17px] text-ink/45">{user.email}</p>
+          {profile.phone && <p className="text-[12px] leading-[17px] text-ink/45">{profile.phone}</p>}
+          <button onClick={logout} className="mt-3 cursor-pointer text-[13px] text-ink/55 transition hover:text-ink">
+            Log out
           </button>
         </div>
       </aside>
@@ -175,12 +169,11 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
             <span className="beta-glass">Beta</span>
           </Link>
           <div className="flex items-center gap-3">
-            <button onClick={callMe} className="waitlist-button flex h-8 cursor-pointer items-center gap-1.5 rounded-[8px] px-3 text-[12px]">
-              <Icon name="phone" className="h-4 w-4" />
+            <button onClick={callMe} className="waitlist-button flex h-8 cursor-pointer items-center rounded-[8px] px-3 text-[12px]">
               Call me
             </button>
-            <button onClick={logout} aria-label="Log out" className="cursor-pointer text-ink/60 hover:text-ink">
-              <Icon name="logout" className="h-5 w-5" />
+            <button onClick={logout} className="cursor-pointer text-[12px] text-ink/60 hover:text-ink">
+              Log out
             </button>
           </div>
         </div>

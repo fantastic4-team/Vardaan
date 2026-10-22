@@ -6,5 +6,7 @@ export default function config(phase: string): NextConfig {
     // `next dev` gets its own output folder so running `next build` alongside it
     // can't delete files the dev server is still serving.
     distDir: phase === PHASE_DEVELOPMENT_SERVER ? ".next-dev" : ".next",
+    // Keep the dev badge clear of the dashboard sidebar.
+    devIndicators: { position: "bottom-right" },
   };
 }
