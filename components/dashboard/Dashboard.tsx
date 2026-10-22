@@ -130,8 +130,7 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
         <button onClick={callMe} className="waitlist-button mt-8 flex h-11 cursor-pointer items-center justify-center rounded-[12px] text-[14px]">
           Call me
         </button>
-        <nav aria-label="Dashboard" className="mt-7 space-y-0.5">
-          <p className="px-3 pb-2 text-[11px] uppercase tracking-[0.16em] text-ink/35">Workspace</p>
+        <nav aria-label="Dashboard" className="mt-6 space-y-0.5">
           {NAV.map((n) => (
             <button
               key={n.id}
@@ -141,7 +140,6 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
                 view === n.id ? "bg-white/[0.07] text-ink" : "text-ink/60 hover:bg-white/[0.035] hover:text-ink"
               }`}
             >
-              {view === n.id && <span className="absolute inset-y-2 left-0 w-[2px] rounded-full bg-[#8ccbff]" />}
               {n.label}
               {!!badge[n.id] && (
                 <span className="ml-auto min-w-[20px] rounded-full bg-[#f6e27a]/15 px-1.5 text-center text-[11px] tabular-nums leading-[18px] text-[#f6e27a]">{badge[n.id]}</span>
@@ -279,7 +277,7 @@ function AccountMenu({
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8ccbff]/15 text-[12px] font-medium text-[#b9e0ff]">{initials(user.name)}</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] text-ink">{user.name}</span>
-          <span className="block text-[12px] text-ink/45">Account</span>
+          {phone && <span className="block text-[12px] text-ink/45">{phone}</span>}
         </span>
       </button>
     </div>
