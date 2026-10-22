@@ -206,6 +206,25 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   heart: <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.2 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" />,
+  home: (
+    <>
+      <path d="M3.5 11 12 4l8.5 7" />
+      <path d="M5.5 9.5V20h13V9.5M10 20v-5.5h4V20" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M14 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H14" />
+      <path d="M10 12h10.5M17 8.5l3.5 3.5-3.5 3.5" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
 };
 
 export default function Icon({ name, className = "h-5 w-5" }: { name: IconName; className?: string }) {

@@ -134,6 +134,8 @@ Everything marked Live works today on a local setup. Nothing on this list is sim
 | **Drafts with approval** — Email, SMS and WhatsApp drafts you can edit, approve or discard. | Live | Free AI key |
 | **Send email for real** — Approved emails go out from your own Gmail. | Live | Gmail app password |
 | **Memory and reminders** — Remembers what you tell it; you can make it forget. | Live | Free AI key |
+| **Free calls in the browser** — Tap Call Vardaan for a hands-free voice call; hand off work mid-call and hang up. | Live | Chrome or Edge |
+| **Vardaan rings you** — When a reminder is due, the dashboard rings like an incoming call, with a notification. | Live | Dashboard open in a tab |
 | **Call me** — Press a button and Vardaan rings your phone; talk, or hang up and let it work. | Next | Twilio trial |
 | **Phone line** — Call a real number; it answers, recognises you by caller ID and talks back. | Next | Twilio or Exotel |
 | **Results by message** — Results and approvals by SMS or WhatsApp; reply YES to approve. | Next | Twilio |

@@ -54,6 +54,12 @@ const TOOLS = {
     { question: { type: "string" } },
     ["question"],
   ),
+  start_task: tool(
+    "start_task",
+    "During a call: hand a piece of work to the background (Call & Cut) so the user can hang up. Use it when the user asks you to do something that takes more than a quick answer, like drafting and sending a message or following something up. Describe the task fully, including every detail the user gave.",
+    { request: { type: "string", description: "The complete task, in the user's words plus any details from the call." } },
+    ["request"],
+  ),
   finish: tool(
     "finish",
     "Finish the task with a short summary of what was done and what the user should do next.",
@@ -84,7 +90,9 @@ How you work:
 - You cannot browse websites, fill web forms, make payments or phone businesses yourself yet. When a task needs
   that, say so honestly and do the most useful part: draft the message, script or complaint, and list next steps.
 - Never invent facts like order numbers, addresses or phone numbers. Ask instead.
-- Never claim something was sent. Drafts wait for the user's approval.`;
+- Never claim something was sent. Drafts wait for the user's approval.
+- On a call, keep replies to one or two short sentences: they are spoken aloud. When the user asks you to
+  do something that takes work, call start_task and tell them they can hang up and you'll message them.`;
 }
 
 function parseArgs(raw: string) {
@@ -129,12 +137,14 @@ export type TalkTurn = { role: "user" | "assistant"; content: string };
 
 export async function talk(userId: string, history: TalkTurn[]) {
   const messages: ChatMessage[] = [{ role: "system", content: await context(userId) }, ...history.slice(-20)];
-  const tools = [TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message];
+  const tools = [TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message, TOOLS.start_task];
   let createdTaskId: string | undefined;
+  // Tasks started during the call; the route runs them in the background after responding.
+  const startedTaskIds: string[] = [];
 
   for (let i = 0; i < MAX_STEPS; i++) {
     const { content, toolCalls } = await chat(messages, tools);
-    if (!toolCalls.length) return { reply: content?.trim() || "Sorry, I didn't catch that.", taskId: createdTaskId };
+    if (!toolCalls.length) return { reply: content?.trim() || "Sorry, I didn't catch that.", taskId: createdTaskId, startedTaskIds };
 
     messages.push({ role: "assistant", content, tool_calls: toolCalls });
     for (const call of toolCalls) {
@@ -142,6 +152,18 @@ export async function talk(userId: string, history: TalkTurn[]) {
       let result = "Unknown tool.";
       if (call.function.name === "save_memory") result = await saveMemory(userId, str(args.fact));
       if (call.function.name === "set_reminder") result = await setReminder(userId, str(args.title), str(args.due_at));
+      if (call.function.name === "start_task") {
+        const request = str(args.request);
+        if (!request) result = "Describe the task.";
+        else {
+          const id = newId();
+          await write((d) => {
+            d.tasks.push({ id, userId, request, status: "planning", steps: [], answers: [], drafts: [], createdAt: now(), updatedAt: now() });
+          });
+          startedTaskIds.push(id);
+          result = "Task started in the background. Tell the user they can hang up and you'll message them.";
+        }
+      }
       if (call.function.name === "draft_message") {
         const draft = makeDraft(args);
         if (!draft) result = "Draft needs a channel, a recipient and a body.";
@@ -170,7 +192,7 @@ export async function talk(userId: string, history: TalkTurn[]) {
       messages.push({ role: "tool", tool_call_id: call.id, content: result });
     }
   }
-  return { reply: "I've noted that. Is there anything else?", taskId: createdTaskId };
+  return { reply: "I've noted that. Is there anything else?", taskId: createdTaskId, startedTaskIds };
 }
 
 // ---------------------------------------------------------------------------------------------

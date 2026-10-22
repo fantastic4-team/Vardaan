@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { talk, type TalkTurn } from "@/lib/agent";
+import { runTask, talk, type TalkTurn } from "@/lib/agent";
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -16,7 +16,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Say something first." }, { status: 400 });
 
   try {
-    return NextResponse.json(await talk(user.id, history));
+    const result = await talk(user.id, history);
+    // Work handed off during the call keeps going after the response (and after the user hangs up).
+    if (result.startedTaskIds.length) after(() => Promise.all(result.startedTaskIds.map(runTask)));
+    return NextResponse.json(result);
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "The agent ran into a problem." }, { status: 502 });
   }

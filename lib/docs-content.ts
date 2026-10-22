@@ -5,7 +5,7 @@ export type IconName =
   | "overview" | "modes" | "architecture" | "callflow" | "lifecycle" | "agent" | "capabilities" | "free"
   | "limits" | "setup" | "config" | "api" | "data" | "security" | "stack" | "roadmap" | "principles"
   | "talk" | "cut" | "key" | "terminal" | "play" | "mail" | "phone" | "tunnel" | "lock" | "cookie"
-  | "users" | "check" | "eye" | "trash" | "compass" | "language" | "heart";
+  | "users" | "check" | "eye" | "trash" | "compass" | "language" | "heart" | "home" | "bell" | "logout" | "plus";
 
 export const TOC: { id: string; label: string; icon: IconName }[] = [
   { id: "overview", label: "Overview", icon: "overview" },
@@ -83,6 +83,8 @@ export const CAPABILITIES: { name: string; detail: string; status: Status; needs
   { name: "Drafts with approval", detail: "Email, SMS and WhatsApp drafts you can edit, approve or discard.", status: "live", needs: "Free AI key" },
   { name: "Send email for real", detail: "Approved emails go out from your own Gmail.", status: "live", needs: "Gmail app password" },
   { name: "Memory and reminders", detail: "Remembers what you tell it; you can make it forget.", status: "live", needs: "Free AI key" },
+  { name: "Free calls in the browser", detail: "Tap Call Vardaan for a hands-free voice call; hand off work mid-call and hang up.", status: "live", needs: "Chrome or Edge" },
+  { name: "Vardaan rings you", detail: "When a reminder is due, the dashboard rings like an incoming call, with a notification.", status: "live", needs: "Dashboard open in a tab" },
   { name: "Call me", detail: "Press a button and Vardaan rings your phone; talk, or hang up and let it work.", status: "next", needs: "Twilio trial" },
   { name: "Phone line", detail: "Call a real number; it answers, recognises you by caller ID and talks back.", status: "next", needs: "Twilio or Exotel" },
   { name: "Results by message", detail: "Results and approvals by SMS or WhatsApp; reply YES to approve.", status: "next", needs: "Twilio" },
