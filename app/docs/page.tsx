@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import DocsToc from "@/components/DocsToc";
 import SectionPage from "@/components/SectionPage";
 
 export const metadata: Metadata = {
@@ -170,18 +171,7 @@ export default function Docs() {
       scene="lotus"
     >
       <div className="grid gap-12 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-16">
-        <nav aria-label="On this page" className="lg:sticky lg:top-8 lg:self-start">
-          <p className="text-[12px] uppercase tracking-[0.16em] text-mute">On this page</p>
-          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[14px] lg:block lg:space-y-2.5">
-            {TOC.map((t) => (
-              <li key={t.id}>
-                <a href={`#${t.id}`} className="text-ink/65 transition hover:text-ink">
-                  {t.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <DocsToc items={TOC} />
 
         <div className="min-w-0 space-y-20">
           <section>
