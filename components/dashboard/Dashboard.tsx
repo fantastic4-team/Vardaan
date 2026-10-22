@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import TaskCard, { STATUS, inProgress, needsYou } from "@/components/dashboard/TaskCard";
 import { api } from "@/components/dashboard/api";
 import Icon from "@/components/docs/Icon";
@@ -149,17 +149,7 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
             </button>
           ))}
         </nav>
-        <div className="mt-auto border-t border-white/[0.07] px-3 pt-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8ccbff]/15 text-[12px] font-medium text-[#b9e0ff]">{initials(user.name)}</span>
-            <p className="min-w-0 break-words text-[14px] leading-[18px] text-ink">{user.name}</p>
-          </div>
-          <p className="mt-2 break-all text-[12px] leading-[17px] text-ink/45">{user.email}</p>
-          {profile.phone && <p className="text-[12px] leading-[17px] text-ink/45">{profile.phone}</p>}
-          <button onClick={logout} className="mt-3 cursor-pointer text-[13px] text-ink/55 transition hover:text-ink">
-            Log out
-          </button>
-        </div>
+        <AccountMenu user={user} phone={profile.phone} onSettings={() => setView("settings")} onLogout={logout} />
       </aside>
 
       <header className="nav-grid lg:hidden">
@@ -232,7 +222,71 @@ const initials = (name: string) =>
     .map((w) => w[0].toUpperCase())
     .join("");
 
-const StatusChip = ({ ok, label }: { ok: boolean; label: string }) => (
+function AccountMenu({
+  user,
+  phone,
+  onSettings,
+  onLogout,
+}: {
+  user: { name: string; email: string };
+  phone: string;
+  onSettings: () => void;
+  onLogout: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open]);
+
+  const item = "block w-full cursor-pointer rounded-[8px] px-3 py-2 text-left text-[13px] transition hover:bg-white/[0.06]";
+
+  return (
+    <div ref={ref} className="relative mt-auto">
+      {open && (
+        <div role="menu" className="absolute inset-x-0 bottom-full mb-2 rounded-[12px] border border-white/10 bg-[#1d1c1a] p-1.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)]">
+          <div className="border-b border-white/[0.07] px-3 pb-2.5 pt-2">
+            <p className="text-[13px] text-ink">{user.name}</p>
+            <p className="mt-0.5 break-all text-[12px] text-ink/50">{user.email}</p>
+            {phone && <p className="text-[12px] text-ink/50">{phone}</p>}
+          </div>
+          <div className="pt-1.5">
+            <button role="menuitem" onClick={() => (setOpen(false), onSettings())} className={`${item} text-ink/80`}>
+              Settings
+            </button>
+            <button role="menuitem" onClick={onLogout} className={`${item} text-[#ffb4a8]`}>
+              Log out
+            </button>
+          </div>
+        </div>
+      )}
+      <button
+        onClick={() => setOpen(!open)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`flex w-full cursor-pointer items-center gap-3 rounded-[12px] px-2.5 py-2 text-left transition hover:bg-white/[0.05] ${open ? "bg-white/[0.05]" : ""}`}
+      >
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8ccbff]/15 text-[12px] font-medium text-[#b9e0ff]">{initials(user.name)}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13px] text-ink">{user.name}</span>
+          <span className="block text-[12px] text-ink/45">Account</span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
+const StatusChip =({ ok, label }: { ok: boolean; label: string }) => (
   <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-ink/65">
     <span className={`h-1.5 w-1.5 rounded-full ${ok ? "bg-[#8fcf3c]" : "bg-ink/30"}`} />
     {label}
