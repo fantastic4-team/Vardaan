@@ -181,6 +181,64 @@ body {
   outline-offset: 2px;
 }
 
+/* ---------- App: inputs and surfaces ---------- */
+
+.auth-input {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.025) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.auth-input:focus {
+  border-color: rgba(140, 203, 255, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 4px rgba(140, 203, 255, 0.1);
+}
+
+.app-panel {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 16px;
+}
+
+/* The mic button: a glassy disc that pulses while listening. */
+.mic-button {
+  background: radial-gradient(circle at 35% 30%, #b9e0ff 0%, #8ccbff 45%, #4f9ff0 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(120, 190, 250, 0.6),
+    0 12px 30px -10px rgba(140, 203, 255, 0.6);
+  transition: transform 150ms ease, filter 200ms ease;
+}
+
+.mic-button:hover {
+  filter: brightness(1.05);
+}
+
+.mic-button:active {
+  transform: scale(0.97);
+}
+
+.mic-button.is-listening {
+  background: radial-gradient(circle at 35% 30%, #ffd0d6 0%, #ff7a8a 50%, #e2301f 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 1px rgba(255, 120, 130, 0.6),
+    0 12px 30px -10px rgba(255, 90, 100, 0.7);
+  animation: mic-pulse 1.4s ease-out infinite;
+}
+
+@keyframes mic-pulse {
+  0% { outline: 0 solid rgba(255, 122, 138, 0.45); outline-offset: 0; }
+  100% { outline: 18px solid rgba(255, 122, 138, 0); outline-offset: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mic-button.is-listening {
+    animation: none;
+  }
+}
+
 /* ---------- "New" tag with a light travelling around its edge ---------- */
 
 @property --glow-angle {
