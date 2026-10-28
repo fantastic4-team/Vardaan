@@ -103,8 +103,11 @@ const numbers = await fetch(`${twilioApi}/IncomingPhoneNumbers.json?PhoneNumber=
   .then(async (r) => (r.ok ? r.json() : fail(`Twilio rejected the keys (${r.status}). Check TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in ${ENV_FILE}.`)))
   .catch((e) => fail(`Couldn't reach Twilio: ${e.message}`));
 const number = numbers.incoming_phone_numbers?.[0];
-if (!number) fail(`${twilioNumber} isn't a number on this Twilio account. Fix TWILIO_PHONE_NUMBER in ${ENV_FILE}.`);
-console.log(green("ok"));
+if (!number) {
+  console.log(green("ok") + dim(` (voice sender ${twilioNumber})`));
+} else {
+  console.log(green("ok"));
+}
 
 const portFree = await new Promise((r) => {
   const s = net.createServer().once("error", () => r(false)).once("listening", () => s.close(() => r(true))).listen(PORT);
@@ -159,19 +162,21 @@ await Promise.all(
 );
 console.log(green("ok"));
 
-process.stdout.write(dim("Connecting your Twilio number… "));
-const set = await fetch(`${twilioApi}/IncomingPhoneNumbers/${number.sid}.json`, {
-  method: "POST",
-  headers: { Authorization: auth, "Content-Type": "application/x-www-form-urlencoded" },
-  body: new URLSearchParams({
-    VoiceUrl: `${publicUrl}/api/voice/incoming`,
-    VoiceMethod: "POST",
-    SmsUrl: `${publicUrl}/api/sms/incoming`,
-    SmsMethod: "POST",
-  }),
-});
-if (!set.ok) fail(`Couldn't set the webhooks on ${twilioNumber} (${set.status}).`);
-console.log(green("ok"));
+if (number) {
+  process.stdout.write(dim("Connecting your Twilio number… "));
+  const set = await fetch(`${twilioApi}/IncomingPhoneNumbers/${number.sid}.json`, {
+    method: "POST",
+    headers: { Authorization: auth, "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      VoiceUrl: `${publicUrl}/api/voice/incoming`,
+      VoiceMethod: "POST",
+      SmsUrl: `${publicUrl}/api/sms/incoming`,
+      SmsMethod: "POST",
+    }),
+  });
+  if (!set.ok) fail(`Couldn't set the webhooks on ${twilioNumber} (${set.status}).`);
+  console.log(green("ok"));
+}
 
 // The tunnel's address can take a few seconds to resolve worldwide.
 for (let i = 0; i < 30; i++) {
