@@ -7,7 +7,7 @@
 
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync, appendFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, appendFileSync } from "node:fs";
 import net from "node:net";
 import { createInterface } from "node:readline/promises";
 import { bin, install } from "cloudflared";
@@ -131,8 +131,16 @@ const publicUrl = await new Promise((resolve) => {
   };
   tunnel.stdout.on("data", find);
   tunnel.stderr.on("data", find);
-});
 console.log(green(publicUrl));
+try {
+  let envContent = existsSync(ENV_FILE) ? readFileSync(ENV_FILE, "utf8") : "";
+  if (/^PUBLIC_URL=/m.test(envContent)) {
+    envContent = envContent.replace(/^PUBLIC_URL=.*$/m, `PUBLIC_URL=${publicUrl}`);
+  } else {
+    envContent += `\nPUBLIC_URL=${publicUrl}\n`;
+  }
+  writeFileSync(ENV_FILE, envContent);
+} catch {}
 
 // ---- 4. App ------------------------------------------------------------------------------------
 
