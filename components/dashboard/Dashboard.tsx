@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import TaskCard, { STATUS, inProgress, needsYou } from "@/components/dashboard/TaskCard";
+import TaskCard, { STATUS, canCancel, inProgress, needsYou } from "@/components/dashboard/TaskCard";
 import { api } from "@/components/dashboard/api";
 import Icon from "@/components/docs/Icon";
 import type { IconName } from "@/lib/docs-content";
@@ -24,6 +24,7 @@ const NAV: { id: View; label: string }[] = [
 type Data = { tasks: Task[]; memories: Memory[]; reminders: Reminder[]; calls: CallLog[]; messages: MessageLog[] };
 type Profile = { phone: string; lang: string };
 type Status = { ai: string | null; phone: boolean; twilioNumber: string | null; publicUrl: boolean; email: boolean };
+type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
   { code: "en-IN", label: "English (India)" },
@@ -69,6 +70,7 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
   const [profile, setProfile] = useState<Profile>({ phone: "", lang: "en-IN" });
   const [status, setStatus] = useState<Status | null>(null);
   const [toast, setToast] = useState("");
+  const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -82,14 +84,20 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
     refresh();
     api<Profile>("/api/profile").then(setProfile).catch(() => {});
     api<Status>("/api/status").then(setStatus).catch(() => {});
+    api<AgentStatus>("/api/agent/status").then(setAgentStatus).catch(() => {});
   }, [refresh]);
+
+  // Also refresh agent status on the same cadence.
+  const agentRefresh = useCallback(() => {
+    api<AgentStatus>("/api/agent/status").then(setAgentStatus).catch(() => {});
+  }, []);
 
   // Poll faster while a call or task is in progress.
   const busy = data.tasks.some(inProgress) || data.calls.some(live);
   useEffect(() => {
-    const t = setInterval(refresh, busy ? 2500 : 12000);
+    const t = setInterval(() => { void refresh(); agentRefresh(); }, busy ? 2500 : 12000);
     return () => clearInterval(t);
-  }, [busy, refresh]);
+  }, [busy, refresh, agentRefresh]);
 
   function showToast(text: string) {
     setToast(text);
@@ -193,8 +201,8 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
           </div>
         </div>
         <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-6 sm:px-8 lg:px-12 lg:pt-10">
-        {view === "overview" && <Overview user={user} data={data} profile={profile} status={status} onCall={callMe} onView={setView} onChange={refresh} />}
-        {view === "calls" && <Calls calls={data.calls} tasks={data.tasks} onCall={callMe} />}
+        {view === "overview" && <Overview user={user} data={data} profile={profile} status={status} agentStatus={agentStatus} onCall={callMe} onView={setView} onChange={refresh} onToast={showToast} />}
+        {view === "calls" && <Calls calls={data.calls} tasks={data.tasks} onCall={callMe} onToast={showToast} />}
         {view === "tasks" && <Tasks tasks={data.tasks} onChange={refresh} onToast={showToast} />}
         {view === "messages" && <Messages messages={data.messages} />}
         {view === "memory" && <MemoryView memories={data.memories} onChange={refresh} />}
@@ -392,22 +400,35 @@ const TONE = {
   text: "bg-[#8fcf3c]/12 text-[#c9e877]",
 };
 
+const AGENT_STATUS_COLORS: Record<string, string> = {
+  Online: "bg-[#8fcf3c]",
+  Idle: "bg-[#8fcf3c]",
+  "Executing Task": "bg-[#8ccbff]",
+  "Preparing Call": "bg-[#f6e27a]",
+  "On Call": "bg-[#8ccbff]",
+  Offline: "bg-white/30",
+};
+
 function Overview({
   user,
   data,
   profile,
   status,
+  agentStatus,
   onCall,
   onView,
   onChange,
+  onToast,
 }: {
   user: { name: string };
   data: Data;
   profile: Profile;
   status: Status | null;
+  agentStatus: AgentStatus | null;
   onCall: () => void;
   onView: (v: View) => void;
   onChange: () => void;
+  onToast: (t: string) => void;
 }) {
   const [today, setToday] = useState<Date | null>(null);
   useEffect(() => setToday(new Date()), []);
@@ -456,6 +477,12 @@ function Overview({
             <div className="flex flex-wrap items-center gap-2 text-[12px]">
               <StatusChip ok={ready} label={ready ? "Calling ready" : "Calling not set up"} />
               {ready && <StatusChip ok label={`Speaks ${lang}`} />}
+              {agentStatus && (
+                <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-ink/65">
+                  <span className={`h-1.5 w-1.5 rounded-full ${AGENT_STATUS_COLORS[agentStatus.status] ?? "bg-white/30"} ${agentStatus.status === "Executing Task" || agentStatus.status === "On Call" ? "animate-pulse" : ""}`} />
+                  {agentStatus.status}
+                </span>
+              )}
             </div>
             <h2 className="mt-4 text-[clamp(22px,2.6vw,30px)] font-medium leading-tight tracking-[-0.02em] text-ink">
               {ready ? "Vardaan will ring your phone." : "Set up calling to your phone."}
@@ -526,7 +553,7 @@ function Overview({
           <SectionLabel>Needs you</SectionLabel>
           <div className="space-y-3">
             {needing.length ? (
-              needing.map((t) => <TaskCard key={t.id} task={t} onChange={onChange} />)
+              needing.map((t) => <TaskCard key={t.id} task={t} onChange={onChange} onToast={onToast} />)
             ) : (
               <Empty icon="check">Nothing is waiting on you. When Vardaan has a question or a draft to approve, it shows up here and you get a text.</Empty>
             )}
@@ -539,7 +566,7 @@ function Overview({
 
 // ---- Calls -------------------------------------------------------------------------------------
 
-function Calls({ calls, tasks, onCall }: { calls: CallLog[]; tasks: Task[]; onCall: () => void }) {
+function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Task[]; onCall: () => void; onToast: (t: string) => void }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
     <div>
@@ -689,7 +716,7 @@ function Tasks({ tasks, onChange, onToast }: { tasks: Task[]; onChange: () => vo
       </div>
       <div className="grid gap-3 xl:grid-cols-2">
         {shown.map((t) => (
-          <TaskCard key={t.id} task={t} onChange={onChange} />
+          <TaskCard key={t.id} task={t} onChange={onChange} onToast={onToast} />
         ))}
       </div>
       {shown.length === 0 && <Empty>Nothing here.</Empty>}
