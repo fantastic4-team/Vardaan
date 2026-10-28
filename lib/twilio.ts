@@ -36,16 +36,15 @@ async function twilio(path: string, params: Record<string, string>) {
 
 /** Ask Twilio to ring `to`; when answered, Twilio fetches TwiML from `answerPath`. */
 export function createCall(to: string, answerPath: string, statusPath: string) {
-  return twilio("Calls.json", {
+  const params: Record<string, string> = {
     To: to,
     From: process.env.TWILIO_PHONE_NUMBER!,
     Url: publicUrl() + answerPath,
-    Method: "POST",
-    StatusCallback: publicUrl() + statusPath,
-    StatusCallbackMethod: "POST",
-    StatusCallbackEvent: "initiated ringing answered completed",
-    Timeout: "30",
-  });
+  };
+  if (statusPath) {
+    params.StatusCallback = publicUrl() + statusPath;
+  }
+  return twilio("Calls.json", params);
 }
 
 export function sendSms(to: string, body: string) {
