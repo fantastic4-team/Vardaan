@@ -12,10 +12,21 @@ export async function greet(call: CallLog) {
   const user = await read((d) => d.users.find((u) => u.id === call.userId));
   const first = user?.name.split(" ")[0] ?? "there";
   const lang = user?.lang ?? "en-IN";
-  const opening =
-    call.reason.startsWith("Reminder:")
-      ? `Hi ${first}, it's Vardaan with your reminder: ${call.reason.slice(9).trim()}. Would you like me to do anything about it?`
-      : `Hi ${first}, Vardaan here. What can I do for you?`;
+
+  // Determine the opening based on why Vardaan is calling.
+  let opening: string;
+  if (call.reason.startsWith("Reminder:")) {
+    const reminderText = call.reason.slice(9).trim();
+    opening = `Hi ${first}, this is Vardaan, your AI assistant. I'm calling about your reminder: ${reminderText}. Would you like me to do anything about it?`;
+  } else if (call.reason.startsWith("Task result:")) {
+    const taskContext = call.reason.slice(12).trim();
+    opening = `Hi ${first}, this is Vardaan, your AI assistant. I'm calling because you asked me to help with: ${taskContext}. Is this a good time to go over the results?`;
+  } else if (call.reason === "Call me") {
+    opening = `Hi ${first}, this is Vardaan, your AI assistant. What can I help you with today?`;
+  } else {
+    opening = `Hi ${first}, this is Vardaan, your AI assistant. I'm calling about: ${call.reason}. Is this a good time?`;
+  }
+
   await updateCall(call.id, (c) => {
     c.status = "in-progress";
     c.answeredAt ??= now();
@@ -35,7 +46,7 @@ export async function respond(call: CallLog, speech: string, onTasks: (ids: stri
     return sayAndListen("Are you still there? You can tell me what you need.", lang, turnPath(call));
   }
 
-  if (/^(bye|goodbye|that's all|thats all|nothing else|no thanks?)\.?$/i.test(speech.trim())) {
+  if (/^(bye|goodbye|that's all|thats all|nothing else|no thanks?|hang up|end call)\.?$/i.test(speech.trim())) {
     await updateCall(call.id, (c) => void c.turns.push({ role: "user", content: speech, at: now() }));
     return sayAndHangUp("Okay. I'll message you with any updates. Goodbye!", lang);
   }
@@ -44,12 +55,20 @@ export async function respond(call: CallLog, speech: string, onTasks: (ids: stri
     c.silences = 0;
     c.turns.push({ role: "user", content: speech, at: now() });
   });
-  // The greeting isn't part of the model's conversation.
-  const history = (withUser?.turns ?? []).slice(1).map(({ role, content }) => ({ role, content }));
+
+  // Build conversation history. If there are linked tasks, prepend their context.
+  const taskContext = await getTaskContext(call);
+  const rawTurns = (withUser?.turns ?? []).slice(1);
+  const history = rawTurns.map(({ role, content }) => ({ role, content }));
+
+  // Prepend task context to the first user message for better agent awareness.
+  const enrichedHistory = taskContext && history.length > 0
+    ? [{ role: "user" as const, content: `[Context: This call was triggered by the following task — ${taskContext}]\n\n${history[0].content}` }, ...history.slice(1)]
+    : history;
 
   let reply: string;
   try {
-    const result = await talk(call.userId, history);
+    const result = await talk(call.userId, enrichedHistory);
     reply = result.reply;
     if (result.startedTaskIds.length) {
       await updateCall(call.id, (c) => void c.taskIds.push(...result.startedTaskIds));
@@ -62,4 +81,12 @@ export async function respond(call: CallLog, speech: string, onTasks: (ids: stri
 
   await updateCall(call.id, (c) => void c.turns.push({ role: "assistant", content: reply, at: now() }));
   return sayAndListen(reply, lang, turnPath(call));
+}
+
+/** Read the summary from any tasks linked to this call, for context injection. */
+async function getTaskContext(call: CallLog): Promise<string | null> {
+  if (!call.taskIds.length) return null;
+  const tasks = await read((d) => d.tasks.filter((t) => call.taskIds.includes(t.id) && t.summary));
+  if (!tasks.length) return null;
+  return tasks.map((t) => `${t.request}: ${t.summary}`).join("; ");
 }

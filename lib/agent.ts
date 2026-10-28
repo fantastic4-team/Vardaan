@@ -2,6 +2,7 @@ import { chat, type ChatMessage, type ToolSpec } from "@/lib/llm";
 import { mailConfigured } from "@/lib/mail";
 import { newId, now, read, write, type Draft, type Task } from "@/lib/db";
 import { notifyUser } from "@/lib/phone";
+import { webSearch, formatResults } from "@/lib/search";
 
 // The Vardaan agent. Two entry points, matching the product's two modes:
 //   talk()    – Talk & Help: a live conversation; replies are short and spoken aloud.
@@ -9,7 +10,7 @@ import { notifyUser } from "@/lib/phone";
 //               and stops to ask the user whenever information is missing or approval is needed.
 // The agent never sends anything on its own: drafts wait for the user to approve them.
 
-const MAX_STEPS = 8;
+const MAX_STEPS = 12;
 
 const tool = (name: string, description: string, properties: Record<string, unknown>, required: string[]): ToolSpec => ({
   type: "function",
@@ -17,6 +18,15 @@ const tool = (name: string, description: string, properties: Record<string, unkn
 });
 
 const TOOLS = {
+  web_search: tool(
+    "web_search",
+    "Search the web for current information, resources, prices, news or any factual query. Use for research tasks, comparisons, finding resources, or any question that benefits from up-to-date information. Always cite the source URLs in your summary.",
+    {
+      query: { type: "string", description: "A clear, specific search query." },
+      limit: { type: "number", description: "Number of results to fetch (1-8). Default 5." },
+    },
+    ["query"],
+  ),
   save_memory: tool(
     "save_memory",
     "Remember a lasting fact or preference about the user (their name, city, family, preferred language, usual contacts). Do not store passwords or one-time codes.",
@@ -64,7 +74,13 @@ const TOOLS = {
   finish: tool(
     "finish",
     "Finish the task with a short summary of what was done and what the user should do next.",
-    { summary: { type: "string" } },
+    {
+      summary: { type: "string" },
+      call_user: {
+        type: "boolean",
+        description: "Set to true if the user asked to be called with the results, or if the task outcome warrants a call (e.g. research results ready, important decision support).",
+      },
+    },
     ["summary"],
   ),
 };
@@ -86,14 +102,18 @@ ${reminders.length ? reminders.map((r) => `- ${r.title}${r.dueAt ? ` (${r.dueAt}
 How you work:
 - Reply in the same language the user speaks, including Hinglish or any mix.
 - Be warm, brief and practical. Plain sentences, no markdown, no lists unless asked.
-- You can: remember preferences, set reminders, explain documents and bills, think through decisions,
-  and draft emails, SMS and WhatsApp messages. ${mailConfigured() ? "Approved emails are sent automatically." : "Email sending is not connected yet, so approved emails can be copied and sent by the user."}
-- You cannot browse websites, fill web forms, make payments or phone businesses yourself yet. When a task needs
-  that, say so honestly and do the most useful part: draft the message, script or complaint, and list next steps.
+- You can: search the web for current information, remember preferences, set reminders, explain documents and bills,
+  think through decisions, and draft emails, SMS and WhatsApp messages.
+  ${mailConfigured() ? "Approved emails are sent automatically." : "Email sending is not connected yet, so approved emails can be copied and sent by the user."}
+- For research tasks, always use web_search to get current, accurate information. Cite sources.
+- You cannot fill web forms, make payments or phone businesses yourself. When a task needs that, do the most
+  useful part: draft the message, script or complaint, and list next steps.
 - Never invent facts like order numbers, addresses or phone numbers. Ask instead.
 - Never claim something was sent. Drafts wait for the user's approval.
 - On a call, keep replies to one or two short sentences: they are spoken aloud. When the user asks you to
-  do something that takes work, call start_task and tell them they can hang up and you'll message them.`;
+  do something that takes work, call start_task and tell them they can hang up and you'll call them back.
+- When finishing a background task, set call_user=true if the user asked to be called back, or if the
+  results are complex enough that a call would be more useful than a text.`;
 }
 
 function parseArgs(raw: string) {
@@ -138,7 +158,7 @@ export type TalkTurn = { role: "user" | "assistant"; content: string };
 
 export async function talk(userId: string, history: TalkTurn[]) {
   const messages: ChatMessage[] = [{ role: "system", content: await context(userId) }, ...history.slice(-20)];
-  const tools = [TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message, TOOLS.start_task];
+  const tools = [TOOLS.web_search, TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message, TOOLS.start_task];
   let createdTaskId: string | undefined;
   // Tasks started during the call; the route runs them in the background after responding.
   const startedTaskIds: string[] = [];
@@ -151,9 +171,21 @@ export async function talk(userId: string, history: TalkTurn[]) {
     for (const call of toolCalls) {
       const args = parseArgs(call.function.arguments);
       let result = "Unknown tool.";
-      if (call.function.name === "save_memory") result = await saveMemory(userId, str(args.fact));
-      if (call.function.name === "set_reminder") result = await setReminder(userId, str(args.title), str(args.due_at));
-      if (call.function.name === "start_task") {
+
+      if (call.function.name === "web_search") {
+        const query = str(args.query);
+        const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 5;
+        if (!query) {
+          result = "A search query is required.";
+        } else {
+          const results = await webSearch(query, limit);
+          result = formatResults(results);
+        }
+      } else if (call.function.name === "save_memory") {
+        result = await saveMemory(userId, str(args.fact));
+      } else if (call.function.name === "set_reminder") {
+        result = await setReminder(userId, str(args.title), str(args.due_at));
+      } else if (call.function.name === "start_task") {
         const request = str(args.request);
         if (!request) result = "Describe the task.";
         else {
@@ -162,10 +194,9 @@ export async function talk(userId: string, history: TalkTurn[]) {
             d.tasks.push({ id, userId, request, status: "planning", steps: [], answers: [], drafts: [], createdAt: now(), updatedAt: now() });
           });
           startedTaskIds.push(id);
-          result = "Task started in the background. Tell the user they can hang up and you'll message them.";
+          result = "Task started in the background. Tell the user they can hang up and you'll call them back with the results.";
         }
-      }
-      if (call.function.name === "draft_message") {
+      } else if (call.function.name === "draft_message") {
         const draft = makeDraft(args);
         if (!draft) result = "Draft needs a channel, a recipient and a body.";
         else {
@@ -190,6 +221,7 @@ export async function talk(userId: string, history: TalkTurn[]) {
           result = "Draft saved for the user to review and approve.";
         }
       }
+
       messages.push({ role: "tool", tool_call_id: call.id, content: result });
     }
   }
@@ -219,7 +251,7 @@ export async function runTask(taskId: string) {
     `Task from the user: ${task.request}`,
     ...task.answers.map((a) => `You asked: ${a.question}\nThey answered: ${a.answer}`),
     task.drafts.length ? `Drafts already prepared: ${task.drafts.map((d) => `${d.channel} to ${d.to}`).join(", ")}` : "",
-    "Work on this now. First call update_plan, then do the work with your tools. Call ask_user if anything important is missing, otherwise end with finish.",
+    "Work on this now. First call update_plan, then do the work with your tools. Use web_search for any research. Call ask_user if anything important is missing, otherwise end with finish. Set call_user=true on finish if the user asked to be called with results.",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -234,7 +266,7 @@ export async function runTask(taskId: string) {
     for (let i = 0; i < MAX_STEPS; i++) {
       const { content, toolCalls } = await chat(messages, tools);
       if (!toolCalls.length) {
-        await finishTask(taskId, content?.trim() || "Done.");
+        await finishTask(taskId, content?.trim() || "Done.", false);
         return;
       }
       messages.push({ role: "assistant", content, tool_calls: toolCalls });
@@ -243,6 +275,17 @@ export async function runTask(taskId: string) {
         const args = parseArgs(call.function.arguments);
         let result = "Unknown tool.";
         switch (call.function.name) {
+          case "web_search": {
+            const query = str(args.query);
+            const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 5;
+            if (!query) {
+              result = "A search query is required.";
+            } else {
+              const results = await webSearch(query, limit);
+              result = formatResults(results);
+            }
+            break;
+          }
           case "update_plan": {
             const steps = Array.isArray(args.steps) ? args.steps.map(String).slice(0, 12) : [];
             await updateTask(taskId, { steps });
@@ -270,20 +313,22 @@ export async function runTask(taskId: string) {
             await notifyUser(task.userId, `Vardaan: ${question}\nReply to this message with your answer.`);
             return;
           }
-          case "finish":
-            await finishTask(taskId, str(args.summary) || "Done.");
+          case "finish": {
+            const callUser = Boolean(args.call_user);
+            await finishTask(taskId, str(args.summary) || "Done.", callUser);
             return;
+          }
         }
         messages.push({ role: "tool", tool_call_id: call.id, content: result });
       }
     }
-    await finishTask(taskId, "I've done what I can on this. Review the details below.");
+    await finishTask(taskId, "I've done what I can on this. Review the details below.", false);
   } catch (err) {
     await updateTask(taskId, { status: "failed", error: err instanceof Error ? err.message : "Something went wrong." });
   }
 }
 
-async function finishTask(taskId: string, summary: string) {
+async function finishTask(taskId: string, summary: string, callUser: boolean) {
   const task = await write((d) => {
     const t = d.tasks.find((x) => x.id === taskId);
     if (!t) return null;
@@ -293,6 +338,24 @@ async function finishTask(taskId: string, summary: string) {
     return { ...t };
   });
   if (!task) return;
+
+  if (callUser) {
+    // Call the user to deliver the results over the phone.
+    try {
+      const { startCall } = await import("@/lib/phone");
+      const reason = `Task result: ${task.request.slice(0, 120)}`;
+      const callId = await startCall(task.userId, reason, taskId);
+      // Link the call to this task for dashboard display.
+      await write((d) => {
+        const c = d.calls.find((x) => x.id === callId);
+        if (c && !c.taskIds.includes(taskId)) c.taskIds.push(taskId);
+      });
+      return; // Call will deliver the result; skip the text notification.
+    } catch {
+      // Fall through to text notification if call fails.
+    }
+  }
+
   await notifyUser(
     task.userId,
     task.status === "needs_approval"

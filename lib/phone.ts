@@ -4,7 +4,13 @@ import { createCall, sendSms, twilioConfigured } from "@/lib/twilio";
 // Phone features on top of Twilio: placing calls to a user, and texting them updates.
 // Every call and message is logged so the dashboard can show the full history.
 
-export async function startCall(userId: string, reason: string) {
+/**
+ * Initiate an outbound call to the user.
+ * @param userId   – Owner of the call.
+ * @param reason   – Human-readable reason shown in the dashboard.
+ * @param taskId   – Optional task that triggered this call; linked in the call log.
+ */
+export async function startCall(userId: string, reason: string, taskId?: string) {
   if (!twilioConfigured()) throw new Error("Phone calls aren't set up yet. Add your Twilio keys and PUBLIC_URL to .env.local.");
   const user = await read((d) => d.users.find((u) => u.id === userId));
   if (!user?.phone) throw new Error("Add your phone number in Settings first.");
@@ -18,7 +24,7 @@ export async function startCall(userId: string, reason: string) {
     status: "queued",
     turns: [],
     silences: 0,
-    taskIds: [],
+    taskIds: taskId ? [taskId] : [],
     startedAt: now(),
   };
   await write((d) => void d.calls.push(call));
