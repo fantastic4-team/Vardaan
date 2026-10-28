@@ -164,8 +164,13 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
                     </li>
                   ))}
                   <li>
-                    <Link href="/#join" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">
-                      Join waitlist
+                    <Link href="/login" onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">
+                      Log in
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/signup" onClick={() => setOpen(false)} className="text-[#8ccbff] hover:text-[#b9e0ff]">
+                      Sign up
                     </Link>
                   </li>
                 </ul>

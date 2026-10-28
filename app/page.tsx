@@ -1,3 +1,4 @@
+import Link from "next/link";
 import NextMonth from "@/components/NextMonth";
 import PosterArt from "@/components/PosterArt";
 import RevealFooter from "@/components/RevealFooter";
@@ -51,11 +52,29 @@ export default function Home() {
               </p>
             </div>
 
-            <div id="join" className="reveal max-w-[440px] scroll-mt-24 2xl:max-w-[480px]" style={step(3)}>
-              <WaitlistForm id="hero" />
-              <p className="mt-3 pl-1 text-[13px] text-mute">
-                Beta spots open for <span className="text-ink"><NextMonth /></span>
-              </p>
+            <div className="reveal space-y-5 max-w-[440px] 2xl:max-w-[480px]" style={step(3)}>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/signup"
+                  className="waitlist-button flex h-11 items-center justify-center rounded-[10px] px-6 text-[14px] font-semibold tracking-[-0.01em]"
+                >
+                  Create free account →
+                </Link>
+                <Link
+                  href="/login"
+                  className="flex h-11 items-center justify-center rounded-[10px] border border-white/15 bg-white/[0.04] px-5 text-[14px] font-medium text-ink transition hover:border-white/30 hover:bg-white/[0.08]"
+                >
+                  Log in
+                </Link>
+              </div>
+
+              <div id="join" className="border-t border-white/[0.08] pt-4 scroll-mt-24">
+                <p className="mb-2 text-[12px] uppercase tracking-[0.14em] text-mute">Or join email waitlist for updates</p>
+                <WaitlistForm id="hero" />
+                <p className="mt-2.5 pl-1 text-[13px] text-mute">
+                  Beta spots open for <span className="text-ink"><NextMonth /></span>
+                </p>
+              </div>
             </div>
           </div>
 

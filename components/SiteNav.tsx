@@ -48,16 +48,36 @@ export default function SiteNav() {
           {links("nav-grid relative flex items-center whitespace-nowrap border-r px-5 text-[14px] first:border-l xl:px-6 2xl:px-8 2xl:text-[15px]")}
         </div>
 
-        <Link
-          href="/#join"
-          className="waitlist-button my-auto ml-auto mr-[max(1rem,6vw)] flex h-7 items-center whitespace-nowrap rounded-[7px] px-3 text-[12px] leading-none lg:ml-0 sm:h-[30px] sm:px-4 sm:text-[13px] 2xl:h-[34px] 2xl:px-5 2xl:text-[14px]"
-        >
-          Join waitlist
-        </Link>
+        <div className="my-auto ml-auto mr-[max(1rem,6vw)] flex items-center gap-2 sm:gap-3 lg:ml-0">
+          <Link
+            href="/login"
+            className="hidden items-center px-2 py-1 text-[13px] font-medium text-ink/75 transition hover:text-ink sm:inline-flex 2xl:text-[14px]"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/signup"
+            className="waitlist-button flex h-7 items-center whitespace-nowrap rounded-[7px] px-3 text-[12px] leading-none sm:h-[30px] sm:px-4 sm:text-[13px] 2xl:h-[34px] 2xl:px-5 2xl:text-[14px]"
+          >
+            Sign up
+          </Link>
+        </div>
       </nav>
 
-      <div className="nav-grid flex border-b lg:hidden">
-        {links("nav-grid relative flex flex-1 items-center justify-center whitespace-nowrap border-r px-1.5 py-2.5 text-[12px] last:border-r-0 sm:text-[13px]")}
+      <div className="nav-grid flex items-stretch border-b lg:hidden">
+        {links("nav-grid relative flex flex-1 items-center justify-center whitespace-nowrap border-r px-1.5 py-2.5 text-[12px] sm:text-[13px]")}
+        <Link
+          href="/login"
+          className="nav-grid relative flex items-center justify-center whitespace-nowrap border-r px-2.5 py-2.5 text-[12px] text-ink/75 hover:text-ink sm:text-[13px]"
+        >
+          Log in
+        </Link>
+        <Link
+          href="/signup"
+          className="nav-grid relative flex items-center justify-center whitespace-nowrap px-3 py-2.5 text-[12px] font-medium text-[#8ccbff] sm:text-[13px]"
+        >
+          Sign up
+        </Link>
       </div>
     </header>
   );
