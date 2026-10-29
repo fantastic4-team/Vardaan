@@ -86,7 +86,7 @@ export async function respond(call: CallLog, speech: string, onTasks: (ids: stri
 /** Read the summary from any tasks linked to this call, for context injection. */
 async function getTaskContext(call: CallLog): Promise<string | null> {
   if (!call.taskIds.length) return null;
-  const tasks = await read((d) => d.tasks.filter((t) => call.taskIds.includes(t.id) && t.summary));
+  const tasks = await read((d) => d.tasks.filter((t) => t.userId === call.userId && call.taskIds.includes(t.id) && t.summary));
   if (!tasks.length) return null;
   return tasks.map((t) => `${t.request}: ${t.summary}`).join("; ");
 }

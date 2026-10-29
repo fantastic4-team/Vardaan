@@ -231,21 +231,28 @@ export async function talk(userId: string, history: TalkTurn[]) {
 // ---------------------------------------------------------------------------------------------
 // Call & Cut
 
+/** A task the user cancelled from the dashboard. Background work must stop and leave it alone. */
+const cancelled = (t: Task) => t.status === "failed" && t.error === "Cancelled by user.";
+
+/** Apply a change to a task. Returns false (and changes nothing) if it's gone or was cancelled. */
 async function updateTask(id: string, patch: Partial<Task> | ((t: Task) => void)) {
-  await write((d) => {
+  return write((d) => {
     const t = d.tasks.find((x) => x.id === id);
-    if (!t) return;
+    if (!t || cancelled(t)) return false;
     if (typeof patch === "function") patch(t);
     else Object.assign(t, patch);
     t.updatedAt = now();
+    return true;
   });
 }
 
+const isCancelled = (id: string) => read((d) => d.tasks.some((t) => t.id === id && cancelled(t)));
+
 export async function runTask(taskId: string) {
   const task = await read((d) => d.tasks.find((t) => t.id === taskId));
-  if (!task) return;
+  if (!task || cancelled(task)) return;
 
-  await updateTask(taskId, { status: "working", question: undefined, error: undefined });
+  if (!(await updateTask(taskId, { status: "working", question: undefined, error: undefined }))) return;
 
   const brief = [
     `Task from the user: ${task.request}`,
@@ -264,6 +271,7 @@ export async function runTask(taskId: string) {
 
   try {
     for (let i = 0; i < MAX_STEPS; i++) {
+      if (await isCancelled(taskId)) return;
       const { content, toolCalls } = await chat(messages, tools);
       if (!toolCalls.length) {
         await finishTask(taskId, content?.trim() || "Done.", false);
@@ -309,7 +317,7 @@ export async function runTask(taskId: string) {
           }
           case "ask_user": {
             const question = str(args.question) || "Can you tell me more?";
-            await updateTask(taskId, { status: "needs_input", question });
+            if (!(await updateTask(taskId, { status: "needs_input", question }))) return;
             await notifyUser(task.userId, `Vardaan: ${question}\nReply to this message with your answer.`);
             return;
           }
@@ -331,7 +339,7 @@ export async function runTask(taskId: string) {
 async function finishTask(taskId: string, summary: string, callUser: boolean) {
   const task = await write((d) => {
     const t = d.tasks.find((x) => x.id === taskId);
-    if (!t) return null;
+    if (!t || cancelled(t)) return null;
     t.summary = summary;
     t.status = t.drafts.some((x) => x.status === "draft") ? "needs_approval" : "done";
     t.updatedAt = now();
@@ -339,7 +347,9 @@ async function finishTask(taskId: string, summary: string, callUser: boolean) {
   });
   if (!task) return;
 
-  if (callUser) {
+  // Only finished results are delivered by call. A task waiting for approval always gets the
+  // "Reply YES" text, because a call can't approve drafts.
+  if (callUser && task.status === "done") {
     // Call the user to deliver the results over the phone.
     try {
       const { startCall } = await import("@/lib/phone");
@@ -350,7 +360,7 @@ async function finishTask(taskId: string, summary: string, callUser: boolean) {
         const c = d.calls.find((x) => x.id === callId);
         if (c && !c.taskIds.includes(taskId)) c.taskIds.push(taskId);
       });
-      return; // Call will deliver the result; skip the text notification.
+      return; // The call delivers the result; skip the text notification.
     } catch {
       // Fall through to text notification if call fails.
     }

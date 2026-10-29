@@ -58,16 +58,11 @@ export function sendSms(to: string, body: string) {
 export function validTwilioRequest(req: Request, params: URLSearchParams) {
   const token = process.env.TWILIO_AUTH_TOKEN;
   const signature = req.headers.get("x-twilio-signature");
-  if (!signature) return false;
+  if (!token || !signature) return false;
 
-  // In non-production local development (Cloudflare tunnel / ngrok):
-  // Signature mismatch is common due to reverse proxy host header rewriting.
-  if (process.env.NODE_ENV !== "production") {
-    return true;
-  }
-
-  if (!token) return false;
-
+  // Never skip this check, even in development: `npm run phone` exposes the dev server through a
+  // public tunnel, and an unchecked webhook would let anyone approve drafts or talk as the user.
+  // Tunnels can rewrite the host, so accept a signature over either the forwarded URL or PUBLIC_URL.
   const u = new URL(req.url);
   const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
   const proto = req.headers.get("x-forwarded-proto") || "https";

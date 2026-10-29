@@ -14,6 +14,7 @@ export async function startCall(userId: string, reason: string, taskId?: string)
   if (!twilioConfigured()) throw new Error("Phone calls aren't set up yet. Add your Twilio keys and PUBLIC_URL to .env.local.");
   const user = await read((d) => d.users.find((u) => u.id === userId));
   if (!user?.phone) throw new Error("Add your phone number in Settings first.");
+  if (taskId && !(await read((d) => d.tasks.some((t) => t.id === taskId && t.userId === userId)))) throw new Error("Task not found.");
 
   const call: CallLog = {
     id: newId(),
