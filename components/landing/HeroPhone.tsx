@@ -50,7 +50,7 @@ const ICONS = {
   check: <path d="m5.5 12.5 4 4 9-9.5" />,
 };
 
-type Card = { tile: string; icon: React.ReactNode; title: string; sub: string };
+type Card = { tile: string; icon: React.ReactNode; title: string; sub: string; approve?: boolean };
 
 // For each scene: the result (top left) and what happens next (bottom right).
 const CARDS: [Card, Card][] = [
@@ -60,7 +60,7 @@ const CARDS: [Card, Card][] = [
   ],
   [
     { tile: "tile-rose", icon: ICONS.mail, title: "Email drafted", sub: "To Mr Sen" },
-    { tile: "tile-violet", icon: ICONS.check, title: "Needs your OK", sub: "Approve before sending" },
+    { tile: "tile-violet", icon: ICONS.check, title: "Approve email?", sub: "To Mr Sen", approve: true },
   ],
   [
     { tile: "tile-leaf", icon: ICONS.search, title: "Researching", sub: "Phones under ₹15k" },
@@ -74,17 +74,25 @@ function ResultCard({ card, spot, leaving, delay }: { card: Card; spot: string; 
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
-      className={`hero-card-in absolute hidden w-[188px] items-center gap-3 rounded-[16px] border border-[#e7ebf3] bg-white py-3 pl-3 pr-3.5 shadow-[0_22px_44px_-18px_rgba(30,50,110,0.4),0_2px_5px_rgba(30,50,110,0.06)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
+      className={`hero-card-in absolute hidden w-[188px] flex-wrap items-center gap-x-3 gap-y-2 rounded-[16px] border border-[#e7ebf3] bg-white py-3 pl-3 pr-3.5 shadow-[0_22px_44px_-18px_rgba(30,50,110,0.4),0_2px_5px_rgba(30,50,110,0.06)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
         leaving ? "translate-y-1 opacity-0" : ""
       } ${spot}`}
     >
       <span className={`glass-tile nav-tile ${card.tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px]`}>
         <Glyph className="h-[17px] w-[17px]">{card.icon}</Glyph>
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block text-[13px] font-semibold leading-[17px] text-[#121833]">{card.title}</span>
         <span className="mt-0.5 block whitespace-nowrap text-[11.5px] leading-[15px] text-[#6b7287]">{card.sub}</span>
       </span>
+      {card.approve && (
+        <span className="mt-1 flex basis-full gap-2">
+          <span className="flex h-7 flex-1 items-center justify-center rounded-[9px] bg-[#f0f2f7] text-[11.5px] font-medium text-[#3c4150]">Edit</span>
+          <span className="flex h-7 flex-1 items-center justify-center rounded-[9px] bg-[linear-gradient(180deg,#5aa8ff_0%,#2f7cf0_100%)] text-[11.5px] font-semibold text-white shadow-[0_6px_14px_-8px_#2f7cf0]">
+            Approve
+          </span>
+        </span>
+      )}
     </div>
   );
 }
