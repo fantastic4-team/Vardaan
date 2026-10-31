@@ -60,7 +60,7 @@ const WAVE = [
 
 function ModeArt({ live }: { live: boolean }) {
   return (
-    <div className="mode-art absolute inset-0 flex items-center justify-center px-6 pb-2 pt-12">
+    <div className="mode-art relative flex min-h-[272px] items-center justify-center px-6 pb-7 pt-16">
       <div className="w-full max-w-[320px] rounded-[16px] border border-white/[0.12] bg-[#16151d]/85 p-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)]">
         <div className="flex items-center gap-3">
           <span className="mic-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-[#0b1626]">V</span>
@@ -129,7 +129,7 @@ export default function Features() {
         {MODES.map((m, i) => (
           <InView key={m.name} i={i} className="h-full">
             <article className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
-              <div aria-hidden="true" className="relative h-60 overflow-hidden">
+              <div aria-hidden="true" className="relative overflow-hidden">
                 <ModeArt live={i === 1} />
                 <span className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/35 px-3 py-1 text-[12px] text-ink/90 lg:left-8 lg:top-7">
                   Mode {String(i + 1).padStart(2, "0")}

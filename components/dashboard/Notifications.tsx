@@ -11,38 +11,48 @@ export type Notice = {
   title: string;
   detail?: string;
   at?: string;
-  tone: "amber" | "sky" | "leaf" | "rose";
+  kind: "question" | "approval" | "ai" | "calling" | "call" | "done";
   onOpen: () => void;
 };
 
-// Each tone gets a glossy tile and an icon: questions, setup, calls and finished tasks.
-const TONES: Record<Notice["tone"], { tile: string; icon: React.ReactNode }> = {
-  amber: {
+const PHONE = (
+  <path d="M21 16.4v2.7a1.9 1.9 0 0 1-2.1 1.9 18.8 18.8 0 0 1-8.2-2.9 18.5 18.5 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.1 4.1 1.9 1.9 0 0 1 4 2h2.7a1.9 1.9 0 0 1 1.9 1.6c.1.9.4 1.8.7 2.7a1.9 1.9 0 0 1-.4 2L7.7 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.1a1.9 1.9 0 0 1 2-.4c.9.3 1.8.6 2.7.7a1.9 1.9 0 0 1 1.8 2.1z" />
+);
+
+// Each kind of notification gets its own glossy tile and icon.
+const KINDS: Record<Notice["kind"], { tile: string; icon: React.ReactNode }> = {
+  // Vardaan asked a question.
+  question: {
     tile: "tile-amber",
     icon: (
       <>
-        <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5z" />
-        <path d="M10 19a2.2 2.2 0 0 0 4 0" />
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 16.8v.2" />
       </>
     ),
   },
-  rose: {
-    tile: "tile-rose",
+  // A draft is waiting for approval.
+  approval: {
+    tile: "tile-amber",
     icon: (
       <>
-        <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
-        <circle cx="16" cy="7" r="2" />
-        <circle cx="8" cy="17" r="2" />
+        <path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z" />
+        <path d="M14 3.5v5h5M9 14l2 2 4-4.5" />
       </>
     ),
   },
-  sky: {
-    tile: "tile-sky",
+  ai: {
+    tile: "tile-violet",
     icon: (
-      <path d="M21 16.4v2.7a1.9 1.9 0 0 1-2.1 1.9 18.8 18.8 0 0 1-8.2-2.9 18.5 18.5 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.1 4.1 1.9 1.9 0 0 1 4 2h2.7a1.9 1.9 0 0 1 1.9 1.6c.1.9.4 1.8.7 2.7a1.9 1.9 0 0 1-.4 2L7.7 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.1a1.9 1.9 0 0 1 2-.4c.9.3 1.8.6 2.7.7a1.9 1.9 0 0 1 1.8 2.1z" />
+      <>
+        <path d="M12 3.5 13.8 9l5.7 1.5-5.7 1.6L12 17.5l-1.8-5.4L4.5 10.5 10.2 9z" />
+        <path d="M18.5 16.5 19.2 18.6 21 19.2 19.2 19.9 18.5 22 17.8 19.9 16 19.2 17.8 18.6z" />
+      </>
     ),
   },
-  leaf: { tile: "tile-leaf", icon: <path d="m5.5 12.5 4 4 9-9.5" /> },
+  calling: { tile: "tile-leaf", icon: PHONE },
+  call: { tile: "tile-sky", icon: PHONE },
+  done: { tile: "tile-leaf", icon: <path d="m5.5 12.5 4 4 9-9.5" /> },
 };
 
 const GROUPS: Notice["group"][] = ["Needs you", "Setup", "Recent"];
@@ -126,9 +136,9 @@ export default function Notifications({ open, items, onClose }: { open: boolean;
                           onClick={() => (n.onOpen(), onClose())}
                           className="flex w-full cursor-pointer items-start gap-3 rounded-[12px] px-2 py-2.5 text-left transition hover:bg-white/[0.05]"
                         >
-                          <span className={`glass-tile nav-tile ${TONES[n.tone].tile} flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px]`}>
+                          <span className={`glass-tile nav-tile ${KINDS[n.kind].tile} flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px]`}>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-4 w-4">
-                              {TONES[n.tone].icon}
+                              {KINDS[n.kind].icon}
                             </svg>
                           </span>
                           <span className="min-w-0 flex-1 pt-[1px]">

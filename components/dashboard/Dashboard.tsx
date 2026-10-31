@@ -172,11 +172,11 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
       title: t.request,
       detail: t.status === "needs_approval" ? "A draft is ready for you to approve." : t.question,
       at: t.updatedAt,
-      tone: "amber" as const,
+      kind: t.status === "needs_approval" ? ("approval" as const) : ("question" as const),
       onOpen: () => setView("tasks"),
     })),
     ...(status && !status.ai
-      ? [{ id: "setup-ai", group: "Setup" as const, title: "Connect an AI model", detail: "Vardaan needs one to plan and talk.", tone: "rose" as const, onOpen: () => setView("integrations") }]
+      ? [{ id: "setup-ai", group: "Setup" as const, title: "Connect an AI model", detail: "Vardaan needs one to plan and talk.", kind: "ai" as const, onOpen: () => setView("integrations") }]
       : []),
     ...(status && !(status.phone && profile.phone)
       ? [
@@ -185,14 +185,14 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
             group: "Setup" as const,
             title: "Set up calling",
             detail: profile.phone ? "Connect a Sarvam phone line." : "Add your phone number.",
-            tone: "rose" as const,
+            kind: "calling" as const,
             onOpen: () => setView(profile.phone ? "integrations" : "settings"),
           },
         ]
       : []),
     ...data.tasks
       .filter((t) => t.status === "done" && t.updatedAt > dayAgo)
-      .map((t) => ({ id: `done-${t.id}`, group: "Recent" as const, title: t.request, detail: t.summary, at: t.updatedAt, tone: "leaf" as const, onOpen: () => setView("tasks") })),
+      .map((t) => ({ id: `done-${t.id}`, group: "Recent" as const, title: t.request, detail: t.summary, at: t.updatedAt, kind: "done" as const, onOpen: () => setView("tasks") })),
     ...data.calls
       .filter((c) => c.status === "completed" && (c.endedAt ?? c.startedAt) > dayAgo)
       .map((c) => ({
@@ -201,7 +201,7 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
         title: c.direction === "inbound" ? "You called Vardaan" : "Vardaan called you",
         detail: c.reason === "Call me" ? undefined : c.reason,
         at: c.endedAt ?? c.startedAt,
-        tone: "sky" as const,
+        kind: "call" as const,
         onOpen: () => setView("calls"),
       })),
   ];
@@ -249,6 +249,7 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
             <span className="beta-glass">Beta</span>
           </Link>
           <div className="flex items-center gap-3">
+            <ThemeSwitch theme={theme} onChange={changeTheme} />
             <Bell count={unread} onClick={() => setNotifOpen(true)} />
             <button onClick={callMe} className="waitlist-button flex h-8 cursor-pointer items-center rounded-[8px] px-3 text-[12px]">
               Call me
@@ -527,11 +528,11 @@ const SectionLabel = ({ children, action }: { children: React.ReactNode; action?
   </div>
 );
 
-const Empty = ({ icon, fill, children }: { icon?: IconName; fill?: boolean; children: React.ReactNode }) => (
+const Empty = ({ icon, tile = "tile-slate", fill, children }: { icon?: View; tile?: string; fill?: boolean; children: React.ReactNode }) => (
   <div className={`app-panel flex flex-col items-center px-6 py-10 text-center ${fill ? "min-h-[220px] flex-1 justify-center" : ""}`}>
     {icon && (
-      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.05] text-ink/45">
-        <Icon name={icon} className="h-5 w-5" />
+      <span className={`glass-tile ${tile} mb-4 flex h-11 w-11 items-center justify-center rounded-[13px]`}>
+        <NavIcon name={icon} className="h-5 w-5" />
       </span>
     )}
     <p className="max-w-[420px] text-[14px] leading-[22px] text-ink/55">{children}</p>
@@ -601,7 +602,7 @@ function Overview({
       at: m.createdAt,
       icon: "talk" as IconName,
       tone: TONE.text,
-      title: m.direction === "outbound" ? "Vardaan texted you" : "You replied",
+      title: m.direction === "outbound" ? "Vardaan sent an update" : "You replied",
       detail: m.body,
     })),
   ]
@@ -771,7 +772,7 @@ function Overview({
               ))}
             </ol>
           ) : (
-            <Empty icon="overview" fill>
+            <Empty icon="calls" tile="tile-sky" fill>
               No activity yet. Press Call me and tell Vardaan what you need. Every call, task and message shows up here.
             </Empty>
           )}
@@ -783,7 +784,7 @@ function Overview({
             {needing.length ? (
               needing.map((t) => <TaskCard key={t.id} task={t} onChange={onChange} onToast={onToast} />)
             ) : (
-              <Empty icon="check" fill>
+              <Empty icon="tasks" tile="tile-leaf" fill>
                 You&apos;re all caught up. Questions and drafts to approve show up here.
               </Empty>
             )}
@@ -833,7 +834,7 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
         </div>
       )}
       {calls.length === 0 ? (
-        <Empty icon="phone">No calls yet. Press Call me, or call your Vardaan number from your phone.</Empty>
+        <Empty icon="calls" tile="tile-sky">No calls yet. Press Call me, or call your Vardaan number from your phone.</Empty>
       ) : (
         <div className="app-panel overflow-hidden">
           <div className="hidden grid-cols-[minmax(0,1fr)_140px_90px_110px] gap-4 border-b border-white/[0.07] bg-white/[0.02] px-5 py-2.5 text-[11px] uppercase tracking-[0.12em] text-ink/40 md:grid">

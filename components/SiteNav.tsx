@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export const NAV_LINKS = [
   { href: "/#pricing", label: "Pricing" },
@@ -12,9 +13,13 @@ export const NAV_LINKS = [
 ];
 
 // Dotted-grid navbar: brand cell on the left, section links boxed in the middle, and a solid
-// Join waitlist block on the right. On phones the links move to a scrollable row underneath.
+// Sign up button on the right. On phones the links move into a menu opened from the right.
 export default function SiteNav() {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the phone menu after navigating.
+  useEffect(() => setMenuOpen(false), [pathname]);
 
   const links = (className: string) =>
     NAV_LINKS.map(({ href, label }) => {
@@ -61,24 +66,30 @@ export default function SiteNav() {
           >
             Sign up
           </Link>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-[8px] border border-white/[0.12] text-ink/80 transition hover:text-ink lg:hidden"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" aria-hidden className="h-[18px] w-[18px]">
+              {menuOpen ? <path d="m6 6 12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
         </div>
       </nav>
 
-      <div className="nav-grid flex items-stretch border-b lg:hidden">
-        {links("nav-grid relative flex flex-1 items-center justify-center whitespace-nowrap border-r px-1.5 py-2.5 text-[12px] sm:text-[13px]")}
-        <Link
-          href="/login"
-          className="nav-grid relative flex items-center justify-center whitespace-nowrap border-r px-2.5 py-2.5 text-[12px] text-ink/75 hover:text-ink sm:text-[13px]"
-        >
-          Log in
-        </Link>
-        <Link
-          href="/signup"
-          className="nav-grid relative flex items-center justify-center whitespace-nowrap px-3 py-2.5 text-[12px] font-medium text-[#8ccbff] sm:text-[13px]"
-        >
-          Sign up
-        </Link>
-      </div>
+      {menuOpen && (
+        <div id="mobile-menu" className="nav-grid absolute inset-x-0 top-full border-b bg-page px-[max(1rem,6vw)] pb-5 pt-2 shadow-[0_24px_40px_-20px_rgba(0,0,0,0.8)] lg:hidden">
+          <div className="flex flex-col">
+            {links("nav-grid relative border-b py-3.5 text-[15px]")}
+            <Link href="/login" className="py-3.5 text-[15px] text-ink/75 transition hover:text-ink">
+              Log in
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

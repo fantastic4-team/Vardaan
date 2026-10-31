@@ -5,7 +5,7 @@
   --font-poster: var(--font-poppins), var(--font-figtree), system-ui, sans-serif;
   --color-page: #141312;
   --color-ink: #f4f2ee;
-  --color-mute: #8f8b85;
+  --color-mute: #a39e97;
   --color-accent: #8ccbff;
   --color-leaf-dark: #334932;
   --color-leaf: #87a454;
@@ -723,4 +723,21 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .wave-bar { animation: none; }
+}
+
+/* Readability: faded text is lifted a step on the dark theme. Kept in the utilities layer so hover
+   and state variants still win. The Sand theme has its own steps above. */
+@layer utilities {
+  .text-ink\/25 { color: color-mix(in oklab, var(--color-ink) 36%, transparent); }
+  .text-ink\/35 { color: color-mix(in oklab, var(--color-ink) 48%, transparent); }
+  .text-ink\/40 { color: color-mix(in oklab, var(--color-ink) 52%, transparent); }
+  .text-ink\/45 { color: color-mix(in oklab, var(--color-ink) 57%, transparent); }
+  .text-ink\/50 { color: color-mix(in oklab, var(--color-ink) 61%, transparent); }
+  .text-ink\/55 { color: color-mix(in oklab, var(--color-ink) 65%, transparent); }
+  .text-ink\/60 { color: color-mix(in oklab, var(--color-ink) 69%, transparent); }
+  .text-ink\/65 { color: color-mix(in oklab, var(--color-ink) 73%, transparent); }
+  .text-ink\/70 { color: color-mix(in oklab, var(--color-ink) 77%, transparent); }
+  .text-ink\/75 { color: color-mix(in oklab, var(--color-ink) 81%, transparent); }
+  .text-ink\/80 { color: color-mix(in oklab, var(--color-ink) 85%, transparent); }
+  .text-ink\/85 { color: color-mix(in oklab, var(--color-ink) 89%, transparent); }
 }
