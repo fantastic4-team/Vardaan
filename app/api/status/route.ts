@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { alertChannel } from "@/lib/emergency";
 import { googleConfigured, googleLinkFor } from "@/lib/google";
 import { provider } from "@/lib/llm";
 import { mailConfigured } from "@/lib/mail";
@@ -20,5 +21,7 @@ export async function GET() {
     // Which web search provider the agent uses (see lib/search.ts).
     search: process.env.TAVILY_API_KEY ? "tavily" : process.env.BRAVE_API_KEY ? "brave" : "duckduckgo",
     google: { configured: googleConfigured(), connected: Boolean(link), email: link?.email ?? null },
+    // How emergency alerts would be sent: "smtp", "gmail", or null (can't send yet).
+    alerts: await alertChannel(user.id),
   });
 }

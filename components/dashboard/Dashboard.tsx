@@ -26,8 +26,8 @@ const NAV: { id: View; label: string }[] = [
 ];
 
 type Data = { tasks: Task[]; memories: Memory[]; reminders: Reminder[]; calls: CallLog[]; messages: MessageLog[] };
-type Profile = { phone: string; lang: string };
-type Status = { ai: string | null; phone: boolean; phoneNumber: string | null; publicUrl: boolean; email: boolean; search?: string; google?: { configured: boolean; connected: boolean; email: string | null } };
+type Profile = { phone: string; lang: string; emergencyName?: string; emergencyEmail?: string };
+type Status = { ai: string | null; phone: boolean; phoneNumber: string | null; publicUrl: boolean; email: boolean; search?: string; google?: { configured: boolean; connected: boolean; email: string | null }; alerts?: "smtp" | "gmail" | null };
 type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
@@ -1147,6 +1147,8 @@ function Settings({
 }) {
   const [phone, setPhone] = useState(profile.phone);
   const [lang, setLang] = useState(profile.lang);
+  const [emergencyName, setEmergencyName] = useState(profile.emergencyName ?? "");
+  const [emergencyEmail, setEmergencyEmail] = useState(profile.emergencyEmail ?? "");
   const [err, setErr] = useState("");
   const [saving, setSaving] = useState(false);
   const [origin, setOrigin] = useState("https://your-public-url");
@@ -1154,6 +1156,8 @@ function Settings({
   useEffect(() => {
     setPhone(profile.phone);
     setLang(profile.lang);
+    setEmergencyName(profile.emergencyName ?? "");
+    setEmergencyEmail(profile.emergencyEmail ?? "");
   }, [profile]);
 
   useEffect(() => setOrigin(window.location.origin), []);
@@ -1173,9 +1177,10 @@ function Settings({
     setErr("");
     setSaving(true);
     try {
-      const saved = await api<Profile>("/api/profile", { method: "POST", body: JSON.stringify({ phone, lang }) });
+      const saved = await api<Profile>("/api/profile", { method: "POST", body: JSON.stringify({ phone, lang, emergencyName, emergencyEmail }) });
       onSaved(saved);
       onToast("Saved.");
+      onStatusChange();
     } catch (error) {
       setErr((error as Error).message);
     } finally {
@@ -1183,7 +1188,11 @@ function Settings({
     }
   }
 
-  const dirty = phone !== profile.phone || lang !== profile.lang;
+  const dirty =
+    phone !== profile.phone ||
+    lang !== profile.lang ||
+    emergencyName !== (profile.emergencyName ?? "") ||
+    emergencyEmail !== (profile.emergencyEmail ?? "");
   const base = status?.publicUrl ? "PUBLIC_URL" : origin;
   const code = "rounded-[5px] bg-white/[0.07] px-1.5 py-0.5 font-mono text-[12px] text-ink/85";
 
@@ -1268,6 +1277,44 @@ function Settings({
                   </svg>
                 </span>
               </label>
+            </div>
+            <div className="border-t border-white/[0.07] p-5 sm:p-6">
+              <p className="text-[13px] font-medium text-ink/80">Emergency contact</p>
+              <p className="mt-1 text-[12px] leading-[18px] text-ink/45">
+                Say &quot;alert my emergency contact&quot; (or tell Vardaan you need help) on a call, and it emails this person straight away, with no questions asked.
+              </p>
+              <div className="mt-4 grid gap-5 sm:grid-cols-[220px_minmax(0,1fr)]">
+                <label className="block">
+                  <span className="text-[13px] font-medium text-ink/80">Name</span>
+                  <input
+                    value={emergencyName}
+                    onChange={(e) => setEmergencyName(e.target.value)}
+                    autoComplete="off"
+                    placeholder="Maa"
+                    className="auth-input mt-2 h-11 w-full rounded-[10px] px-3.5 text-[14px] text-ink outline-none placeholder:text-ink/35"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[13px] font-medium text-ink/80">Email</span>
+                  <input
+                    value={emergencyEmail}
+                    onChange={(e) => setEmergencyEmail(e.target.value)}
+                    type="email"
+                    inputMode="email"
+                    autoComplete="off"
+                    placeholder="family@example.com"
+                    className="auth-input mt-2 h-11 w-full rounded-[10px] px-3.5 text-[14px] text-ink outline-none placeholder:text-ink/35"
+                  />
+                </label>
+              </div>
+              {profile.emergencyEmail && status && !status.alerts && (
+                <p className="mt-3 text-[12.5px] text-[#ffb4a8]">
+                  Vardaan can&apos;t send emails yet. Press Connect under Apps below (it now asks to send email too), or add SMTP settings.
+                </p>
+              )}
+              {profile.emergencyEmail && status?.alerts && (
+                <p className="mt-3 text-[12.5px] text-[#c9e877]">Ready: alerts go out {status.alerts === "gmail" ? "from your Gmail" : "by email"}.</p>
+              )}
             </div>
             <div className="flex items-center justify-between gap-4 border-t border-white/[0.07] bg-black/15 px-5 py-3.5 sm:px-6">
               <p className={`text-[12.5px] ${err ? "text-[#ffb4a8]" : "text-ink/40"}`}>{err || (dirty ? "You have unsaved changes." : "All changes saved.")}</p>

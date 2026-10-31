@@ -1,5 +1,6 @@
 import type { ToolSpec } from "@/lib/llm";
 import { createEvent, googleConfigured, googleLinkFor, listEvents, readEmail, searchEmails, TIME_ZONE } from "@/lib/google";
+import { emergencyContact, sendEmergencyAlert } from "@/lib/emergency";
 import { getWeather } from "@/lib/weather";
 
 // Third-party app tools for the agent: live weather (always), and Google Calendar + Gmail (once the
@@ -54,19 +55,38 @@ const GMAIL = [
   tool("read_email", "Read one email's text by id from search_emails.", { id: { type: "string" } }, ["id"]),
 ];
 
+const emergencyTool = (who: string) =>
+  tool(
+    "send_emergency_alert",
+    `Email the user's emergency contact (${who}) IMMEDIATELY. Use whenever the user asks to alert, inform or message their emergency contact, or says they're in danger or need help urgently. Do not ask for confirmation or more details: send their words at once.`,
+    { message: { type: "string", description: "The user's message, in their words" } },
+    ["message"],
+  );
+
 /** The app tools available to this user right now. */
 export async function appTools(userId: string): Promise<ToolSpec[]> {
   const link = googleConfigured() ? await googleLinkFor(userId) : null;
   const has = (scope: string) => Boolean(link?.scopes.some((s) => s.includes(scope)));
-  return [WEATHER, ...(has("calendar") ? CALENDAR : []), ...(has("gmail") ? GMAIL : [])];
+  const contact = await emergencyContact(userId);
+  return [
+    WEATHER,
+    ...(has("calendar") ? CALENDAR : []),
+    ...(has("gmail") ? GMAIL : []),
+    ...(contact ? [emergencyTool(contact.name || contact.email)] : []),
+  ];
 }
 
 /** One line for the system prompt saying which apps are connected. */
 export async function appsSummary(userId: string) {
   const link = googleConfigured() ? await googleLinkFor(userId) : null;
-  return link
+  const contact = await emergencyContact(userId);
+  const apps = link
     ? `Apps: weather, Google Calendar and Gmail (${link.email}).`
     : "Apps: weather only. For calendar or email, ask them to connect Google in Settings.";
+  return contact
+    ? `${apps}
+Emergency contact: ${contact.name ? `${contact.name} ` : ""}<${contact.email}>. send_emergency_alert sends at once with no confirmation; in real danger also tell them to call 112.`
+    : apps;
 }
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -95,6 +115,8 @@ export async function runAppTool(userId: string, name: string, args: Record<stri
         return await searchEmails(userId, str(args.query), num(args.max) ?? 5);
       case "read_email":
         return await readEmail(userId, str(args.id));
+      case "send_emergency_alert":
+        return await sendEmergencyAlert(userId, str(args.message));
       default:
         return null;
     }

@@ -16,6 +16,9 @@ export type User = {
   phone?: string;
   /** Language for phone calls, e.g. "en-IN" or "hi-IN". */
   lang?: string;
+  /** Emergency contact. Vardaan emails them at once, without asking, when the user says so. */
+  emergencyName?: string;
+  emergencyEmail?: string;
   /** Google account linked for Calendar and Gmail. Server-side only: never send to the browser. */
   google?: GoogleLink;
   createdAt: string;
