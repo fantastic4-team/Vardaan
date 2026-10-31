@@ -93,7 +93,7 @@ export function SceneDots() {
       {STEPS.map((s, i) => (
         <span
           key={s.label}
-          className={`w-2 rounded-full transition-all duration-500 ease-out ${i === scene ? "h-7 bg-white" : "h-2 bg-white/40"}`}
+          className={`w-2 rounded-full transition-all duration-500 ease-out ${i === scene ? "h-7 bg-[#1d2a5c]" : "h-2 bg-[#1d2a5c]/25"}`}
         />
       ))}
     </div>

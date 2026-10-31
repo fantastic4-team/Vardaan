@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Faq from "@/components/landing/Faq";
 import Features from "@/components/landing/Features";
-import HeroGlass from "@/components/landing/HeroGlass";
 import HeroPhone from "@/components/landing/HeroPhone";
 import { HeroSteps, HeroSync, SceneDots } from "@/components/landing/HeroSync";
 import Pricing from "@/components/landing/Pricing";
@@ -80,7 +79,6 @@ export default function Home() {
 
           {/* The right panel: the poster's blue sky with grain, and the phone playing a live call. */}
           <figure className="poster-art-in nav-grid hero-panel relative min-h-[600px] overflow-hidden border-t lg:min-h-0 lg:border-l lg:border-t-0">
-            <HeroGlass />
             <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             <HeroPhone />
             <SceneDots />
