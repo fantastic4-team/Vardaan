@@ -1,4 +1,3 @@
-import GardenScene from "@/components/GardenScene";
 import ChatDemo from "@/components/landing/ChatDemo";
 import InView from "@/components/landing/InView";
 import SectionHeading, { GUTTER } from "@/components/landing/SectionHeading";
@@ -52,6 +51,69 @@ const ICONS: Record<FeatureIcon, React.ReactNode> = {
 // Glossy icon tiles in the garden's colours: rose, sky, violet and leaf (see .glass-tile).
 const TONES = ["tile-rose", "tile-sky", "tile-violet", "tile-leaf"];
 
+// The header of each mode card: a phone call as Vardaan shows it. Call & Cut has ended and
+// Vardaan is working through the task; Talk & Help is live, with the voice waveform moving.
+const WAVE = [
+  0.3, 0.5, 0.75, 0.45, 0.9, 0.6, 1, 0.7, 0.4, 0.85, 0.55, 0.95, 0.65, 0.35, 0.8, 0.5, 0.9, 0.6, 0.3, 0.7, 1, 0.55, 0.8, 0.45, 0.65, 0.9, 0.4,
+  0.75, 0.5, 0.3,
+];
+
+function ModeArt({ live }: { live: boolean }) {
+  return (
+    <div className="mode-art absolute inset-0 flex items-center justify-center px-6 pb-2 pt-12">
+      <div className="w-full max-w-[320px] rounded-[16px] border border-white/[0.12] bg-[#16151d]/85 p-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)]">
+        <div className="flex items-center gap-3">
+          <span className="mic-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-[#0b1626]">V</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13.5px] font-medium text-ink">Vardaan</p>
+            <p className="text-[11.5px] text-ink/50">{live ? "On call · 0:07" : "Call ended · 0:42"}</p>
+          </div>
+          <span
+            className={`rounded-full border px-2 py-0.5 text-[10.5px] font-medium ${
+              live ? "border-[#8fcf3c]/35 bg-[#8fcf3c]/12 text-[#c9e877]" : "border-white/15 bg-white/[0.05] text-ink/60"
+            }`}
+          >
+            {live ? "Live" : "Working"}
+          </span>
+        </div>
+
+        {live ? (
+          <div className="mt-4 flex h-12 items-center justify-between gap-[3px]" aria-hidden>
+            {WAVE.map((h, k) => (
+              <span key={k} className="wave-bar w-[4px] rounded-full bg-[linear-gradient(180deg,#b9e0ff_0%,#74bdf8_100%)]" style={{ height: `${h * 100}%`, animationDelay: `${(k % 8) * 0.11}s` }} />
+            ))}
+          </div>
+        ) : (
+          <ol className="mt-3.5 space-y-2 text-[12px]">
+            {[
+              { label: "Find the landlord's email", state: "done" },
+              { label: "Draft the message", state: "done" },
+              { label: "Call you back to approve", state: "now" },
+            ].map((s) => (
+              <li key={s.label} className="flex items-center gap-2.5">
+                <span
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                    s.state === "done" ? "bg-[#8fcf3c]/20 text-[#c9e877]" : "border border-[#8ccbff]/60"
+                  }`}
+                >
+                  {s.state === "done" ? (
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-2.5 w-2.5">
+                      <path d="m3.5 8.5 3 3 6-7" />
+                    </svg>
+                  ) : (
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#8ccbff]" />
+                  )}
+                </span>
+                <span className={s.state === "done" ? "text-ink/55 line-through decoration-white/20" : "text-ink/90"}>{s.label}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Features() {
   return (
     <section id="features" aria-labelledby="features-title" className={`nav-grid scroll-mt-6 border-t ${GUTTER} py-24 lg:py-32`}>
@@ -67,10 +129,8 @@ export default function Features() {
         {MODES.map((m, i) => (
           <InView key={m.name} i={i} className="h-full">
             <article className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
-              <div aria-hidden="true" className="relative h-48 overflow-hidden sm:h-56">
-                <GardenScene scene={m.scene} className="art-drift absolute inset-0 h-full w-full" />
-                <div className="poster-grain absolute inset-0" />
-                <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(23,22,21,0)_0%,#171615_100%)]" />
+              <div aria-hidden="true" className="relative h-60 overflow-hidden">
+                <ModeArt live={i === 1} />
                 <span className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/35 px-3 py-1 text-[12px] text-ink/90 lg:left-8 lg:top-7">
                   Mode {String(i + 1).padStart(2, "0")}
                 </span>

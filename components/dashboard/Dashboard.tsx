@@ -212,7 +212,7 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
       <Notifications open={notifOpen} items={notices} onClose={() => setNotifOpen(false)} />
       <aside className="nav-grid sticky top-0 hidden h-svh flex-col border-r px-4 py-6 lg:flex">
         <Link href="/" className="flex items-center gap-2.5 px-3">
-          <span className="font-poster text-[19px] font-semibold uppercase tracking-[0.02em] text-ink">Vardaan</span>
+          <span className="font-poster text-[21px] font-semibold uppercase tracking-[0.02em] text-ink">Vardaan</span>
           <span className="beta-glass">Beta</span>
         </Link>
         <button onClick={callMe} className="waitlist-button mt-8 flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[12px] text-[14px]">
@@ -546,10 +546,11 @@ const Pill = ({ tone, children }: { tone: string; children: React.ReactNode }) =
 
 type Activity = { at: string; icon: IconName; title: string; detail?: string; tone: string };
 
+// Glossy tile colours for activity rows, matching the sidebar.
 const TONE = {
-  call: "bg-[#8ccbff]/12 text-[#b9e0ff]",
-  task: "bg-[#5a63e4]/18 text-[#c7b8ff]",
-  text: "bg-[#8fcf3c]/12 text-[#c9e877]",
+  call: "tile-sky",
+  task: "tile-violet",
+  text: "tile-teal",
 };
 
 const AGENT_STATUS_COLORS: Record<string, string> = {
@@ -605,15 +606,15 @@ function Overview({
     })),
   ]
     .sort((a, b) => b.at.localeCompare(a.at))
-    .slice(0, 12);
+    .slice(0, 6);
 
   const needing = data.tasks.filter(needsYou);
   const minutes = Math.round(data.calls.reduce((s, c) => s + (c.durationSec ?? 0), 0) / 60);
   const stats: { label: string; value: number; hint: string; view: View; icon: IconName; tone: string }[] = [
-    { label: "Calls", value: data.calls.length, hint: `${minutes} min talked`, view: "calls", icon: "phone", tone: "text-[#b9e0ff] bg-[#8ccbff]/10" },
-    { label: "Needs you", value: needing.length, hint: needing.length ? "Waiting on your reply" : "All clear", view: "tasks", icon: "bell", tone: "text-[#f6e27a] bg-[#f6e27a]/10" },
-    { label: "In progress", value: data.tasks.filter(inProgress).length, hint: "Vardaan is working", view: "tasks", icon: "capabilities", tone: "text-[#c7b8ff] bg-[#5a63e4]/15" },
-    { label: "Done", value: data.tasks.filter((t) => t.status === "done").length, hint: `${data.messages.length} texts exchanged`, view: "tasks", icon: "check", tone: "text-[#c9e877] bg-[#8fcf3c]/10" },
+    { label: "Calls", value: data.calls.length, hint: `${minutes} min talked`, view: "calls", icon: "phone", tone: "tile-sky" },
+    { label: "Needs you", value: needing.length, hint: needing.length ? "Waiting on your reply" : "All clear", view: "tasks", icon: "bell", tone: "tile-amber" },
+    { label: "In progress", value: data.tasks.filter(inProgress).length, hint: "Vardaan is working", view: "tasks", icon: "capabilities", tone: "tile-violet" },
+    { label: "Done", value: data.tasks.filter((t) => t.status === "done").length, hint: `${data.messages.length} messages sent`, view: "tasks", icon: "check", tone: "tile-leaf" },
   ];
   const lang = CALL_LANGUAGES.find((l) => l.code === profile.lang)?.label.split(" ").slice(-1)[0] ?? "English";
 
@@ -728,7 +729,7 @@ function Overview({
           <button key={s.label} onClick={() => onView(s.view)} className="app-panel group cursor-pointer p-5 text-left transition hover:border-white/20 hover:bg-white/[0.035]">
             <div className="flex items-center justify-between">
               <p className="text-[13px] text-ink/60">{s.label}</p>
-              <span className={`flex h-8 w-8 items-center justify-center rounded-[9px] ${s.tone}`}>
+              <span className={`glass-tile nav-tile ${s.tone} flex h-8 w-8 items-center justify-center rounded-[9px]`}>
                 <Icon name={s.icon} className="h-4 w-4" />
               </span>
             </div>
@@ -740,13 +741,23 @@ function Overview({
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <section className="flex flex-col">
-          <SectionLabel>Recent activity</SectionLabel>
+          <SectionLabel
+            action={
+              activity.length ? (
+                <button onClick={() => onView("calls")} className="cursor-pointer text-[12.5px] text-ink/55 transition hover:text-ink">
+                  View all
+                </button>
+              ) : undefined
+            }
+          >
+            Recent activity
+          </SectionLabel>
           {activity.length ? (
             <ol className="app-panel relative px-5 py-2">
               {activity.map((a, i) => (
                 <li key={i} className="relative flex gap-4 py-4">
                   {i < activity.length - 1 && <span className="absolute bottom-[-16px] left-4 top-[52px] w-px bg-white/[0.08]" />}
-                  <span className={`relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-4 ring-[#1a1918] ${a.tone}`}>
+                  <span className={`glass-tile nav-tile ${a.tone} relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px]`}>
                     <Icon name={a.icon} className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -973,7 +984,7 @@ function Messages({ messages }: { messages: MessageLog[] }) {
     <div>
       <PageTitle title="Messages" sub="Updates Vardaan sent you (emailed too, if email is set up). Approve drafts and answer questions from Tasks." />
       {messages.length === 0 ? (
-        <Empty>No messages yet. Vardaan texts you when a task is done or needs you.</Empty>
+        <Empty>No messages yet. Vardaan sends you an update when a task is done or needs you.</Empty>
       ) : (
         <ul className="app-panel space-y-3 p-5">
           {[...messages].reverse().map((m) => (

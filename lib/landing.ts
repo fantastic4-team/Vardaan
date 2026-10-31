@@ -5,9 +5,9 @@ export type FeatureIcon = "phone" | "language" | "shield" | "memory" | "bell" | 
 export const MODES = [
   {
     name: "Call & Cut",
-    body: "Say what you need and hang up. Vardaan works on it in the background and calls or texts you when it's done.",
+    body: "Say what you need and hang up. Vardaan works on it in the background and calls you back when it's done.",
     example: "Email my landlord the kitchen tap is leaking, and tell me when he replies.",
-    reply: "On it. You can hang up, I'll text you the draft to approve.",
+    reply: "On it. You can hang up, I'll call you back when the draft is ready to approve.",
     scene: "tulips" as const,
   },
   {
@@ -52,8 +52,8 @@ export const FEATURES: { icon: FeatureIcon; title: string; body: string }[] = [
   },
   {
     icon: "message",
-    title: "Updates by text",
-    body: "Questions, results and approvals arrive as SMS. Reply to answer, or YES to approve.",
+    title: "Updates in one place",
+    body: "Questions, results and drafts to approve land on your dashboard and in your email.",
   },
   {
     icon: "log",
@@ -77,7 +77,7 @@ export const PLANS = [
       "Call Vardaan, or have it call you",
       "Call & Cut and Talk & Help",
       "Reminder calls",
-      "SMS updates and YES approvals",
+      "Approve drafts before anything is sent",
       "Memory and web research",
       "Full call and task history",
     ],
@@ -127,7 +127,7 @@ export const FAQS = [
   },
   {
     q: "How does Vardaan tell me a task is done?",
-    a: "It reports back the way that suits you: a callback, an SMS or a WhatsApp message.",
+    a: "It calls you back with the result, and every update also lands on your dashboard and in your email. WhatsApp updates are coming soon.",
   },
   {
     q: "Will it act without asking me?",

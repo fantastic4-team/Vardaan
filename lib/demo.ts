@@ -111,7 +111,7 @@ export function demoData() {
         { role: "user", content: "Remind me to call Maa every Sunday at 7 pm.", at: ago(130) },
         { role: "assistant", content: "Done. I'll ring you every Sunday at 7 pm to call Maa.", at: ago(129) },
         { role: "user", content: "And email my landlord that the kitchen tap is leaking.", at: ago(129) },
-        { role: "assistant", content: "On it. You can hang up, I'll text you the draft to approve.", at: ago(129) },
+        { role: "assistant", content: "On it. You can hang up, I'll call you back when the draft is ready to approve.", at: ago(129) },
       ],
       silences: 0,
       taskIds: ["demo-task-landlord"],
@@ -184,14 +184,14 @@ export function demoData() {
   ];
 
   const messages: MessageLog[] = [
-    { ...u, id: "demo-msg-1", direction: "outbound", status: "sent", body: "Vardaan: What is your landlord's email address?\nReply to this message with your answer.", createdAt: ago(126) },
+    { ...u, id: "demo-msg-1", direction: "outbound", status: "sent", body: "Vardaan: What is your landlord's email address? Answer it in Tasks.", createdAt: ago(126) },
     { ...u, id: "demo-msg-2", direction: "inbound", status: "received", body: "mr.sen@example.com", createdAt: ago(122) },
     {
       ...u,
       id: "demo-msg-3",
       direction: "outbound",
       status: "sent",
-      body: "Vardaan: Drafted the email to Mr Sen. Approve it to send.\nReply YES to approve and send, or open your dashboard to edit it first.",
+      body: "Vardaan: Drafted the email to Mr Sen. Approve it in Tasks to send, or edit it first.",
       createdAt: ago(118),
     },
     {
@@ -199,7 +199,7 @@ export function demoData() {
       id: "demo-msg-4",
       direction: "outbound",
       status: "sent",
-      body: "Vardaan: Which gas agency is Maa with, and what is her consumer number?\nReply to this message with your answer.",
+      body: "Vardaan: Which gas agency is Maa with, and what is her consumer number? Answer it in Tasks.",
       createdAt: ago(38),
     },
   ];
@@ -208,7 +208,7 @@ export function demoData() {
     { ...u, id: "demo-mem-1", fact: "Lives in Bangalore. Parents live in Kolkata.", createdAt: ago(60 * 24 * 5) },
     { ...u, id: "demo-mem-2", fact: "Landlord is Mr Sen, mr.sen@example.com", createdAt: ago(122) },
     { ...u, id: "demo-mem-3", fact: "Papa sees Dr Banerjee for his blood pressure.", createdAt: ago(60 * 50) },
-    { ...u, id: "demo-mem-4", fact: "Prefers short calls and updates by text.", createdAt: ago(60 * 24 * 4) },
+    { ...u, id: "demo-mem-4", fact: "Prefers short calls and updates by email.", createdAt: ago(60 * 24 * 4) },
   ];
 
   const reminders: Reminder[] = [

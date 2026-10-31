@@ -15,11 +15,34 @@ export type Notice = {
   onOpen: () => void;
 };
 
-const TONES: Record<Notice["tone"], string> = {
-  amber: "bg-[#f6e27a]",
-  sky: "bg-[#8ccbff]",
-  leaf: "bg-[#8fcf3c]",
-  rose: "bg-[#ff8a7a]",
+// Each tone gets a glossy tile and an icon: questions, setup, calls and finished tasks.
+const TONES: Record<Notice["tone"], { tile: string; icon: React.ReactNode }> = {
+  amber: {
+    tile: "tile-amber",
+    icon: (
+      <>
+        <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5z" />
+        <path d="M10 19a2.2 2.2 0 0 0 4 0" />
+      </>
+    ),
+  },
+  rose: {
+    tile: "tile-rose",
+    icon: (
+      <>
+        <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
+        <circle cx="16" cy="7" r="2" />
+        <circle cx="8" cy="17" r="2" />
+      </>
+    ),
+  },
+  sky: {
+    tile: "tile-sky",
+    icon: (
+      <path d="M21 16.4v2.7a1.9 1.9 0 0 1-2.1 1.9 18.8 18.8 0 0 1-8.2-2.9 18.5 18.5 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.1 4.1 1.9 1.9 0 0 1 4 2h2.7a1.9 1.9 0 0 1 1.9 1.6c.1.9.4 1.8.7 2.7a1.9 1.9 0 0 1-.4 2L7.7 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.1a1.9 1.9 0 0 1 2-.4c.9.3 1.8.6 2.7.7a1.9 1.9 0 0 1 1.8 2.1z" />
+    ),
+  },
+  leaf: { tile: "tile-leaf", icon: <path d="m5.5 12.5 4 4 9-9.5" /> },
 };
 
 const GROUPS: Notice["group"][] = ["Needs you", "Setup", "Recent"];
@@ -101,11 +124,15 @@ export default function Notifications({ open, items, onClose }: { open: boolean;
                       <li key={n.id}>
                         <button
                           onClick={() => (n.onOpen(), onClose())}
-                          className="flex w-full cursor-pointer items-start gap-3 rounded-[10px] px-2 py-2.5 text-left transition hover:bg-white/[0.05]"
+                          className="flex w-full cursor-pointer items-start gap-3 rounded-[12px] px-2 py-2.5 text-left transition hover:bg-white/[0.05]"
                         >
-                          <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${TONES[n.tone]}`} />
-                          <span className="min-w-0 flex-1">
-                            <span className="block text-[13.5px] leading-[20px] text-ink">{n.title}</span>
+                          <span className={`glass-tile nav-tile ${TONES[n.tone].tile} flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px]`}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-4 w-4">
+                              {TONES[n.tone].icon}
+                            </svg>
+                          </span>
+                          <span className="min-w-0 flex-1 pt-[1px]">
+                            <span className="block text-[13.5px] font-medium leading-[20px] text-ink">{n.title}</span>
                             {n.detail && <span className="mt-0.5 block line-clamp-2 text-[12.5px] leading-[18px] text-ink/50">{n.detail}</span>}
                           </span>
                           {n.at && <span className="shrink-0 pt-0.5 text-[11.5px] text-ink/40 tabular-nums">{ago(n.at)}</span>}
