@@ -58,11 +58,20 @@ const GLYPHS = {
 
 export type Glyph = keyof typeof GLYPHS;
 
+// Glossy colour tiles for the glyphs, matching the dashboard sidebar.
+const GLYPH_TILES: Record<Glyph, string> = {
+  ai: "tile-violet",
+  phone: "tile-leaf",
+  weather: "tile-sky",
+  sms: "tile-teal",
+  search: "tile-indigo",
+};
+
 export default function BrandLogo({ brand, glyph, className = "h-11 w-11" }: { brand?: Brand; glyph?: Glyph; className?: string }) {
   if (brand) {
     const b = BRANDS[brand];
     return (
-      <span className={`flex shrink-0 items-center justify-center rounded-[12px] border border-black/[0.06] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.25)] ${className}`}>
+      <span className={`flex shrink-0 items-center justify-center rounded-[12px] border border-black/[0.06] bg-[#ffffff] shadow-[0_1px_2px_rgba(0,0,0,0.25)] ${className}`}>
         <svg viewBox="0 0 24 24" aria-hidden className="h-[46%] w-[46%]" fill={b.hex}>
           <path d={b.d} />
         </svg>
@@ -70,8 +79,8 @@ export default function BrandLogo({ brand, glyph, className = "h-11 w-11" }: { b
     );
   }
   return (
-    <span className={`flex shrink-0 items-center justify-center rounded-[12px] border border-white/[0.1] bg-white/[0.05] text-ink/75 ${className}`}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-[46%] w-[46%]">
+    <span className={`glass-tile ${glyph ? GLYPH_TILES[glyph] : "tile-slate"} flex shrink-0 items-center justify-center rounded-[12px] ${className}`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-[48%] w-[48%]">
         {glyph && GLYPHS[glyph]}
       </svg>
     </span>

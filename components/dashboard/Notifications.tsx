@@ -67,8 +67,8 @@ export default function Notifications({ open, items, onClose }: { open: boolean;
       <aside
         role="dialog"
         aria-label="Notifications"
-        className={`drawer-panel absolute inset-y-0 right-0 flex w-full max-w-[400px] flex-col border-l border-white/[0.09] shadow-[-24px_0_60px_-20px_rgba(0,0,0,0.6)] transition-transform duration-300 ease-out ${
-          open ? "translate-x-0" : "translate-x-full"
+        className={`drawer-panel absolute inset-y-0 right-0 flex w-full max-w-[400px] flex-col border-l border-white/[0.09] transition-[transform,visibility] duration-300 ease-out ${
+          open ? "visible translate-x-0 shadow-[-24px_0_60px_-20px_rgba(0,0,0,0.6)]" : "invisible translate-x-full"
         }`}
       >
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/[0.07] px-5">

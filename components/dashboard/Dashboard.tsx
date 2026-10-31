@@ -7,6 +7,7 @@ import TaskCard, { STATUS, canCancel, inProgress, needsYou } from "@/components/
 import { api } from "@/components/dashboard/api";
 import Integrations from "@/components/dashboard/Integrations";
 import Notifications, { Bell, type Notice } from "@/components/dashboard/Notifications";
+import BrandLogo from "@/components/dashboard/BrandLogo";
 import Icon from "@/components/docs/Icon";
 import type { IconName } from "@/lib/docs-content";
 import type { CallLog, Memory, MessageLog, Reminder, Task } from "@/lib/db";
@@ -948,7 +949,7 @@ function Tasks({ tasks, onChange, onToast }: { tasks: Task[]; onChange: () => vo
             role="tab"
             aria-selected={filter === f.id}
             onClick={() => setFilter(f.id)}
-            className={`cursor-pointer rounded-full px-3.5 py-1.5 text-[13px] transition ${filter === f.id ? "bg-white text-black" : "bg-white/[0.05] text-ink/70 hover:text-ink"}`}
+            className={`cursor-pointer rounded-full px-3.5 py-1.5 text-[13px] transition ${filter === f.id ? "bg-ink text-page" : "bg-white/[0.05] text-ink/70 hover:text-ink"}`}
           >
             {f.label}
             <span className="ml-1.5 tabular-nums opacity-60">{tasks.filter(f.match).length}</span>
@@ -1260,7 +1261,7 @@ function Settings({
               <p className={`text-[12.5px] ${err ? "text-[#ffb4a8]" : "text-ink/40"}`}>{err || (dirty ? "You have unsaved changes." : "All changes saved.")}</p>
               <button
                 disabled={!dirty || saving}
-                className="h-9 shrink-0 cursor-pointer rounded-[9px] bg-ink px-4 text-[13px] font-medium text-[#141312] transition hover:bg-white disabled:cursor-default disabled:bg-white/[0.08] disabled:text-ink/35"
+                className="h-9 shrink-0 cursor-pointer rounded-[9px] bg-ink px-4 text-[13px] font-medium text-[#141312] transition hover:opacity-90 disabled:cursor-default disabled:bg-white/[0.08] disabled:text-ink/35"
               >
                 {saving ? "Saving" : "Save changes"}
               </button>
@@ -1290,8 +1291,9 @@ function Settings({
         <SettingsSection title="Apps" sub="Extra abilities Vardaan can use while it works on your tasks.">
           <ul className="app-panel divide-y divide-white/[0.06]">
             <li className="flex items-center gap-3.5 px-5 py-3.5">
-              <span className={`glass-tile nav-tile tile-amber flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] ${status?.google?.connected ? "" : "opacity-60"}`}>
-                <NavIcon name="reminders" className="h-4 w-4" />
+              <span className="flex shrink-0 -space-x-1.5">
+                <BrandLogo brand="googlecalendar" className="h-8 w-8 !rounded-[9px]" />
+                <BrandLogo brand="gmail" className="h-8 w-8 !rounded-[9px] ring-2 ring-page" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-[13.5px] text-ink">Google Calendar and Gmail</p>
@@ -1308,7 +1310,7 @@ function Settings({
                   Disconnect
                 </button>
               ) : status?.google?.configured ? (
-                <a href="/api/google/connect" className="flex h-8 shrink-0 items-center rounded-[9px] bg-ink px-3 text-[12.5px] font-medium text-[#141312] transition hover:bg-white">
+                <a href="/api/google/connect" className="flex h-8 shrink-0 items-center rounded-[9px] bg-ink px-3 text-[12.5px] font-medium text-[#141312] transition hover:opacity-90">
                   Connect
                 </a>
               ) : (

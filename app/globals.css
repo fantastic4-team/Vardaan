@@ -664,3 +664,20 @@ body {
 .theme-skin .beta-glass::after {
   background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.8) 50%, transparent 65%);
 }
+
+/* Sand: faded text needs more contrast on a light page, so each step is lifted while keeping its order. */
+.theme-skin .text-ink\/25 { color: color-mix(in oklab, var(--color-ink) 46%, transparent); }
+.theme-skin .text-ink\/35 { color: color-mix(in oklab, var(--color-ink) 56%, transparent); }
+.theme-skin .text-ink\/40 { color: color-mix(in oklab, var(--color-ink) 60%, transparent); }
+.theme-skin .text-ink\/45 { color: color-mix(in oklab, var(--color-ink) 64%, transparent); }
+.theme-skin .text-ink\/50 { color: color-mix(in oklab, var(--color-ink) 68%, transparent); }
+.theme-skin .text-ink\/55 { color: color-mix(in oklab, var(--color-ink) 72%, transparent); }
+.theme-skin .text-ink\/60 { color: color-mix(in oklab, var(--color-ink) 76%, transparent); }
+.theme-skin .text-ink\/65 { color: color-mix(in oklab, var(--color-ink) 80%, transparent); }
+.theme-skin .text-ink\/70 { color: color-mix(in oklab, var(--color-ink) 84%, transparent); }
+.theme-skin .text-ink\/75 { color: color-mix(in oklab, var(--color-ink) 87%, transparent); }
+.theme-skin .text-ink\/80 { color: color-mix(in oklab, var(--color-ink) 90%, transparent); }
+.theme-skin .text-ink\/85 { color: color-mix(in oklab, var(--color-ink) 93%, transparent); }
+.theme-skin .text-mute { color: #75604d; }
+.theme-skin .hover\:text-ink:hover { color: var(--color-ink); }
+.theme-skin .disabled\:text-ink\/35:disabled { color: color-mix(in oklab, var(--color-ink) 45%, transparent); }
