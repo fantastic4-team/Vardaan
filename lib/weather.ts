@@ -11,22 +11,71 @@ const CODES: Record<number, string> = {
 };
 const describe = (code: number) => CODES[code] ?? "mixed weather";
 
-type Place = { name: string; admin1?: string; country?: string; latitude: number; longitude: number };
+type Place = { name: string; latitude: number; longitude: number };
 
-async function json<T>(url: string): Promise<T> {
-  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+async function json<T>(url: string, headers: Record<string, string> = {}): Promise<T> {
+  const res = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`Weather service error (${res.status})`);
   return res.json() as Promise<T>;
+}
+
+// ---- Finding the place --------------------------------------------------------------------
+// Callers say places in many ways: "Kolkata", "Calcutta", "कोलकाता", "Salt Lake, Kolkata",
+// "Kolkata West Bengal India". OpenStreetMap's Nominatim handles all of these (any script, old
+// names, neighbourhoods); Open-Meteo's own search only matches clean English names. Vardaan is
+// India-first, so Indian places win, but anywhere in the world works.
+
+const cache = new Map<string, Place | null>();
+
+/** Drop filler words the model or caller adds: "Kolkata city" → "Kolkata". */
+const tidy = (s: string) =>
+  s.replace(/\b(weather|forecast|in|at|for|city|town|district|area|today|tomorrow)\b/gi, " ").replace(/\s+/g, " ").replace(/^[\s,]+|[\s,]+$/g, "");
+
+type NominatimHit = { lat: string; lon: string; name?: string; display_name: string; category?: string; importance?: number };
+
+async function nominatim(q: string, india: boolean): Promise<Place | null> {
+  const url =
+    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=en&q=${encodeURIComponent(q)}` +
+    (india ? "&countrycodes=in" : "");
+  // Nominatim's usage policy asks for an identifying User-Agent and light use (we cache).
+  const hits = await json<NominatimHit[]>(url, { "User-Agent": "Vardaan/0.1 (voice assistant; weather lookups)" });
+  // Real places only (cities, towns, neighbourhoods), not shops or streets that share the name.
+  const place = hits.find((h) => (h.category === "place" || h.category === "boundary") && (!india || (h.importance ?? 0) >= 0.25));
+  if (!place) return null;
+  const parts = place.display_name.split(",").map((x) => x.trim()).filter((x) => !/^\d[\d\s-]*$/.test(x)); // drop PIN codes
+  const label = [...new Set([place.name || parts[0], parts.at(-2), parts.at(-1)].filter(Boolean))].join(", ");
+  return { name: label, latitude: Number(place.lat), longitude: Number(place.lon) };
+}
+
+async function openMeteoExact(q: string): Promise<Place | null> {
+  const first = q.split(",")[0].trim();
+  const geo = await json<{ results?: { name: string; admin1?: string; country?: string; latitude: number; longitude: number; population?: number }[] }>(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(first)}&count=10&language=en&format=json`,
+  );
+  // Its search is prefix-based ("Kolkatta" → "Kolkattampālaiyam"), so only accept an exact name.
+  const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const exact = (geo.results ?? []).filter((r) => fold(r.name) === fold(first)).sort((a, b) => (b.population ?? 0) - (a.population ?? 0))[0];
+  return exact ? { name: [exact.name, exact.admin1, exact.country].filter(Boolean).join(", "), latitude: exact.latitude, longitude: exact.longitude } : null;
+}
+
+async function findPlace(raw: string): Promise<Place | null> {
+  const q = tidy(raw) || raw.trim();
+  const key = q.toLowerCase();
+  if (cache.has(key)) return cache.get(key)!;
+  let found: Place | null = null;
+  for (const attempt of [() => nominatim(q, true), () => openMeteoExact(q), () => nominatim(q, false)]) {
+    found = await attempt().catch(() => null);
+    if (found) break;
+  }
+  cache.set(key, found);
+  return found;
 }
 
 /** Current conditions plus a daily forecast (1–7 days) for a city or place name, as plain text. */
 export async function getWeather(place: string, days = 3): Promise<string> {
   if (!place) return "Which city? Ask the user, or use the city you remember for them.";
-  const geo = await json<{ results?: Place[] }>(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(place)}&count=1&language=en&format=json`,
-  );
-  const p = geo.results?.[0];
-  if (!p) return `I couldn't find a place called "${place}".`;
+  const p = await findPlace(place);
+  if (!p) return `I couldn't find "${place}". Ask the user to repeat the city name, then retry with its English spelling.`;
 
   const n = Math.min(7, Math.max(1, Math.round(days)));
   const w = await json<{
@@ -39,7 +88,7 @@ export async function getWeather(place: string, days = 3): Promise<string> {
       `&timezone=auto&forecast_days=${n}`,
   );
 
-  const where = [p.name, p.admin1, p.country].filter(Boolean).join(", ");
+  const where = p.name;
   const c = w.current;
   const lines = [
     `Weather in ${where} right now: ${describe(c.weather_code)}, ${Math.round(c.temperature_2m)}°C (feels like ${Math.round(c.apparent_temperature)}°C), humidity ${c.relative_humidity_2m}%, wind ${Math.round(c.wind_speed_10m)} km/h.`,

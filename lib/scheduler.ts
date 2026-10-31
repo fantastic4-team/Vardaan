@@ -21,9 +21,31 @@ export async function callDueReminders() {
   }
 }
 
+/**
+ * Close calls whose end-of-call webhook never arrived (usually because the tunnel was down), so
+ * they don't sit at "ringing" forever and keep the agent looking busy.
+ */
+export async function expireStuckCalls() {
+  const t = Date.now();
+  await write((d) => {
+    for (const c of d.calls) {
+      const age = t - Date.parse(c.startedAt);
+      const stuckRinging = (c.status === "queued" || c.status === "ringing") && age > 10 * 60_000;
+      const stuckLive = c.status === "in-progress" && age > 60 * 60_000;
+      if (!stuckRinging && !stuckLive) continue;
+      c.status = c.turns.length > 1 ? "completed" : "failed";
+      c.endedAt ??= now();
+      c.error ??= "No call result from Sarvam. Is `npm run tunnel` running?";
+    }
+  });
+}
+
 export function startScheduler() {
   const g = globalThis as unknown as { __vardaanScheduler?: NodeJS.Timeout };
   if (g.__vardaanScheduler) return;
-  g.__vardaanScheduler = setInterval(() => void callDueReminders().catch(() => {}), EVERY_MS);
+  g.__vardaanScheduler = setInterval(() => {
+    void callDueReminders().catch(() => {});
+    void expireStuckCalls().catch(() => {});
+  }, EVERY_MS);
   void read(() => null); // warm the store
 }

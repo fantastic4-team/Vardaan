@@ -18,70 +18,40 @@ const tool = (name: string, description: string, properties: Record<string, unkn
   function: { name, description, parameters: { type: "object", properties, required } },
 });
 
+// Tool and prompt text is sent on every model call, so it's kept short: Groq's free tier limits
+// tokens per minute, and every word here costs tokens on each step of every call.
 const TOOLS = {
   web_search: tool(
     "web_search",
-    "Search the web for current information, resources, prices, news or any factual query. Use for research tasks, comparisons, finding resources, or any question that benefits from up-to-date information. Always cite the source URLs in your summary.",
-    {
-      query: { type: "string", description: "A clear, specific search query." },
-      limit: { type: "number", description: "Number of results to fetch (1-8). Default 5." },
-    },
+    "Search the web for current facts, news, prices or research. Cite source URLs in written answers.",
+    { query: { type: "string" }, limit: { type: "number", description: "1-8, default 3" } },
     ["query"],
   ),
-  save_memory: tool(
-    "save_memory",
-    "Remember a lasting fact or preference about the user (their name, city, family, preferred language, usual contacts). Do not store passwords or one-time codes.",
-    { fact: { type: "string", description: "One short sentence." } },
-    ["fact"],
-  ),
-  set_reminder: tool(
-    "set_reminder",
-    "Create a reminder for the user.",
-    {
-      title: { type: "string" },
-      due_at: { type: "string", description: "ISO 8601 date-time, if the user gave a time." },
-    },
-    ["title"],
-  ),
+  save_memory: tool("save_memory", "Remember a lasting fact about the user (never passwords or codes).", { fact: { type: "string" } }, ["fact"]),
+  set_reminder: tool("set_reminder", "Create a reminder.", { title: { type: "string" }, due_at: { type: "string", description: "ISO 8601" } }, ["title"]),
   draft_message: tool(
     "draft_message",
-    "Draft an email, SMS or WhatsApp message on the user's behalf. It is saved for the user to review and approve; nothing is sent until they do.",
+    "Draft an email, SMS or WhatsApp for the user to approve. Nothing is sent until they do.",
     {
       channel: { type: "string", enum: ["email", "sms", "whatsapp"] },
-      to: { type: "string", description: "Email address or phone number of the recipient." },
-      subject: { type: "string", description: "Email subject. Omit for SMS and WhatsApp." },
+      to: { type: "string", description: "Email or phone" },
+      subject: { type: "string", description: "Email only" },
       body: { type: "string" },
     },
     ["channel", "to", "body"],
   ),
-  update_plan: tool(
-    "update_plan",
-    "Record the step-by-step plan for the current task, shown to the user as progress.",
-    { steps: { type: "array", items: { type: "string" } } },
-    ["steps"],
-  ),
-  ask_user: tool(
-    "ask_user",
-    "Stop and ask the user for missing information or a decision. Use whenever guessing would be risky.",
-    { question: { type: "string" } },
-    ["question"],
-  ),
+  update_plan: tool("update_plan", "Record the task's step-by-step plan.", { steps: { type: "array", items: { type: "string" } } }, ["steps"]),
+  ask_user: tool("ask_user", "Ask the user for missing information or a decision instead of guessing.", { question: { type: "string" } }, ["question"]),
   start_task: tool(
     "start_task",
-    "During a call: hand a piece of work to the background (Call & Cut) so the user can hang up. Use it when the user asks you to do something that takes more than a quick answer, like drafting and sending a message or following something up. Describe the task fully, including every detail the user gave.",
-    { request: { type: "string", description: "The complete task, in the user's words plus any details from the call." } },
+    "On a call: hand longer work to the background so the user can hang up. Include every detail they gave.",
+    { request: { type: "string" } },
     ["request"],
   ),
   finish: tool(
     "finish",
-    "Finish the task with a short summary of what was done and what the user should do next.",
-    {
-      summary: { type: "string" },
-      call_user: {
-        type: "boolean",
-        description: "Set to true if the user asked to be called with the results, or if the task outcome warrants a call (e.g. research results ready, important decision support).",
-      },
-    },
+    "End the task with a short summary and next steps.",
+    { summary: { type: "string" }, call_user: { type: "boolean", description: "True if they asked for a call back or results are best explained by phone" } },
     ["summary"],
   ),
 };
@@ -89,37 +59,24 @@ const TOOLS = {
 async function context(userId: string) {
   const { user, memories, reminders } = await read((d) => ({
     user: d.users.find((u) => u.id === userId),
-    memories: d.memories.filter((m) => m.userId === userId).slice(-30),
-    reminders: d.reminders.filter((r) => r.userId === userId).slice(-10),
+    memories: d.memories.filter((m) => m.userId === userId).slice(-15),
+    // Only reminders still to come.
+    reminders: d.reminders.filter((r) => r.userId === userId && !r.calledAt).slice(-5),
   }));
-  return `You are Vardaan, a voice-first AI agent that gets everyday tasks done for people.
-
-The user is ${user?.name ?? "a user"} (${user?.email ?? "no email"}). Current time: ${new Date().toString()}.
-What you remember about them:
-${memories.length ? memories.map((m) => `- ${m.fact}`).join("\n") : "- nothing yet"}
-Their reminders:
-${reminders.length ? reminders.map((r) => `- ${r.title}${r.dueAt ? ` (${r.dueAt})` : ""}`).join("\n") : "- none"}
+  const now = new Date().toLocaleString("en-IN", { timeZone: process.env.APP_TIMEZONE || "Asia/Kolkata", dateStyle: "full", timeStyle: "short" });
+  return `You are Vardaan, a voice-first AI assistant that gets everyday tasks done.
+User: ${user?.name ?? "unknown"} (${user?.email ?? "-"}). Now: ${now}.
+Memory: ${memories.length ? memories.map((m) => m.fact).join("; ") : "none"}
+Reminders: ${reminders.length ? reminders.map((r) => `${r.title}${r.dueAt ? ` (${r.dueAt})` : ""}`).join("; ") : "none"}
 ${await appsSummary(userId)}
-
-How you work:
-- Reply in the language of the user's latest message: English if they spoke English, Hindi or Hinglish
-  if they did, and so on. Don't switch languages on your own.
-- Be warm, brief and practical. Plain sentences, no markdown, no lists unless asked.
-- You can: search the web for current information, check live weather, remember preferences, set reminders,
-  explain documents and bills, think through decisions, and draft emails, SMS and WhatsApp messages.
-  With Google connected you can also read their calendar, book events (Google emails the invites), and read their Gmail.
-- Before booking an event, confirm the title, day, time and guests with the user, and check for clashes.
-- When summarising emails or events aloud, give the few that matter, not a full list.
-  ${mailConfigured() ? "Approved emails are sent automatically." : "Email sending is not connected yet, so approved emails can be copied and sent by the user."}
-- For research tasks, always use web_search to get current, accurate information. Cite sources.
-- You cannot fill web forms, make payments or phone businesses yourself (calendar bookings are the exception). When a task needs that, do the most
-  useful part: draft the message, script or complaint, and list next steps.
-- Never invent facts like order numbers, addresses or phone numbers. Ask instead.
-- Never claim something was sent. Drafts wait for the user's approval.
-- On a call, keep replies to one or two short sentences: they are spoken aloud. When the user asks you to
-  do something that takes work, call start_task and tell them they can hang up and you'll call them back.
-- When finishing a background task, set call_user=true if the user asked to be called back, or if the
-  results are complex enough that a call would be more useful than a text.`;
+Rules:
+- Reply in the language of the user's latest message. Warm, brief, plain sentences, no markdown.
+- On a call, 1-2 short sentences (spoken aloud). For longer work use start_task and say you'll call back.
+- Use tools for live facts; never invent numbers, addresses or contacts: ask.
+- Book calendar events only after the user confirms title, time and guests; check clashes first.
+- Drafts wait for approval; never say something was sent.${mailConfigured() ? " Approved emails are sent automatically." : ""}
+- You can't fill forms, pay, or phone businesses: draft what's needed and give next steps.
+- Summarise emails and events: the few that matter, not everything.`;
 }
 
 function parseArgs(raw: string) {
@@ -131,6 +88,10 @@ function parseArgs(raw: string) {
 }
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+
+/** Cap a tool result before it goes back to the model (saves tokens on every later step). */
+const clip = (text: string, max = 1500) => (text.length > max ? `${text.slice(0, max)}
+…(trimmed)` : text);
 
 async function saveMemory(userId: string, fact: string) {
   if (!fact) return "No fact given.";
@@ -163,7 +124,7 @@ function makeDraft(args: Record<string, unknown>): Draft | null {
 export type TalkTurn = { role: "user" | "assistant"; content: string };
 
 export async function talk(userId: string, history: TalkTurn[]) {
-  const messages: ChatMessage[] = [{ role: "system", content: await context(userId) }, ...history.slice(-20)];
+  const messages: ChatMessage[] = [{ role: "system", content: await context(userId) }, ...history.slice(-10)];
   const tools = [TOOLS.web_search, TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message, TOOLS.start_task, ...(await appTools(userId))];
   let createdTaskId: string | undefined;
   // Tasks started during the call; the route runs them in the background after responding.
@@ -183,7 +144,7 @@ export async function talk(userId: string, history: TalkTurn[]) {
         result = appResult;
       } else if (call.function.name === "web_search") {
         const query = str(args.query);
-        const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 5;
+        const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 3;
         if (!query) {
           result = "A search query is required.";
         } else {
@@ -231,7 +192,7 @@ export async function talk(userId: string, history: TalkTurn[]) {
         }
       }
 
-      messages.push({ role: "tool", tool_call_id: call.id, content: result });
+      messages.push({ role: "tool", tool_call_id: call.id, content: clip(result) });
     }
   }
   return { reply: "I've noted that. Is there anything else?", taskId: createdTaskId, startedTaskIds };
@@ -294,7 +255,7 @@ export async function runTask(taskId: string) {
         switch (call.function.name) {
           case "web_search": {
             const query = str(args.query);
-            const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 5;
+            const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 3;
             if (!query) {
               result = "A search query is required.";
             } else {
@@ -336,7 +297,7 @@ export async function runTask(taskId: string) {
             return;
           }
         }
-        messages.push({ role: "tool", tool_call_id: call.id, content: result });
+        messages.push({ role: "tool", tool_call_id: call.id, content: clip(result) });
       }
     }
     await finishTask(taskId, "I've done what I can on this. Review the details below.", false);

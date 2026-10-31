@@ -10,39 +10,35 @@ const tool = (name: string, description: string, properties: Record<string, unkn
   function: { name, description, parameters: { type: "object", properties, required } },
 });
 
+// Kept short on purpose: these descriptions are sent with every model call.
 const WEATHER = tool(
   "get_weather",
-  "Get live weather and a forecast for a city. Use for any question about weather, rain, temperature, or what to wear or carry.",
-  {
-    place: { type: "string", description: "City or place, e.g. Bengaluru or Connaught Place, Delhi." },
-    days: { type: "number", description: "Forecast days, 1-7. Default 3." },
-  },
+  "Live weather and forecast for a city.",
+  { place: { type: "string" }, days: { type: "number", description: "1-7, default 2" } },
   ["place"],
 );
 
 const CALENDAR = [
   tool(
     "list_calendar_events",
-    `Read the user's Google Calendar: what's on today, tomorrow, this week, or whether they are free at a time. Times are in ${TIME_ZONE}.`,
+    `The user's Google Calendar events in a time range (also to check if they're free). Times in ${TIME_ZONE}.`,
     {
-      from: { type: "string", description: "ISO 8601 start, e.g. 2026-11-02T00:00:00. Default: start of today." },
-      to: { type: "string", description: "ISO 8601 end. Default: 24 hours after from." },
-      query: { type: "string", description: "Optional text to match, e.g. a person or meeting name." },
+      from: { type: "string", description: "ISO 8601, default start of today" },
+      to: { type: "string", description: "ISO 8601, default from + 24h" },
+      query: { type: "string" },
     },
     [],
   ),
   tool(
     "create_calendar_event",
-    `Book an event in the user's Google Calendar. Google emails invites to any guests. Only call this after the user has confirmed the title, date, time and guests; on a call, read them back and get a yes first. Check list_calendar_events for clashes first. Times are in ${TIME_ZONE}.`,
+    "Book a Google Calendar event; Google emails invites to guests. Only after the user confirms the details.",
     {
       title: { type: "string" },
-      start: { type: "string", description: "ISO 8601 start, e.g. 2026-11-02T16:00:00." },
-      end: { type: "string", description: "ISO 8601 end. Omit to use duration_minutes." },
-      duration_minutes: { type: "number", description: "Default 30." },
-      attendees: { type: "array", items: { type: "string" }, description: "Guest email addresses. Never guess an address: ask." },
-      description: { type: "string" },
+      start: { type: "string", description: "ISO 8601" },
+      duration_minutes: { type: "number", description: "default 30" },
+      attendees: { type: "array", items: { type: "string" }, description: "emails; never guess" },
       location: { type: "string" },
-      google_meet: { type: "boolean", description: "Add a Google Meet video link." },
+      google_meet: { type: "boolean" },
     },
     ["title", "start"],
   ),
@@ -51,14 +47,11 @@ const CALENDAR = [
 const GMAIL = [
   tool(
     "search_emails",
-    "Search the user's Gmail (read-only). Uses Gmail search syntax, e.g. 'is:unread', 'from:professor newer_than:7d', 'subject:invoice'. Returns sender, subject, date and a preview with each email's id.",
-    {
-      query: { type: "string", description: "Gmail search query. Default: in:inbox." },
-      max: { type: "number", description: "How many, 1-10. Default 5." },
-    },
+    "Search the user's Gmail (read-only) with Gmail syntax, e.g. is:unread newer_than:1d, from:amazon.",
+    { query: { type: "string" }, max: { type: "number", description: "1-10, default 5" } },
     [],
   ),
-  tool("read_email", "Read the full text of one email found with search_emails.", { id: { type: "string" } }, ["id"]),
+  tool("read_email", "Read one email's text by id from search_emails.", { id: { type: "string" } }, ["id"]),
 ];
 
 /** The app tools available to this user right now. */
@@ -72,8 +65,8 @@ export async function appTools(userId: string): Promise<ToolSpec[]> {
 export async function appsSummary(userId: string) {
   const link = googleConfigured() ? await googleLinkFor(userId) : null;
   return link
-    ? `Connected apps: Google Calendar and Gmail (${link.email}). Use them for schedules, bookings and email questions.`
-    : "Connected apps: none besides live weather. If asked about their calendar or email, tell them to connect Google in Vardaan's Settings.";
+    ? `Apps: weather, Google Calendar and Gmail (${link.email}).`
+    : "Apps: weather only. For calendar or email, ask them to connect Google in Settings.";
 }
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -84,7 +77,7 @@ export async function runAppTool(userId: string, name: string, args: Record<stri
   try {
     switch (name) {
       case "get_weather":
-        return await getWeather(str(args.place), num(args.days) ?? 3);
+        return await getWeather(str(args.place), num(args.days) ?? 2);
       case "list_calendar_events":
         return await listEvents(userId, { from: str(args.from) || undefined, to: str(args.to) || undefined, query: str(args.query) || undefined });
       case "create_calendar_event":
