@@ -606,3 +606,50 @@ body {
   .chat-in { transition: none; }
   .typing-dot, .live-dot, .art-drift { animation: none; }
 }
+
+/* ---------- Dashboard: notification panel and the Sand theme ---------- */
+
+.drawer-panel {
+  background: #181716;
+}
+
+/* Sand: a warm light theme for the dashboard. Every white/black tint in the dashboard is built
+   from --color-white and --color-black, so swapping them for warm browns turns the faint white
+   lines and fills into faint brown ones. The few fixed colours are remapped below. */
+.theme-skin {
+  --color-page: #f1e3d3;
+  --color-ink: #2b1e14;
+  --color-mute: #8a7461;
+  --color-white: #5b3b22;
+  --color-black: #6b4a2e;
+  color-scheme: light;
+}
+
+.theme-skin .drawer-panel { background: #f7ece0; }
+.theme-skin .nav-grid { border-color: rgba(91, 59, 34, 0.25); }
+.theme-skin .app-panel {
+  border-color: rgba(91, 59, 34, 0.14);
+  background: rgba(255, 250, 244, 0.55);
+}
+.theme-skin .auth-input {
+  border-color: rgba(91, 59, 34, 0.18);
+  background: #fbf4ec;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.theme-skin .call-hero {
+  background:
+    radial-gradient(70% 160% at 100% 0%, rgba(90, 99, 228, 0.1) 0%, rgba(90, 99, 228, 0) 60%),
+    rgba(255, 250, 244, 0.6);
+}
+
+.theme-skin .bg-\[\#1d1c1a\],
+.theme-skin .bg-\[\#1c1b1a\],
+.theme-skin .bg-\[\#1f1e1c\] { background-color: #f9f0e6; }
+.theme-skin .ring-\[\#1a1918\] { --tw-ring-color: #f1e3d3; }
+.theme-skin .text-\[\#141312\] { color: #f9f0e6; }
+.theme-skin .text-\[\#c9e877\] { color: #4a7419; }
+.theme-skin .text-\[\#ffb4a8\] { color: #b0412b; }
+.theme-skin .text-\[\#b9e0ff\] { color: #2a64a0; }
+.theme-skin .text-\[\#f6e27a\] { color: #8d6408; }
+.theme-skin .text-\[\#c7b8ff\] { color: #5641b3; }
+.theme-skin .text-\[\#c9e877\]\/80 { color: #4a7419; }

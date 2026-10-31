@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import TaskCard, { STATUS, canCancel, inProgress, needsYou } from "@/components/dashboard/TaskCard";
 import { api } from "@/components/dashboard/api";
 import Integrations from "@/components/dashboard/Integrations";
+import Notifications, { Bell, type Notice } from "@/components/dashboard/Notifications";
 import Icon from "@/components/docs/Icon";
 import type { IconName } from "@/lib/docs-content";
 import type { CallLog, Memory, MessageLog, Reminder, Task } from "@/lib/db";
@@ -73,6 +74,22 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
   const [status, setStatus] = useState<Status | null>(null);
   const [toast, setToast] = useState("");
   const [agentStatus, setAgentStatus] = useState<AgentStatus | null>(null);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  // The colour theme is a per-browser preference.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("vardaan-theme") === "skin") setTheme("skin");
+    } catch {}
+  }, []);
+
+  function changeTheme(t: Theme) {
+    setTheme(t);
+    try {
+      localStorage.setItem("vardaan-theme", t);
+    } catch {}
+  }
 
   const refresh = useCallback(async () => {
     try {
@@ -146,8 +163,52 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
   const needs = data.tasks.filter(needsYou).length;
   const badge: Partial<Record<View, number>> = { tasks: needs, calls: data.calls.filter(live).length };
 
+  const dayAgo = new Date(Date.now() - 24 * 3600_000).toISOString();
+  const notices: Notice[] = [
+    ...data.tasks.filter(needsYou).map((t) => ({
+      id: t.id,
+      group: "Needs you" as const,
+      title: t.request,
+      detail: t.status === "needs_approval" ? "A draft is ready for you to approve." : t.question,
+      at: t.updatedAt,
+      tone: "amber" as const,
+      onOpen: () => setView("tasks"),
+    })),
+    ...(status && !status.ai
+      ? [{ id: "setup-ai", group: "Setup" as const, title: "Connect an AI model", detail: "Vardaan needs one to plan and talk.", tone: "rose" as const, onOpen: () => setView("integrations") }]
+      : []),
+    ...(status && !(status.phone && profile.phone)
+      ? [
+          {
+            id: "setup-phone",
+            group: "Setup" as const,
+            title: "Set up calling",
+            detail: profile.phone ? "Connect a Sarvam phone line." : "Add your phone number.",
+            tone: "rose" as const,
+            onOpen: () => setView(profile.phone ? "integrations" : "settings"),
+          },
+        ]
+      : []),
+    ...data.tasks
+      .filter((t) => t.status === "done" && t.updatedAt > dayAgo)
+      .map((t) => ({ id: `done-${t.id}`, group: "Recent" as const, title: t.request, detail: t.summary, at: t.updatedAt, tone: "leaf" as const, onOpen: () => setView("tasks") })),
+    ...data.calls
+      .filter((c) => c.status === "completed" && (c.endedAt ?? c.startedAt) > dayAgo)
+      .map((c) => ({
+        id: `call-${c.id}`,
+        group: "Recent" as const,
+        title: c.direction === "inbound" ? "You called Vardaan" : "Vardaan called you",
+        detail: c.reason === "Call me" ? undefined : c.reason,
+        at: c.endedAt ?? c.startedAt,
+        tone: "sky" as const,
+        onOpen: () => setView("calls"),
+      })),
+  ];
+  const unread = notices.filter((n) => n.group !== "Recent").length;
+
   return (
-    <div className="min-h-svh lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+    <div className={`min-h-svh bg-page text-ink lg:grid lg:grid-cols-[248px_minmax(0,1fr)] ${theme === "skin" ? "theme-skin" : ""}`}>
+      <Notifications open={notifOpen} items={notices} onClose={() => setNotifOpen(false)} />
       <aside className="nav-grid sticky top-0 hidden h-svh flex-col border-r px-4 py-6 lg:flex">
         <Link href="/" className="flex items-center gap-2.5 px-3">
           <span className="font-poster text-[19px] font-semibold uppercase tracking-[0.02em] text-ink">Vardaan</span>
@@ -187,6 +248,7 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
             <span className="beta-glass">Beta</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Bell count={unread} onClick={() => setNotifOpen(true)} />
             <button onClick={callMe} className="waitlist-button flex h-8 cursor-pointer items-center rounded-[8px] px-3 text-[12px]">
               Call me
             </button>
@@ -215,9 +277,9 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
             Dashboard <span className="px-1.5 text-ink/25">/</span>
             <span className="text-ink/85">{NAV.find((n) => n.id === view)?.label}</span>
           </p>
-          <div className="flex items-center gap-2 text-[12px]">
-            <StatusChip ok={Boolean(status?.ai)} label={status?.ai ? "AI connected" : "AI not set"} />
-            <StatusChip ok={Boolean(status?.phone && profile.phone)} label={status?.phone && profile.phone ? "Phone ready" : "Phone not set"} />
+          <div className="flex items-center gap-2.5">
+            <ThemeSwitch theme={theme} onChange={changeTheme} />
+            <Bell count={unread} onClick={() => setNotifOpen(true)} />
           </div>
         </div>
         <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-6 sm:px-8 lg:px-12 lg:pt-10">
@@ -410,6 +472,30 @@ const NavIcon = ({ name, className }: { name: View | "logout"; className?: strin
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
     {NAV_ICONS[name]}
   </svg>
+);
+
+type Theme = "dark" | "skin";
+
+const THEMES: { id: Theme; label: string; swatch: string }[] = [
+  { id: "dark", label: "Dark", swatch: "bg-[#141312]" },
+  { id: "skin", label: "Sand", swatch: "bg-[#f2e3d3]" },
+];
+
+const ThemeSwitch = ({ theme, onChange }: { theme: Theme; onChange: (t: Theme) => void }) => (
+  <div role="radiogroup" aria-label="Colour theme" className="flex h-9 items-center gap-0.5 rounded-[10px] border border-white/[0.09] bg-white/[0.03] p-1">
+    {THEMES.map((t) => (
+      <button
+        key={t.id}
+        role="radio"
+        aria-checked={theme === t.id}
+        onClick={() => onChange(t.id)}
+        className={`flex h-7 cursor-pointer items-center gap-2 rounded-[7px] px-2.5 text-[12px] transition ${theme === t.id ? "bg-white/[0.09] text-ink" : "text-ink/50 hover:text-ink"}`}
+      >
+        <span className={`h-3 w-3 rounded-full ring-1 ring-black/20 ${t.swatch}`} />
+        {t.label}
+      </button>
+    ))}
+  </div>
 );
 
 const StatusChip = ({ ok, label }: { ok: boolean; label: string }) => (
