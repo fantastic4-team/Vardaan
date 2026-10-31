@@ -25,56 +25,65 @@ function Glyph({ children, className = "h-4 w-4" }: { children: React.ReactNode;
   );
 }
 
-const CARDS = [
-  {
-    tile: "tile-amber",
-    title: "Reminder set",
-    sub: "Call Maa · Sun, 7:00 pm",
-    icon: (
-      <>
-        <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5z" />
-        <path d="M10 19a2.2 2.2 0 0 0 4 0" />
-      </>
-    ),
-  },
-  {
-    tile: "tile-rose",
-    title: "Email drafted",
-    sub: "Waiting for your OK",
-    icon: (
-      <>
-        <rect x="3" y="5" width="18" height="14" rx="2.5" />
-        <path d="m4 7 8 6 8-6" />
-      </>
-    ),
-  },
-  {
-    tile: "tile-leaf",
-    title: "Researching",
-    sub: "Calls you back when done",
-    icon: (
-      <>
-        <circle cx="10.5" cy="10.5" r="6.5" />
-        <path d="m20 20-4.8-4.8" />
-      </>
-    ),
-  },
+const ICONS = {
+  bell: (
+    <>
+      <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5z" />
+      <path d="M10 19a2.2 2.2 0 0 0 4 0" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m4 7 8 6 8-6" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m20 20-4.8-4.8" />
+    </>
+  ),
+  phone: (
+    <path d="M21 16.4v2.7a1.9 1.9 0 0 1-2.1 1.9 18.8 18.8 0 0 1-8.2-2.9 18.5 18.5 0 0 1-5.7-5.7A18.8 18.8 0 0 1 2.1 4.1 1.9 1.9 0 0 1 4 2h2.7a1.9 1.9 0 0 1 1.9 1.6c.1.9.4 1.8.7 2.7a1.9 1.9 0 0 1-.4 2L7.7 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.1a1.9 1.9 0 0 1 2-.4c.9.3 1.8.6 2.7.7a1.9 1.9 0 0 1 1.8 2.1z" />
+  ),
+  check: <path d="m5.5 12.5 4 4 9-9.5" />,
+};
+
+type Card = { tile: string; icon: React.ReactNode; title: string; sub: string };
+
+// For each scene: the result (top left) and what happens next (bottom right).
+const CARDS: [Card, Card][] = [
+  [
+    { tile: "tile-amber", icon: ICONS.bell, title: "Reminder set", sub: "Call Maa · Sun 7 pm" },
+    { tile: "tile-sky", icon: ICONS.phone, title: "Call scheduled", sub: "I'll ring you Sunday" },
+  ],
+  [
+    { tile: "tile-rose", icon: ICONS.mail, title: "Email drafted", sub: "To Mr Sen" },
+    { tile: "tile-violet", icon: ICONS.check, title: "Needs your OK", sub: "Approve before sending" },
+  ],
+  [
+    { tile: "tile-leaf", icon: ICONS.search, title: "Researching", sub: "Phones under ₹15k" },
+    { tile: "tile-sky", icon: ICONS.phone, title: "Call back", sub: "When picks are ready" },
+  ],
 ];
 
-function ResultCard({ index, side, leaving }: { index: number; side: "left" | "right"; leaving: boolean }) {
-  const c = CARDS[index];
+// A card floating beside the phone: a glossy icon, a bold title and a short line. Solid white, in
+// a fixed spot clear of the phone: top left beside its top corner, bottom right beside the hand.
+function ResultCard({ card, spot, leaving, delay }: { card: Card; spot: string; leaving: boolean; delay: number }) {
   return (
     <div
-      className={`hero-card-in absolute hidden items-center gap-3 rounded-[16px] border border-white/80 bg-white/85 py-2.5 pl-2.5 pr-4 shadow-[0_20px_44px_-18px_rgba(30,50,110,0.45)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
+      style={{ animationDelay: `${delay}ms` }}
+      className={`hero-card-in absolute hidden w-[196px] items-center gap-3 rounded-[16px] border border-[#e7ebf3] bg-white py-3 pl-3 pr-3.5 shadow-[0_22px_44px_-18px_rgba(30,50,110,0.4),0_2px_5px_rgba(30,50,110,0.06)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
         leaving ? "translate-y-1 opacity-0" : ""
-      } ${side === "left" ? "-left-[6%] top-[10%]" : "-right-[6%] top-[24%]"}`}
+      } ${spot}`}
     >
-      <span className={`glass-tile nav-tile ${c.tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]`}>
-        <Glyph>{c.icon}</Glyph>
+      <span className={`glass-tile nav-tile ${card.tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px]`}>
+        <Glyph className="h-[17px] w-[17px]">{card.icon}</Glyph>
       </span>
       <span className="min-w-0">
-        <span className="block whitespace-nowrap text-[12.5px] font-medium text-[#1b2140]">{c.title}</span>
-        <span className="block whitespace-nowrap text-[11px] text-[#5b6383]">{c.sub}</span>
+        <span className="block text-[13px] font-semibold leading-[17px] text-[#121833]">{card.title}</span>
+        <span className="mt-0.5 block whitespace-nowrap text-[11.5px] leading-[15px] text-[#6b7287]">{card.sub}</span>
       </span>
     </div>
   );
@@ -110,7 +119,7 @@ export default function HeroPhone() {
       at(300, () => setCaption({ key: ++key, who: "You", text: line.ask }));
       at(2100, () => setSpeaking(true));
       at(2600, () => setCaption({ key: ++key, who: "Vardaan", text: line.reply }));
-      at(3000, () => setCard({ key, index: line.card }));
+      at(2650, () => setCard({ key, index: line.card }));
       at(5200, () => setSpeaking(false));
       at(SCENE_MS - 600, () => setLeaving(true));
       at(SCENE_MS, () => play(i + 1));
@@ -141,11 +150,6 @@ export default function HeroPhone() {
                 <rect x="4.6" y="5" width="3" height="6" rx="0.8" />
                 <rect x="9.2" y="2.6" width="3" height="8.4" rx="0.8" />
                 <rect x="13.8" y="0" width="3" height="11" rx="0.8" />
-              </svg>
-              <svg viewBox="0 0 16 11.5" aria-hidden className="h-[10px] w-[14px] fill-current">
-                <path d="M8 2.3c2.3 0 4.4.9 6 2.4l1.3-1.3A10.3 10.3 0 0 0 8 .4 10.3 10.3 0 0 0 .7 3.4L2 4.7a8.5 8.5 0 0 1 6-2.4z" />
-                <path d="M8 5.6c1.4 0 2.6.5 3.6 1.4l1.3-1.3A7 7 0 0 0 8 3.7a7 7 0 0 0-4.9 2l1.3 1.3c1-.9 2.2-1.4 3.6-1.4z" />
-                <path d="M8 8.8c.6 0 1.1.2 1.5.6L8 11 6.5 9.4c.4-.4.9-.6 1.5-.6z" />
               </svg>
               <span className="relative flex h-[11px] w-[23px] items-center rounded-[3.5px] border border-current/40 p-[1.5px]">
                 <span className="h-full w-[78%] rounded-[2px] bg-current" />
@@ -194,8 +198,13 @@ export default function HeroPhone() {
         {/* The hand and phone, on top: the screen is transparent, so the call shows through. */}
         <Image src="/images/hero-hand.png" alt="" width={1121} height={1403} priority className="hand-photo absolute inset-0 h-full w-full select-none" />
 
-        {/* The result of the latest request, alternating sides. */}
-        {card && <ResultCard key={card.key} index={card.index} side={card.index % 2 ? "right" : "left"} leaving={leaving} />}
+        {/* What the latest request did, top left, and what happens next, bottom right. */}
+        {card && (
+          <>
+            <ResultCard key={`a${card.key}`} card={CARDS[card.index][0]} spot="-left-[70px] top-[6%]" leaving={leaving} delay={0} />
+            <ResultCard key={`b${card.key}`} card={CARDS[card.index][1]} spot="left-[426px] top-[68%]" leaving={leaving} delay={110} />
+          </>
+        )}
       </div>
     </div>
   );
