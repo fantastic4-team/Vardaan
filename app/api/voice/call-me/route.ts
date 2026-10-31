@@ -2,8 +2,7 @@ import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { read, write } from "@/lib/db";
-import { startCall } from "@/lib/phone";
-import { normalisePhone } from "@/lib/twilio";
+import { normalisePhone, startCall } from "@/lib/phone";
 
 // "Call me": Vardaan rings the user's phone. Triggered from the dashboard (logged-in user), or from
 // the `npm run phone` terminal, which proves itself with a random token it set for this server only.

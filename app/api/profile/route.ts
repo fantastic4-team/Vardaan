@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { read, write } from "@/lib/db";
-import { PHONE_LANGUAGES, normalisePhone } from "@/lib/twilio";
+import { normalisePhone } from "@/lib/phone";
+import { PHONE_LANGUAGES } from "@/lib/sarvam-calls";
 
 export async function GET() {
   const user = await getCurrentUser();

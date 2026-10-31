@@ -26,7 +26,8 @@ export function provider(): Provider | null {
     return {
       baseUrl: "https://api.groq.com/openai/v1",
       apiKey: env.GROQ_API_KEY,
-      model: env.LLM_MODEL || "llama-3.3-70b-versatile",
+      // llama-3.3-70b-versatile was retired by Groq; gpt-oss-120b supports tool calling well.
+      model: env.LLM_MODEL || "openai/gpt-oss-120b",
       name: "Groq",
     };
   }
@@ -47,24 +48,46 @@ export class LLMNotConfigured extends Error {
   }
 }
 
+/**
+ * Models to try in order. Groq's free tier limits tokens per minute *per model*, so when one is
+ * rate-limited (or retired) we move to the next instead of failing the call. Override with
+ * LLM_FALLBACK_MODELS (comma-separated).
+ */
+function modelChain(p: Provider) {
+  const extra = process.env.LLM_FALLBACK_MODELS?.split(",").map((m) => m.trim()).filter(Boolean)
+    ?? (p.name === "Groq" ? ["qwen/qwen3.8-27b", "openai/gpt-oss-20b"] : []);
+  return [...new Set([p.model, ...extra])];
+}
+
+const retryable = (status: number) => status === 429 || status === 404 || status === 400 || status >= 500;
+
 export async function chat(messages: ChatMessage[], tools: ToolSpec[]) {
   const p = provider();
   if (!p) throw new LLMNotConfigured();
 
-  const res = await fetch(`${p.baseUrl.replace(/\/$/, "")}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(p.apiKey ? { Authorization: `Bearer ${p.apiKey}` } : {}),
-    },
-    body: JSON.stringify({ model: p.model, messages, tools, tool_choice: "auto", temperature: 0.3 }),
-  });
+  let lastError = "";
+  let data: { choices?: { message?: Record<string, unknown> }[] } | null = null;
+  for (const model of modelChain(p)) {
+    const res = await fetch(`${p.baseUrl.replace(/\/$/, "")}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(p.apiKey ? { Authorization: `Bearer ${p.apiKey}` } : {}),
+      },
+      body: JSON.stringify({ model, messages, tools, tool_choice: "auto", temperature: 0.3 }),
+      signal: AbortSignal.timeout(20_000),
+    }).catch((err: Error) => ({ ok: false, status: 599, text: async () => err.message }) as unknown as Response);
 
-  if (!res.ok) {
+    if (res.ok) {
+      data = await res.json();
+      break;
+    }
     const text = await res.text().catch(() => "");
-    throw new Error(`${p.name} request failed (${res.status}): ${text.slice(0, 300)}`);
+    lastError = `${p.name} request failed (${res.status}) on ${model}: ${text.slice(0, 300)}`;
+    if (!retryable(res.status)) break;
+    console.warn(`LLM ${model} unavailable (${res.status}); trying the next model.`);
   }
-  const data = await res.json();
+  if (!data) throw new Error(lastError || `${p.name} request failed.`);
   const message = data?.choices?.[0]?.message;
   if (!message) throw new Error(`${p.name} returned no message.`);
   return {

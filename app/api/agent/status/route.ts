@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { read } from "@/lib/db";
 import { provider } from "@/lib/llm";
-import { twilioConfigured } from "@/lib/twilio";
+import { sarvamCallsConfigured } from "@/lib/sarvam-calls";
 
 // GET /api/agent/status — the agent's current disposition for the signed-in user.
 // Returns whether the agent is idle, actively working on tasks, or on a call.
@@ -36,7 +36,7 @@ export async function GET() {
   return NextResponse.json({
     status: agentStatus,
     ai: provider()?.name ?? null,
-    phone: twilioConfigured(),
+    phone: sarvamCallsConfigured(),
     activeTasks: activeTasks.length,
     activeCalls: activeCalls.length,
   });

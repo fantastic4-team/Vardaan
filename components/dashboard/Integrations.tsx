@@ -8,10 +8,11 @@ import { useState } from "react";
 export type IntegrationStatus = {
   ai: string | null;
   phone: boolean;
-  twilioNumber: string | null;
+  phoneNumber: string | null;
   publicUrl: boolean;
   email: boolean;
   search?: string;
+  google?: { configured: boolean; connected: boolean; email: string | null };
 };
 
 type State = "connected" | "available" | "soon";
@@ -56,6 +57,12 @@ const ICONS = {
       <path d="M9.2 8.6c.2-.5.5-.6.8-.6h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .5-.1.6l-.5.6c.6 1.1 1.5 2 2.6 2.6l.6-.5c.2-.1.4-.2.6-.1l1.6.7c.3.1.4.3.4.5v.5c0 .3-.1.6-.6.8-.6.3-1.6.4-3.2-.4a8.4 8.4 0 0 1-3.6-3.6c-.8-1.6-.7-2.6-.3-3.1z" />
     </>
   ),
+  weather: (
+    <>
+      <path d="M7.5 18.5h9.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.4A3.3 3.3 0 0 0 7.5 18.5z" />
+      <path d="M12 2.5v1.5M5.4 5.4l1 1M2.5 12H4" />
+    </>
+  ),
   calendar: (
     <>
       <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
@@ -80,29 +87,28 @@ function build(s: IntegrationStatus | null): Integration[] {
     {
       id: "phone",
       name: "Phone calls",
-      body: "Vardaan rings your phone, and answers when you call it. Powered by Twilio.",
+      body: "Vardaan rings your phone, and answers when you call it, in Indian languages and Hinglish. Powered by Sarvam AI.",
       tile: "tile-leaf",
       icon: ICONS.phone,
       state: s?.phone ? "connected" : "available",
-      detail: s?.twilioNumber ? `Calling from ${s.twilioNumber}` : undefined,
+      detail: s?.phoneNumber ? `Calling from ${s.phoneNumber}` : undefined,
       setup: {
         steps: [
-          "Start a free Twilio trial and verify your mobile number",
-          "Get a Twilio phone number and enable your country in Voice geo permissions",
-          "Run npm run phone: it asks for the keys and connects everything",
+          "Add wallet credit in the Sarvam dashboard, complete KYC and rent a number",
+          "Create the Vardaan voice agent with the ask_vardaan tool (docs/SARVAM_SETUP.md)",
+          "Run npm run tunnel and npm run dev, then press Call me",
         ],
-        env: ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_PHONE_NUMBER"],
+        env: ["SARVAM_AGENT_API_KEY", "SARVAM_ORG_ID", "SARVAM_WORKSPACE_ID", "SARVAM_APP_ID", "SARVAM_CONNECTION_ID", "SARVAM_PHONE_NUMBER", "PUBLIC_URL"],
       },
     },
     {
-      id: "sms",
-      name: "Text messages",
-      body: "Questions, results and approvals by SMS. Reply to answer, or YES to approve.",
+      id: "weather",
+      name: "Live weather",
+      body: "Current conditions and forecasts for any city, on calls and in your briefings.",
       tile: "tile-teal",
-      icon: ICONS.sms,
-      state: s?.phone ? "connected" : "available",
-      detail: s?.phone ? "Uses your Twilio number" : undefined,
-      setup: { steps: ["Comes with the phone calls integration: set up Twilio and texts work too"] },
+      icon: ICONS.weather,
+      state: "connected",
+      detail: "Using Open-Meteo (free, no key)",
     },
     {
       id: "email",
@@ -138,9 +144,32 @@ function build(s: IntegrationStatus | null): Integration[] {
     {
       id: "calendar",
       name: "Google Calendar",
-      body: "Reminders and appointments straight from your calendar, with a call before each one.",
+      body: "Ask what's on your day, check if you're free, and book meetings. Google emails the invites.",
       tile: "tile-amber",
       icon: ICONS.calendar,
+      state: s?.google?.connected ? "connected" : "available",
+      detail: s?.google?.connected ? `Connected as ${s.google.email}` : undefined,
+      setup: {
+        steps: ["Create a Google OAuth client (docs/GOOGLE_SETUP.md) and add the keys to .env.local", "Open Settings and press Connect Google"],
+        env: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+      },
+    },
+    {
+      id: "gmail",
+      name: "Gmail",
+      body: "\"Any unread emails from my professor?\" Vardaan reads your inbox aloud. Read-only: it never sends or deletes.",
+      tile: "tile-rose",
+      icon: ICONS.mail,
+      state: s?.google?.connected ? "connected" : "available",
+      detail: s?.google?.connected ? `Connected as ${s.google.email}` : undefined,
+      setup: { steps: ["Comes with the Google Calendar connection: connect Google once in Settings"] },
+    },
+    {
+      id: "sms",
+      name: "Text messages",
+      body: "Questions, results and approvals by SMS. Sarvam has no SMS yet, so updates show on your dashboard and by email.",
+      tile: "tile-teal",
+      icon: ICONS.sms,
       state: "soon",
     },
   ];
@@ -162,7 +191,7 @@ export default function Integrations({ status }: { status: IntegrationStatus | n
       <div className="mb-8">
         <h1 className="text-[clamp(26px,3vw,32px)] font-medium leading-[1.15] tracking-[-0.02em] text-ink">Integrations</h1>
         <p className="mt-2 max-w-[640px] text-[14px] leading-[22px] text-ink/55">
-          The services Vardaan uses to call, text, think and search. {connected} of {items.filter((i) => i.state !== "soon").length} connected.
+          The services Vardaan uses to call, think, search and get things done. {connected} of {items.filter((i) => i.state !== "soon").length} connected.
         </p>
       </div>
 

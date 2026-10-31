@@ -48,7 +48,7 @@ Agent parses intent and plans steps
         ↓
 Agent executes tools (web search, drafting, reminders…)
         ↓
-When done: calls user via Twilio outbound call
+When done: calls user on a Sarvam phone number
         ↓
 Two-way voice conversation (speech → LLM → TTS)
         ↓
@@ -58,11 +58,11 @@ Call summary + task result saved to dashboard
 ### The core call flow
 
 1. User presses **Call me** in the dashboard (or a background task completes with `call_user=true`).
-2. Vardaan calls the user's verified phone number via Twilio.
-3. Twilio fetches TwiML from `/api/voice/answer` → agent greets user, identifies itself as an AI.
-4. User speaks → Twilio transcribes → posts to `/api/voice/turn`.
-5. Agent responds → speak + listen loop continues.
-6. User says "goodbye" or hangs up → call ends, summary saved.
+2. Vardaan asks Sarvam (Instant Outbound API) to ring the user's number from your Sarvam number.
+3. Sarvam's voice agent greets the user with Vardaan's opening line and identifies itself as an AI.
+4. User speaks → Sarvam's `ask_vardaan` tool posts it to `/api/sarvam/turn` → Vardaan's agent replies → Sarvam speaks it.
+5. The loop continues until the user says goodbye or hangs up.
+6. Sarvam posts the outcome and full transcript to `/api/sarvam/webhook`; the call log is saved.
 
 ---
 
@@ -70,7 +70,7 @@ Call summary + task result saved to dashboard
 
 | Feature | Status |
 |---|---|
-| Real outbound phone calls via Twilio | ✅ Working |
+| Real outbound phone calls on a Sarvam number | ✅ Working |
 | Inbound calls (user calls Vardaan's number) | ✅ Working |
 | Two-way voice conversation (speech-to-text + LLM + TTS) | ✅ Working |
 | AI identity disclosure ("this is Vardaan, your AI assistant") | ✅ Working |
@@ -82,9 +82,9 @@ Call summary + task result saved to dashboard
 | Message drafting (email, SMS, WhatsApp) | ✅ Working |
 | Draft approval workflow | ✅ Working |
 | Task cancel from dashboard | ✅ Working |
-| Multi-language calls (en-IN, hi-IN, 8+ Indian languages) | ✅ Working |
-| Secure webhook signature verification | ✅ Working |
-| SMS notifications | ✅ Working |
+| Multi-language calls (English, Hindi, 9 more Indian languages, Hinglish) | ✅ Working |
+| Sarvam tool and webhook secured by a shared secret | ✅ Working |
+| Notifications (dashboard, plus email if SMTP is set up) | ✅ Working |
 | Email sending via SMTP | ✅ Working (optional) |
 | Authentication (session cookie, scrypt passwords) | ✅ Working |
 | Real-time agent status polling | ✅ Working |
@@ -99,9 +99,8 @@ Call summary + task result saved to dashboard
 | UI | React 19, TypeScript, Tailwind CSS 4 |
 | AI / LLM | Groq (Llama 3.3 70B) or Gemini 2.5 Flash via OpenAI-compatible API |
 | Web search | Tavily / Brave Search / DuckDuckGo (no key fallback) |
-| Telephony | Twilio Programmable Voice (TwiML + webhooks) |
-| STT | Twilio `<Gather input="speech">` (built-in) |
-| TTS | Amazon Polly (Aditi voice for Indian English/Hindi) via Twilio |
+| Telephony | Sarvam Voice Agents (rented Sarvam number, Instant Outbound API, webhooks) |
+| STT / TTS | Sarvam (built into the voice agent; Indian languages and code-mixed speech) |
 | Database | JSON file (`data/db.json`) for local dev — swap for Supabase/Neon in production |
 | Auth | Stateless HMAC-signed session cookies, scrypt password hashing |
 | Hosting | Vercel (frontend), any persistent host for production webhooks |
@@ -114,7 +113,7 @@ Call summary + task result saved to dashboard
 
 - **Node.js 20+** and npm
 - A free [Groq](https://console.groq.com) or [Google AI Studio](https://aistudio.google.com) API key for the LLM
-- (Optional but recommended) A [Twilio](https://console.twilio.com) account for phone calls
+- For phone calls: a [Sarvam](https://dashboard.sarvam.ai) account with wallet credit and a rented number (see [docs/SARVAM_SETUP.md](docs/SARVAM_SETUP.md))
 
 ### 1. Clone and install
 
@@ -160,10 +159,12 @@ Open [http://localhost:3000](http://localhost:3000), sign up, and try handing of
 | `LLM_BASE_URL` | Optional | Use any OpenAI-compatible server (e.g. Ollama). |
 | `TAVILY_API_KEY` | Optional | Better web search (1000 free/month). |
 | `BRAVE_API_KEY` | Optional | Alternative web search (2000 free/month). |
-| `TWILIO_ACCOUNT_SID` | For calls | From console.twilio.com. |
-| `TWILIO_AUTH_TOKEN` | For calls | From console.twilio.com. |
-| `TWILIO_PHONE_NUMBER` | For calls | Your Twilio number in E.164 format. |
-| `PUBLIC_URL` | For calls | Public HTTPS URL Twilio can reach (ngrok for local dev). |
+| `SARVAM_API_KEY` | For calls | Sarvam API key (Settings → API Key). |
+| `SARVAM_ORG_ID`, `SARVAM_WORKSPACE_ID` | For calls | From your Sarvam dashboard URL or Settings. |
+| `SARVAM_APP_ID`, `SARVAM_APP_VERSION` | For calls | Your published Vardaan voice agent. |
+| `SARVAM_CONNECTION_ID`, `SARVAM_PHONE_NUMBER` | For calls | Your rented number's connection and the number (E.164). |
+| `SARVAM_WEBHOOK_SECRET` | For calls | Random string; Sarvam sends it back so only it can drive calls. |
+| `PUBLIC_URL` | For calls | Fixed public HTTPS URL Sarvam can reach (ngrok static domain for local dev). |
 | `SMTP_HOST` | Optional | Gmail SMTP for email sending. |
 | `SMTP_USER` | Optional | Gmail address. |
 | `SMTP_PASS` | Optional | Gmail app password. |
@@ -189,11 +190,8 @@ Open [http://localhost:3000](http://localhost:3000), sign up, and try handing of
 | `GET` | `/api/calls/:id` | Fetch one call |
 | `POST` | `/api/calls/request` | Request an outbound call with a reason/taskId |
 | `POST` | `/api/voice/call-me` | Shorthand: "Call me now" |
-| `POST` | `/api/voice/answer` | Twilio webhook: call answered |
-| `POST` | `/api/voice/turn` | Twilio webhook: speech turn |
-| `POST` | `/api/voice/status` | Twilio webhook: call status |
-| `POST` | `/api/voice/incoming` | Twilio webhook: inbound call |
-| `POST` | `/api/sms/incoming` | Twilio webhook: inbound SMS |
+| `POST` | `/api/sarvam/turn` | Sarvam `ask_vardaan` tool: caller's words in, `{ reply }` out |
+| `POST` | `/api/sarvam/webhook` | Sarvam webhook: call outcome and transcript (outbound and inbound) |
 | `GET/POST` | `/api/reminders` | List / create reminders |
 | `DELETE` | `/api/reminders/:id` | Delete a reminder |
 | `GET/POST` | `/api/memories` | List / add memories |
@@ -207,47 +205,19 @@ Open [http://localhost:3000](http://localhost:3000), sign up, and try handing of
 
 ## Making a real test call
 
-### Prerequisites
+Full step-by-step guide (buying the number, creating the agent, costs): **[docs/SARVAM_SETUP.md](docs/SARVAM_SETUP.md)**.
 
-1. Create a free Twilio account at [twilio.com](https://www.twilio.com).
-2. Verify your mobile number in Twilio (trial accounts can only call verified numbers).
-3. Get a Twilio phone number.
+In short:
 
-### Local setup (with ngrok)
-
-```bash
-# Terminal 1: start the app
-npm run dev
-
-# Terminal 2: expose it to the internet
-npx ngrok http 3000
-# Copy the https URL, e.g. https://abcd-1234.ngrok-free.app
-```
-
-Add to `.env.local`:
-
-```env
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your_auth_token
-TWILIO_PHONE_NUMBER=+1234567890
-PUBLIC_URL=https://abcd-1234.ngrok-free.app
-```
-
-Restart `npm run dev`.
-
-### Configure Twilio webhooks
-
-In Twilio Console → Phone Numbers → your number, set:
-
-| Event | Webhook URL | Method |
-|---|---|---|
-| A call comes in | `https://your-ngrok-url/api/voice/incoming` | POST |
-| A message comes in | `https://your-ngrok-url/api/sms/incoming` | POST |
+1. In the Sarvam dashboard, add wallet credit, complete KYC and rent a number.
+2. Claim a free ngrok static domain and run `ngrok http --url=your-name.ngrok-free.app 3000`.
+3. Create a Sarvam voice agent with an `ask_vardaan` API tool → `https://<PUBLIC_URL>/api/sarvam/turn`, publish it, and set the inbound webhook to `https://<PUBLIC_URL>/api/sarvam/webhook?token=<SARVAM_WEBHOOK_SECRET>`.
+4. Fill in the `SARVAM_*` variables and `PUBLIC_URL` in `.env.local`, then restart `npm run dev`.
 
 ### Make your first call
 
 1. Open [http://localhost:3000](http://localhost:3000) and sign up.
-2. In Settings, add your verified mobile number.
+2. In Settings, add your mobile number and call language.
 3. Press **Call me** in the dashboard.
 4. Your phone rings. Pick up and say what you need.
 
@@ -260,7 +230,8 @@ In Twilio Console → Phone Numbers → your number, set:
 
 ```bash
 npm run phone
-# Enter your phone number and email when prompted — Vardaan will call immediately.
+# Asks for any missing Sarvam settings, starts the app, prints the URLs to paste into Sarvam,
+# then calls you whenever you press Enter.
 ```
 
 ---
@@ -283,12 +254,9 @@ app/
     calls/route.ts            Call list
     calls/[id]/route.ts       Call detail
     calls/request/route.ts    Request outbound call
-    voice/answer/             Twilio: call answered
-    voice/turn/               Twilio: speech turn
-    voice/status/             Twilio: call status
     voice/call-me/            "Call me now"
-    voice/incoming/           Inbound calls
-    sms/incoming/             Inbound SMS
+    sarvam/turn/              Sarvam ask_vardaan tool (one conversational turn)
+    sarvam/webhook/           Sarvam call outcome + transcript
     reminders/, memories/     CRUD
     profile/, status/         User settings / integration status
     auth/                     Login / signup / logout
@@ -301,9 +269,10 @@ components/
   docs/, AuthForm.tsx, …      Shared UI components
 lib/
   agent.ts                    LLM agent with tool calling (web search, drafts, reminders…)
-  voice.ts                    Call conversation loop (greet, respond)
-  phone.ts                    startCall / updateCall / notifyUser
-  twilio.ts                   TwiML helpers, webhook verification, normalisePhone
+  voice.ts                    One call turn: caller's words → agent reply
+  phone.ts                    startCall / updateCall / notifyUser / normalisePhone
+  sarvam-calls.ts             Sarvam Voice Agents: place calls, verify secret, parse webhooks
+  call-script.ts              Opening line for each kind of call
   search.ts                   Web search (Tavily / Brave / DuckDuckGo)
   llm.ts                      OpenAI-compatible chat client (Groq / Gemini / Ollama)
   db.ts                       JSON file store (local dev)
@@ -312,9 +281,9 @@ lib/
   mail.ts                     SMTP email sender
   drafts.ts                   Draft approve / discard logic
 scripts/
-  phone.mjs                   Terminal shortcut to trigger a call
+  phone.mjs                   Terminal phone line: start app, print Sarvam URLs, call on Enter
 data/                         Auto-created: db.json, auth-secret (gitignored)
-docs/                         Screenshots
+docs/                         Screenshots, SARVAM_SETUP.md
 ```
 
 ---
@@ -331,8 +300,8 @@ docs/                         Screenshots
 2. Import the repository in [Vercel](https://vercel.com).
 3. Set all required environment variables under **Settings → Environment Variables**.
 4. Set `NEXT_PUBLIC_SITE_URL` to your production domain.
-5. Set `PUBLIC_URL` to your production domain (same value, used for Twilio webhooks).
-6. In Twilio, update the webhook URLs to your production domain.
+5. Set `PUBLIC_URL` to your production domain (same value, used for Sarvam's tool and webhooks).
+6. In Sarvam, update the `ask_vardaan` tool URL and the inbound webhook URL to your production domain.
 
 ---
 
@@ -344,15 +313,15 @@ Add `GROQ_API_KEY` or `GEMINI_API_KEY` to `.env.local` and restart the dev serve
 
 ### "Phone calls aren't set up yet"
 
-Add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, and `PUBLIC_URL` to `.env.local`. Restart the server and make sure ngrok (or your tunnel) is running.
+Fill in every `SARVAM_*` variable and `PUBLIC_URL` in `.env.local` (see [docs/SARVAM_SETUP.md](docs/SARVAM_SETUP.md)). Restart the server and make sure your tunnel is running.
 
-### Twilio says "Forbidden" on webhooks
+### Sarvam's tool gets "Forbidden"
 
-Your `PUBLIC_URL` doesn't match the URL Twilio is posting to, so the HMAC signature check fails. Make sure `PUBLIC_URL` is the exact base URL ngrok is forwarding (no trailing slash).
+The tool's Bearer token (or the webhook's `?token=`) doesn't match `SARVAM_WEBHOOK_SECRET` in `.env.local`.
 
 ### Call connects but I hear silence / errors
 
-Check that the LLM is configured — the agent needs to be able to respond before TwiML can speak anything back.
+Check that the LLM is configured and that Sarvam can reach `PUBLIC_URL/api/sarvam/turn` (the call log shows each turn that reached Vardaan). The agent must reply within 30 seconds.
 
 ### Reminders don't fire
 

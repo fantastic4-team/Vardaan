@@ -1,13 +1,12 @@
 import { now, write } from "@/lib/db";
 import { mailConfigured, sendEmail } from "@/lib/mail";
-import { sendSms, twilioConfigured } from "@/lib/twilio";
 
 type Who = { id: string; email: string };
 
 /**
- * Approve a draft (optionally with an edited body). Emails go out over SMTP and SMS over Twilio
- * when those are set up; otherwise, and for WhatsApp, the user gets a link that opens their own
- * app with the message filled in.
+ * Approve a draft (optionally with an edited body). Emails go out over SMTP when it is set up;
+ * otherwise, and for SMS and WhatsApp, the user gets a link that opens their own app with the
+ * message filled in.
  */
 export async function approveDraft(user: Who, taskId: string, draftId: string, editedBody?: string) {
   const draft = await write((d) => {
@@ -26,9 +25,6 @@ export async function approveDraft(user: Who, taskId: string, draftId: string, e
   try {
     if (draft.channel === "email" && mailConfigured()) {
       await sendEmail({ to: draft.to, subject: draft.subject || "(no subject)", body: draft.body, replyTo: user.email });
-      status = "sent";
-    } else if (draft.channel === "sms" && twilioConfigured()) {
-      await sendSms(draft.to, draft.body);
       status = "sent";
     } else if (draft.channel === "email") {
       link = `mailto:${encodeURIComponent(draft.to)}?subject=${encodeURIComponent(draft.subject || "")}&body=${encodeURIComponent(draft.body)}`;

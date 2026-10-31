@@ -25,7 +25,7 @@ const NAV: { id: View; label: string }[] = [
 
 type Data = { tasks: Task[]; memories: Memory[]; reminders: Reminder[]; calls: CallLog[]; messages: MessageLog[] };
 type Profile = { phone: string; lang: string };
-type Status = { ai: string | null; phone: boolean; twilioNumber: string | null; publicUrl: boolean; email: boolean; search?: string };
+type Status = { ai: string | null; phone: boolean; phoneNumber: string | null; publicUrl: boolean; email: boolean; search?: string; google?: { configured: boolean; connected: boolean; email: string | null } };
 type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
@@ -39,7 +39,7 @@ const CALL_LANGUAGES = [
   { code: "kn-IN", label: "ಕನ್ನಡ Kannada" },
   { code: "ml-IN", label: "മലയാളം Malayalam" },
   { code: "pa-IN", label: "ਪੰਜਾਬੀ Punjabi" },
-  { code: "en-US", label: "English (US)" },
+  { code: "od-IN", label: "ଓଡ଼ିଆ Odia" },
 ];
 
 const CALL_STATUS: Record<CallLog["status"], { label: string; tone: string }> = {
@@ -88,6 +88,22 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
     api<Status>("/api/status").then(setStatus).catch(() => {});
     api<AgentStatus>("/api/agent/status").then(setAgentStatus).catch(() => {});
   }, [refresh]);
+
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get("google");
+    if (!result) return;
+    const messages: Record<string, string> = {
+      connected: "Google connected. Ask Vardaan about your calendar or email.",
+      denied: "Google access wasn't allowed.",
+      expired: "That sign-in expired. Press Connect Google again.",
+      failed: "Couldn't connect Google. Check the terminal for details.",
+      not_configured: "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local first (docs/GOOGLE_SETUP.md).",
+    };
+    setView("settings");
+    setToast(messages[result] ?? "Google: " + result);
+    setTimeout(() => setToast(""), 6000);
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   // Also refresh agent status on the same cadence.
   const agentRefresh = useCallback(() => {
@@ -223,7 +239,15 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
         {view === "memory" && <MemoryView memories={data.memories} onChange={refresh} />}
         {view === "reminders" && <RemindersView reminders={data.reminders} hasPhone={Boolean(profile.phone)} phoneReady={Boolean(status?.phone)} onChange={refresh} />}
         {view === "integrations" && <Integrations status={status} />}
-        {view === "settings" && <Settings profile={profile} status={status} onSaved={setProfile} onToast={showToast} />}
+        {view === "settings" && (
+          <Settings
+            profile={profile}
+            status={status}
+            onSaved={setProfile}
+            onToast={showToast}
+            onStatusChange={() => api<Status>("/api/status").then(setStatus).catch(() => {})}
+          />
+        )}
         </div>
       </main>
 
@@ -526,10 +550,10 @@ function Overview({
               {ready ? (
                 <>
                   Press Call me and Vardaan rings <span className="text-ink">{profile.phone}</span>. Talk, or tell it what to do and hang
-                  up. You can also call <span className="text-ink">{status?.twilioNumber}</span> any time.
+                  up. You can also call <span className="text-ink">{status?.phoneNumber}</span> any time.
                 </>
               ) : (
-                "Add your number in Settings and connect Twilio. Then Vardaan can call you, you can call it, and it texts you updates."
+                "Add your number in Settings and connect your Sarvam phone number. Then Vardaan can call you, and you can call it."
               )}
             </p>
           </div>
@@ -764,7 +788,7 @@ function Tasks({ tasks, onChange, onToast }: { tasks: Task[]; onChange: () => vo
 function Messages({ messages }: { messages: MessageLog[] }) {
   return (
     <div>
-      <PageTitle title="Messages" sub="Texts Vardaan sent you, and your replies. Reply YES to approve a draft, or answer its question." />
+      <PageTitle title="Messages" sub="Updates Vardaan sent you (emailed too, if email is set up). Approve drafts and answer questions from Tasks." />
       {messages.length === 0 ? (
         <Empty>No messages yet. Vardaan texts you when a task is done or needs you.</Empty>
       ) : (
@@ -918,11 +942,13 @@ function Settings({
   status,
   onSaved,
   onToast,
+  onStatusChange,
 }: {
   profile: Profile;
   status: Status | null;
   onSaved: (p: Profile) => void;
   onToast: (t: string) => void;
+  onStatusChange: () => void;
 }) {
   const [phone, setPhone] = useState(profile.phone);
   const [lang, setLang] = useState(profile.lang);
@@ -935,6 +961,16 @@ function Settings({
   }, [profile]);
 
   useEffect(() => setOrigin(window.location.origin), []);
+
+  async function disconnectGoogle() {
+    try {
+      await api("/api/google/disconnect", { method: "POST" });
+      onToast("Google disconnected.");
+      onStatusChange();
+    } catch (error) {
+      onToast((error as Error).message);
+    }
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -952,9 +988,9 @@ function Settings({
     { label: "AI model", ok: Boolean(status?.ai), detail: status?.ai ? `Connected: ${status.ai}` : "Add GROQ_API_KEY (free) to .env.local" },
     { label: "Your phone number", ok: Boolean(profile.phone), detail: profile.phone || "Add it below" },
     {
-      label: "Twilio (calls and SMS)",
+      label: "Sarvam AI (phone calls)",
       ok: Boolean(status?.phone),
-      detail: status?.phone ? `Connected: ${status.twilioNumber}` : "Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER and PUBLIC_URL",
+      detail: status?.phone ? `Connected: ${status.phoneNumber}` : "Add the SARVAM_* settings and PUBLIC_URL to .env.local (see docs/SARVAM_SETUP.md)",
     },
     { label: "Email sending", ok: Boolean(status?.email), detail: status?.email ? "Connected" : "Optional: add Gmail SMTP settings" },
   ];
@@ -975,7 +1011,7 @@ function Settings({
             placeholder="98765 43210"
             className="auth-input mt-1.5 h-12 w-full rounded-[12px] px-4 text-[15px] text-ink outline-none placeholder:text-ink/35"
           />
-          <span className="mt-1.5 block text-[12px] text-ink/45">Vardaan calls and texts this number, and recognises you when you call from it.</span>
+          <span className="mt-1.5 block text-[12px] text-ink/45">Vardaan calls this number, and recognises you when you call from it.</span>
         </label>
         <label className="block">
           <span className="text-[13px] text-ink/70">Language on calls</span>
@@ -1012,23 +1048,58 @@ function Settings({
       </section>
 
       <section className="max-w-[760px]">
-        <SectionLabel>Twilio setup</SectionLabel>
+        <SectionLabel>Apps</SectionLabel>
+        <ul className="app-panel divide-y divide-white/[0.06]">
+          <li className="flex items-center gap-4 px-5 py-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] text-ink">Google Calendar and Gmail</p>
+              <p className="break-words text-[13px] text-ink/55">
+                {status?.google?.connected
+                  ? `Connected: ${status.google.email}. Vardaan can read your calendar, book events with invites, and read your email.`
+                  : status?.google?.configured
+                    ? "Let Vardaan read your calendar, book events (Google emails the invites) and read your email."
+                    : "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local first (see docs/GOOGLE_SETUP.md)."}
+              </p>
+            </div>
+            {status?.google?.connected ? (
+              <button onClick={disconnectGoogle} className="h-9 shrink-0 cursor-pointer rounded-[10px] border border-white/[0.12] px-4 text-[13px] text-ink/80 hover:bg-white/[0.06]">
+                Disconnect
+              </button>
+            ) : (
+              status?.google?.configured && (
+                <a href="/api/google/connect" className="waitlist-button flex h-9 shrink-0 items-center rounded-[10px] px-4 text-[13px]">
+                  Connect Google
+                </a>
+              )
+            )}
+          </li>
+          <li className="flex items-center gap-4 px-5 py-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] text-ink">Live weather</p>
+              <p className="text-[13px] text-ink/55">Always on (Open-Meteo, free). Ask "Will it rain in Pune tomorrow?"</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section className="max-w-[760px]">
+        <SectionLabel>Sarvam setup</SectionLabel>
         <ol className="app-panel space-y-4 p-6 text-[14px] leading-[22px] text-ink/70">
           <li>
-            <span className="text-ink">1.</span> Create a free trial at twilio.com, verify your own mobile number, and get a Twilio phone number.
+            <span className="text-ink">1.</span> In the Sarvam dashboard, add wallet credit, complete KYC and rent a phone number (Deploy → Phone Numbers → Rent from Sarvam).
           </li>
           <li>
-            <span className="text-ink">2.</span> Run <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">ngrok http 3000</code> and copy its https address into <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">PUBLIC_URL</code> in .env.local, with your Twilio keys. Restart the app.
+            <span className="text-ink">2.</span> Give this app a stable public address (for example a free ngrok static domain) and put it in <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">PUBLIC_URL</code> in .env.local with your <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">SARVAM_*</code> settings. Restart the app.
           </li>
           <li>
-            <span className="text-ink">3.</span> In Twilio, open your number and set these webhooks (method POST):
+            <span className="text-ink">3.</span> Create a voice agent with an API tool named <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">ask_vardaan</code> and set the inbound webhook:
             <div className="mt-2 space-y-1.5 font-mono text-[12.5px] text-ink/85">
-              <p className="break-all rounded-[8px] bg-black/30 px-3 py-2">A call comes in → {status?.publicUrl ? "PUBLIC_URL" : origin}/api/voice/incoming</p>
-              <p className="break-all rounded-[8px] bg-black/30 px-3 py-2">A message comes in → {status?.publicUrl ? "PUBLIC_URL" : origin}/api/sms/incoming</p>
+              <p className="break-all rounded-[8px] bg-black/30 px-3 py-2">ask_vardaan tool (POST) → {status?.publicUrl ? "PUBLIC_URL" : origin}/api/sarvam/turn</p>
+              <p className="break-all rounded-[8px] bg-black/30 px-3 py-2">Call webhook → {status?.publicUrl ? "PUBLIC_URL" : origin}/api/sarvam/webhook?token=SARVAM_WEBHOOK_SECRET</p>
             </div>
           </li>
           <li>
-            <span className="text-ink">4.</span> Save your number above and press Call me.
+            <span className="text-ink">4.</span> Save your number above and press Call me. Full steps: docs/SARVAM_SETUP.md.
           </li>
         </ol>
       </section>

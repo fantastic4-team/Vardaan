@@ -1,3 +1,4 @@
+import { appTools, appsSummary, runAppTool } from "@/lib/app-tools";
 import { chat, type ChatMessage, type ToolSpec } from "@/lib/llm";
 import { mailConfigured } from "@/lib/mail";
 import { newId, now, read, write, type Draft, type Task } from "@/lib/db";
@@ -98,15 +99,20 @@ What you remember about them:
 ${memories.length ? memories.map((m) => `- ${m.fact}`).join("\n") : "- nothing yet"}
 Their reminders:
 ${reminders.length ? reminders.map((r) => `- ${r.title}${r.dueAt ? ` (${r.dueAt})` : ""}`).join("\n") : "- none"}
+${await appsSummary(userId)}
 
 How you work:
-- Reply in the same language the user speaks, including Hinglish or any mix.
+- Reply in the language of the user's latest message: English if they spoke English, Hindi or Hinglish
+  if they did, and so on. Don't switch languages on your own.
 - Be warm, brief and practical. Plain sentences, no markdown, no lists unless asked.
-- You can: search the web for current information, remember preferences, set reminders, explain documents and bills,
-  think through decisions, and draft emails, SMS and WhatsApp messages.
+- You can: search the web for current information, check live weather, remember preferences, set reminders,
+  explain documents and bills, think through decisions, and draft emails, SMS and WhatsApp messages.
+  With Google connected you can also read their calendar, book events (Google emails the invites), and read their Gmail.
+- Before booking an event, confirm the title, day, time and guests with the user, and check for clashes.
+- When summarising emails or events aloud, give the few that matter, not a full list.
   ${mailConfigured() ? "Approved emails are sent automatically." : "Email sending is not connected yet, so approved emails can be copied and sent by the user."}
 - For research tasks, always use web_search to get current, accurate information. Cite sources.
-- You cannot fill web forms, make payments or phone businesses yourself. When a task needs that, do the most
+- You cannot fill web forms, make payments or phone businesses yourself (calendar bookings are the exception). When a task needs that, do the most
   useful part: draft the message, script or complaint, and list next steps.
 - Never invent facts like order numbers, addresses or phone numbers. Ask instead.
 - Never claim something was sent. Drafts wait for the user's approval.
@@ -158,7 +164,7 @@ export type TalkTurn = { role: "user" | "assistant"; content: string };
 
 export async function talk(userId: string, history: TalkTurn[]) {
   const messages: ChatMessage[] = [{ role: "system", content: await context(userId) }, ...history.slice(-20)];
-  const tools = [TOOLS.web_search, TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message, TOOLS.start_task];
+  const tools = [TOOLS.web_search, TOOLS.save_memory, TOOLS.set_reminder, TOOLS.draft_message, TOOLS.start_task, ...(await appTools(userId))];
   let createdTaskId: string | undefined;
   // Tasks started during the call; the route runs them in the background after responding.
   const startedTaskIds: string[] = [];
@@ -171,8 +177,11 @@ export async function talk(userId: string, history: TalkTurn[]) {
     for (const call of toolCalls) {
       const args = parseArgs(call.function.arguments);
       let result = "Unknown tool.";
+      const appResult = await runAppTool(userId, call.function.name, args);
 
-      if (call.function.name === "web_search") {
+      if (appResult !== null) {
+        result = appResult;
+      } else if (call.function.name === "web_search") {
         const query = str(args.query);
         const limit = typeof args.limit === "number" ? Math.min(8, Math.max(1, args.limit)) : 5;
         if (!query) {
@@ -267,7 +276,7 @@ export async function runTask(taskId: string) {
     { role: "system", content: await context(task.userId) },
     { role: "user", content: brief },
   ];
-  const tools = Object.values(TOOLS);
+  const tools = [...Object.values(TOOLS), ...(await appTools(task.userId))];
 
   try {
     for (let i = 0; i < MAX_STEPS; i++) {
@@ -281,7 +290,7 @@ export async function runTask(taskId: string) {
 
       for (const call of toolCalls) {
         const args = parseArgs(call.function.arguments);
-        let result = "Unknown tool.";
+        let result = (await runAppTool(task.userId, call.function.name, args)) ?? "Unknown tool.";
         switch (call.function.name) {
           case "web_search": {
             const query = str(args.query);
@@ -318,7 +327,7 @@ export async function runTask(taskId: string) {
           case "ask_user": {
             const question = str(args.question) || "Can you tell me more?";
             if (!(await updateTask(taskId, { status: "needs_input", question }))) return;
-            await notifyUser(task.userId, `Vardaan: ${question}\nReply to this message with your answer.`);
+            await notifyUser(task.userId, `Vardaan: ${question}\nAnswer it on your Vardaan dashboard.`);
             return;
           }
           case "finish": {
@@ -348,7 +357,7 @@ async function finishTask(taskId: string, summary: string, callUser: boolean) {
   if (!task) return;
 
   // Only finished results are delivered by call. A task waiting for approval always gets the
-  // "Reply YES" text, because a call can't approve drafts.
+  // approval message, because a call can't approve drafts.
   if (callUser && task.status === "done") {
     // Call the user to deliver the results over the phone.
     try {
@@ -369,7 +378,7 @@ async function finishTask(taskId: string, summary: string, callUser: boolean) {
   await notifyUser(
     task.userId,
     task.status === "needs_approval"
-      ? `Vardaan: ${summary}\nReply YES to approve and send, or open your dashboard to edit it first.`
+      ? `Vardaan: ${summary}\nOpen your Vardaan dashboard to review and approve it.`
       : `Vardaan: Done. ${summary}`,
   );
 }

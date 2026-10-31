@@ -80,14 +80,14 @@ const NEXT = { label: "Next", color: C.accent };
 export function ArchitectureDiagram() {
   const channels = [
     { y: 60, title: "Web console", sub: "Voice in the browser", tag: LIVE },
-    { y: 170, title: "Phone call", sub: "Twilio / Exotel", tag: NEXT },
+    { y: 170, title: "Phone call", sub: "Sarvam number", tag: NEXT },
     { y: 280, title: "Telegram", sub: "Voice notes, free", tag: NEXT },
   ];
   const services = [
     { y: 40, title: "AI model", sub: "Groq · Gemini · Ollama" },
     { y: 128, title: "Database", sub: "Users, tasks, memory" },
     { y: 216, title: "Email", sub: "Gmail over SMTP" },
-    { y: 304, title: "SMS & WhatsApp", sub: "Twilio · your own apps" },
+    { y: 304, title: "SMS & WhatsApp", sub: "Your own apps" },
   ];
   return (
     <Frame label="System architecture. Every channel reaches the same backend and agent." minWidth={760}>
@@ -135,7 +135,7 @@ export function ArchitectureDiagram() {
 export function CallSequenceDiagram() {
   const lanes = [
     { x: 110, label: "You" },
-    { x: 360, label: "Twilio" },
+    { x: 360, label: "Sarvam" },
     { x: 610, label: "Vardaan" },
     { x: 860, label: "AI model" },
   ];
@@ -147,11 +147,11 @@ export function CallSequenceDiagram() {
     { from: 2, to: 1, y: 270, text: "5  Text to speak", reply: true },
     { from: 1, to: 0, y: 310, text: "6  You hear the answer", reply: true },
     { from: 0, to: 1, y: 350, text: "7  You hang up (Call & Cut)" },
-    { from: 2, to: 0, y: 450, text: "9  SMS: “Done” or “Approve? Reply YES”", reply: true, tone: C.lime },
+    { from: 2, to: 0, y: 450, text: "9  Dashboard: “Done” or “Approve?”", reply: true, tone: C.lime },
   ];
   return (
     <Frame label="A call from start to finish. Steps 1–6 repeat for each thing you say." minWidth={780}>
-      <svg viewBox="0 0 960 490" role="img" aria-label="Sequence of a call between you, Twilio, Vardaan and the AI model." className="h-auto w-full">
+      <svg viewBox="0 0 960 490" role="img" aria-label="Sequence of a call between you, Sarvam, Vardaan and the AI model." className="h-auto w-full">
         <defs>
           <Arrow id="sq-a" color={C.ink} />
           <Arrow id="sq-b" color={C.mute} />

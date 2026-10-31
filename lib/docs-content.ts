@@ -85,26 +85,26 @@ export const CAPABILITIES: { name: string; detail: string; status: Status; needs
   { name: "Memory and reminders", detail: "Remembers what you tell it; you can make it forget.", status: "live", needs: "Free AI key" },
   { name: "Free calls in the browser", detail: "Tap Call Vardaan for a hands-free voice call; hand off work mid-call and hang up.", status: "live", needs: "Chrome or Edge" },
   { name: "Vardaan rings you", detail: "When a reminder is due, the dashboard rings like an incoming call, with a notification.", status: "live", needs: "Dashboard open in a tab" },
-  { name: "Call me", detail: "Press a button and Vardaan rings your phone; talk, or hang up and let it work.", status: "next", needs: "Twilio trial" },
-  { name: "Phone line", detail: "Call a real number; it answers, recognises you by caller ID and talks back.", status: "next", needs: "Twilio or Exotel" },
-  { name: "Results by message", detail: "Results and approvals by SMS or WhatsApp; reply YES to approve.", status: "next", needs: "Twilio" },
+  { name: "Call me", detail: "Press a button and Vardaan rings your phone; talk, or hang up and let it work.", status: "next", needs: "Sarvam number" },
+  { name: "Phone line", detail: "Call a real number; it answers, recognises you by caller ID and talks back.", status: "next", needs: "Sarvam number" },
+  { name: "Results by message", detail: "Results and approvals by SMS or WhatsApp; reply YES to approve.", status: "next", needs: "SMS provider" },
   { name: "Telegram voice notes", detail: "Send a voice note, get the result as a message. The free alternative to calls.", status: "next", needs: "Free Telegram bot" },
   { name: "Places and directions", detail: "Nearest metro, hospital or ATM, with distance and directions.", status: "next", needs: "Free map data" },
   { name: "Calendar", detail: "Add and move events in Google Calendar.", status: "later", needs: "Google sign-in" },
-  { name: "Call a business for you", detail: "Vardaan phones a shop or office and speaks on your behalf.", status: "later", needs: "Twilio" },
+  { name: "Call a business for you", detail: "Vardaan phones a shop or office and speaks on your behalf.", status: "later", needs: "Sarvam number" },
   { name: "Book rides and food", detail: "Rapido, Uber, Ola, Swiggy and similar apps.", status: "no", needs: "A partnership with each company" },
 ];
 
 export const FREE_TEXT =
-  "Almost everything runs on free tools. The one thing no provider gives away is a real phone call, in or out. Calls start on Twilio's trial credit, and Telegram voice notes are the free alternative.";
+  "Almost everything runs on free tools. The one thing no provider gives away is a real phone call, in or out. Calls use a number rented from Sarvam (₹59 a month plus about ₹4 a minute), and Telegram voice notes are the free alternative.";
 
 export const FREE = [
   { what: "AI model", free: "Groq or Gemini free tier", paid: "Only at large scale" },
   { what: "Voice on the website", free: "Built into Chrome and Edge", paid: "Never" },
   { what: "Voice notes", free: "Telegram bot", paid: "Never" },
   { what: "Email", free: "Your Gmail", paid: "Never" },
-  { what: "WhatsApp and SMS", free: "Opens your own app with the message filled in", paid: "Sending automatically: Twilio or WhatsApp Business" },
-  { what: "Phone calls, in or out", free: "Twilio trial credit (about $15, verified numbers only)", paid: "After the trial: a few rupees per minute" },
+  { what: "WhatsApp and SMS", free: "Opens your own app with the message filled in", paid: "Sending automatically: an SMS provider or WhatsApp Business" },
+  { what: "Phone calls, in or out", free: "None: calls need a rented number", paid: "Sarvam: ₹59 a month for the number, about ₹4 a minute" },
   { what: "Database and hosting", free: "Vercel and Supabase / Neon free tiers", paid: "Only at large scale" },
 ];
 
@@ -118,8 +118,8 @@ export const SETUP: { title: string; body: string; icon: IconName; link?: { href
   { title: "Add it to the project", icon: "terminal", body: "In the project folder, create .env.local and add GROQ_API_KEY= followed by your key. Every setting is listed under Configuration." },
   { title: "Start the app", icon: "play", body: "In a terminal in the project folder, run npm run dev, then open localhost:3000/signup and create an account." },
   { title: "Optional: send real email", icon: "mail", body: "Turn on two-step verification on your Google account, create an app password, and add it as SMTP_USER and SMTP_PASS.", link: { href: "https://myaccount.google.com/apppasswords", label: "Google app passwords" } },
-  { title: "For calls: Twilio", icon: "phone", body: "Start a Twilio trial, verify your own number and get a Twilio number. The trial includes free credit.", link: { href: "https://www.twilio.com/try-twilio", label: "twilio.com" } },
-  { title: "For local testing: ngrok", icon: "tunnel", body: "Twilio and Telegram need to reach your laptop. A free ngrok account gives localhost a temporary public link.", link: { href: "https://ngrok.com", label: "ngrok.com" } },
+  { title: "For calls: Sarvam", icon: "phone", body: "Add wallet credit, complete KYC and rent a number, then create the Vardaan voice agent. Step by step in docs/SARVAM_SETUP.md.", link: { href: "https://dashboard.sarvam.ai", label: "dashboard.sarvam.ai" } },
+  { title: "For local testing: ngrok", icon: "tunnel", body: "Sarvam and Telegram need to reach your laptop. A free ngrok account gives localhost a fixed public link (a static domain).", link: { href: "https://ngrok.com", label: "ngrok.com" } },
 ];
 
 export const CONFIG = [
@@ -173,7 +173,7 @@ export const STACK = [
   { area: "AI model", tool: "Groq or Google Gemini, any OpenAI-compatible model", cost: "Free tier" },
   { area: "Voice in the browser", tool: "Web Speech API (speech to text and text to speech)", cost: "Free" },
   { area: "Voice notes", tool: "Telegram Bot API, transcribed with Groq Whisper", cost: "Free" },
-  { area: "Phone calls and SMS", tool: "Twilio, or Exotel for Indian numbers", cost: "Trial credit, then pay per use" },
+  { area: "Phone calls", tool: "Sarvam Voice Agents (rented Indian number)", cost: "₹59 a month + about ₹4 a minute" },
   { area: "Email", tool: "Gmail over SMTP (Nodemailer)", cost: "Free" },
   { area: "Database", tool: "Local file today; Supabase, Neon or Turso before launch", cost: "Free tier" },
   { area: "Maps", tool: "OpenStreetMap", cost: "Free" },
@@ -181,7 +181,7 @@ export const STACK = [
 
 export const ROADMAP = [
   { phase: "Now", items: ["Accounts and login", "Voice console: Talk & Help and Call & Cut", "Drafts with approval, memory, reminders", "Real email sending"] },
-  { phase: "Next", items: ["Call me and a phone line (Twilio)", "Recognise callers by saved number", "Results and approvals by message", "Telegram voice notes", "Places and directions"] },
+  { phase: "Next", items: ["Call me and a phone line (Sarvam)", "Recognise callers by saved number", "Results and approvals by message", "Telegram voice notes", "Places and directions"] },
   { phase: "Before launch", items: ["Hosted database", "Login secret on Vercel", "Log in link in the navbar", "Privacy policy, data export and deletion"] },
   { phase: "Later", items: ["Google Calendar", "Vardaan calls businesses for you", "Partner integrations for bookings"] },
 ];
@@ -227,18 +227,18 @@ flowchart LR
 const MERMAID_FLOW = `\`\`\`mermaid
 sequenceDiagram
   participant You
-  participant Twilio
+  participant Sarvam
   participant Vardaan
   participant AI as AI model
-  You->>Twilio: Calls, or presses "Call me"
-  Twilio->>Vardaan: Caller ID + your speech as text
+  You->>Sarvam: Calls, or presses "Call me"
+  Sarvam->>Vardaan: Caller ID + your words (ask_vardaan tool)
   Vardaan->>AI: Request + memory + tools
   AI-->>Vardaan: Reply, or a plan
-  Vardaan-->>Twilio: Text to speak
-  Twilio-->>You: You hear the answer
-  You->>Twilio: You hang up (Call & Cut)
+  Vardaan-->>Sarvam: Reply to speak
+  Sarvam-->>You: You hear the answer
+  You->>Sarvam: You hang up (Call & Cut)
   Note over Vardaan: Works in the background
-  Vardaan-->>You: SMS: "Done" or "Approve? Reply YES"
+  Vardaan-->>You: Dashboard / email: "Done" or "Approve?"
 \`\`\``;
 
 const MERMAID_LIFECYCLE = `\`\`\`mermaid

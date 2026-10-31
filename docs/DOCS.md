@@ -78,18 +78,18 @@ What happens on a call, whether you dial Vardaan or press Call me and it rings y
 ```mermaid
 sequenceDiagram
   participant You
-  participant Twilio
+  participant Sarvam
   participant Vardaan
   participant AI as AI model
-  You->>Twilio: Calls, or presses "Call me"
-  Twilio->>Vardaan: Caller ID + your speech as text
+  You->>Sarvam: Calls, or presses "Call me"
+  Sarvam->>Vardaan: Caller ID + your words (ask_vardaan tool)
   Vardaan->>AI: Request + memory + tools
   AI-->>Vardaan: Reply, or a plan
-  Vardaan-->>Twilio: Text to speak
-  Twilio-->>You: You hear the answer
-  You->>Twilio: You hang up (Call & Cut)
+  Vardaan-->>Sarvam: Reply to speak
+  Sarvam-->>You: You hear the answer
+  You->>Sarvam: You hang up (Call & Cut)
   Note over Vardaan: Works in the background
-  Vardaan-->>You: SMS: "Done" or "Approve? Reply YES"
+  Vardaan-->>You: Dashboard / email: "Done" or "Approve?"
 ```
 
 ## 05. Task lifecycle
@@ -136,18 +136,18 @@ Everything marked Live works today on a local setup. Nothing on this list is sim
 | **Memory and reminders** — Remembers what you tell it; you can make it forget. | Live | Free AI key |
 | **Free calls in the browser** — Tap Call Vardaan for a hands-free voice call; hand off work mid-call and hang up. | Live | Chrome or Edge |
 | **Vardaan rings you** — When a reminder is due, the dashboard rings like an incoming call, with a notification. | Live | Dashboard open in a tab |
-| **Call me** — Press a button and Vardaan rings your phone; talk, or hang up and let it work. | Next | Twilio trial |
-| **Phone line** — Call a real number; it answers, recognises you by caller ID and talks back. | Next | Twilio or Exotel |
-| **Results by message** — Results and approvals by SMS or WhatsApp; reply YES to approve. | Next | Twilio |
+| **Call me** — Press a button and Vardaan rings your phone; talk, or hang up and let it work. | Next | Sarvam number |
+| **Phone line** — Call a real number; it answers, recognises you by caller ID and talks back. | Next | Sarvam number |
+| **Results by message** — Results and approvals by SMS or WhatsApp; reply YES to approve. | Next | SMS provider |
 | **Telegram voice notes** — Send a voice note, get the result as a message. The free alternative to calls. | Next | Free Telegram bot |
 | **Places and directions** — Nearest metro, hospital or ATM, with distance and directions. | Next | Free map data |
 | **Calendar** — Add and move events in Google Calendar. | Later | Google sign-in |
-| **Call a business for you** — Vardaan phones a shop or office and speaks on your behalf. | Later | Twilio |
+| **Call a business for you** — Vardaan phones a shop or office and speaks on your behalf. | Later | Sarvam number |
 | **Book rides and food** — Rapido, Uber, Ola, Swiggy and similar apps. | Not planned | A partnership with each company |
 
 ## 08. Free vs paid
 
-Almost everything runs on free tools. The one thing no provider gives away is a real phone call, in or out. Calls start on Twilio's trial credit, and Telegram voice notes are the free alternative.
+Almost everything runs on free tools. The one thing no provider gives away is a real phone call, in or out. Calls use a number rented from Sarvam (₹59 a month plus about ₹4 a minute), and Telegram voice notes are the free alternative.
 
 | Part | Free option | When it costs money |
 | --- | --- | --- |
@@ -155,8 +155,8 @@ Almost everything runs on free tools. The one thing no provider gives away is a 
 | Voice on the website | Built into Chrome and Edge | Never |
 | Voice notes | Telegram bot | Never |
 | Email | Your Gmail | Never |
-| WhatsApp and SMS | Opens your own app with the message filled in | Sending automatically: Twilio or WhatsApp Business |
-| Phone calls, in or out | Twilio trial credit (about $15, verified numbers only) | After the trial: a few rupees per minute |
+| WhatsApp and SMS | Opens your own app with the message filled in | Sending automatically: an SMS provider or WhatsApp Business |
+| Phone calls, in or out | None: calls need a rented number | Sarvam: ₹59 a month for the number, about ₹4 a minute |
 | Database and hosting | Vercel and Supabase / Neon free tiers | Only at large scale |
 
 ## 09. Limitations
@@ -173,8 +173,8 @@ No coding needed: sign up for the services and copy keys into one file.
 2. **Add it to the project.** In the project folder, create .env.local and add GROQ_API_KEY= followed by your key. Every setting is listed under Configuration.
 3. **Start the app.** In a terminal in the project folder, run npm run dev, then open localhost:3000/signup and create an account.
 4. **Optional: send real email.** Turn on two-step verification on your Google account, create an app password, and add it as SMTP_USER and SMTP_PASS. ([Google app passwords](https://myaccount.google.com/apppasswords))
-5. **For calls: Twilio.** Start a Twilio trial, verify your own number and get a Twilio number. The trial includes free credit. ([twilio.com](https://www.twilio.com/try-twilio))
-6. **For local testing: ngrok.** Twilio and Telegram need to reach your laptop. A free ngrok account gives localhost a temporary public link. ([ngrok.com](https://ngrok.com))
+5. **For calls: Sarvam.** Add wallet credit, complete KYC and rent a number, then create the Vardaan voice agent. Step by step in [SARVAM_SETUP.md](SARVAM_SETUP.md). ([dashboard.sarvam.ai](https://dashboard.sarvam.ai))
+6. **For local testing: ngrok.** Sarvam and Telegram need to reach your laptop. A free ngrok account gives localhost a fixed public link (a static domain). ([ngrok.com](https://ngrok.com))
 
 ## 11. Configuration
 
@@ -242,7 +242,7 @@ Stored in a local file for development, moving to a hosted database before launc
 | AI model | Groq or Google Gemini, any OpenAI-compatible model | Free tier |
 | Voice in the browser | Web Speech API (speech to text and text to speech) | Free |
 | Voice notes | Telegram Bot API, transcribed with Groq Whisper | Free |
-| Phone calls and SMS | Twilio, or Exotel for Indian numbers | Trial credit, then pay per use |
+| Phone calls | Sarvam Voice Agents (rented Indian number) | ₹59 a month + about ₹4 a minute |
 | Email | Gmail over SMTP (Nodemailer) | Free |
 | Database | Local file today; Supabase, Neon or Turso before launch | Free tier |
 | Maps | OpenStreetMap | Free |
@@ -258,7 +258,7 @@ Stored in a local file for development, moving to a hosted database before launc
 
 **Next**
 
-- Call me and a phone line (Twilio)
+- Call me and a phone line (Sarvam)
 - Recognise callers by saved number
 - Results and approvals by message
 - Telegram voice notes

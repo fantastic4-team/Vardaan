@@ -1,9 +1,21 @@
 import { newId, now, read, write, type CallLog } from "@/lib/db";
 import { DEMO_USER_ID } from "@/lib/demo";
-import { createCall, sendSms, twilioConfigured } from "@/lib/twilio";
+import { mailConfigured, sendEmail } from "@/lib/mail";
+import { placeSarvamCall, sarvamCallsConfigured } from "@/lib/sarvam-calls";
 
-// Phone features on top of Twilio: placing calls to a user, and texting them updates.
-// Every call and message is logged so the dashboard can show the full history.
+// Phone features: Vardaan calls the user on a Sarvam number (lib/sarvam-calls.ts), and sends them
+// updates by email (Sarvam has no SMS). Every call and message is logged for the dashboard.
+
+/** Normalise an Indian or international number to E.164 (+919876543210), or null if invalid. */
+export function normalisePhone(input: string) {
+  const digits = input.replace(/[^\d+]/g, "");
+  if (/^\+\d{8,15}$/.test(digits)) return digits;
+  const plain = digits.replace(/\D/g, "");
+  if (/^[6-9]\d{9}$/.test(plain)) return `+91${plain}`;
+  if (/^0[6-9]\d{9}$/.test(plain)) return `+91${plain.slice(1)}`;
+  if (/^91[6-9]\d{9}$/.test(plain)) return `+${plain}`;
+  return null;
+}
 
 /**
  * Initiate an outbound call to the user.
@@ -13,7 +25,7 @@ import { createCall, sendSms, twilioConfigured } from "@/lib/twilio";
  */
 export async function startCall(userId: string, reason: string, taskId?: string) {
   if (userId === DEMO_USER_ID) throw new Error("The demo can't place calls. Create a free account to talk to Vardaan.");
-  if (!twilioConfigured()) throw new Error("Phone calls aren't set up yet. Add your Twilio keys and PUBLIC_URL to .env.local.");
+  if (!sarvamCallsConfigured()) throw new Error("Phone calls aren't set up yet. Add your Sarvam settings and PUBLIC_URL to .env.local (see docs/SARVAM_SETUP.md).");
   const user = await read((d) => d.users.find((u) => u.id === userId));
   if (!user?.phone) throw new Error("Add your phone number in Settings first.");
   if (taskId && !(await read((d) => d.tasks.some((t) => t.id === taskId && t.userId === userId)))) throw new Error("Task not found.");
@@ -33,8 +45,7 @@ export async function startCall(userId: string, reason: string, taskId?: string)
   await write((d) => void d.calls.push(call));
 
   try {
-    const { sid } = await createCall(user.phone, `/api/voice/answer?call=${call.id}`, `/api/voice/status?call=${call.id}`);
-    await updateCall(call.id, { twilioSid: sid });
+    await updateCall(call.id, { sarvamAttemptId: await placeSarvamCall(call, user), status: "ringing" });
   } catch (err) {
     const error = err instanceof Error ? err.message : "Could not place the call.";
     await updateCall(call.id, { status: "failed", error, endedAt: now() });
@@ -53,18 +64,23 @@ export async function updateCall(id: string, patch: Partial<CallLog> | ((c: Call
   });
 }
 
-/** Text the user, if phone features are set up and they have a number. Never throws. */
+/**
+ * Send the user an update. Emailed when SMTP is set up; always logged so it shows on the dashboard.
+ * Never throws.
+ */
 export async function notifyUser(userId: string, body: string) {
-  if (!twilioConfigured() || userId === DEMO_USER_ID) return;
+  if (userId === DEMO_USER_ID) return;
   const user = await read((d) => d.users.find((u) => u.id === userId));
-  if (!user?.phone) return;
+  if (!user) return;
   let status: "sent" | "failed" = "sent";
   let error: string | undefined;
-  try {
-    await sendSms(user.phone, body);
-  } catch (err) {
-    status = "failed";
-    error = err instanceof Error ? err.message : "Could not send.";
+  if (mailConfigured()) {
+    try {
+      await sendEmail({ to: user.email, subject: body.split("\n")[0].slice(0, 120), body });
+    } catch (err) {
+      status = "failed";
+      error = err instanceof Error ? err.message : "Could not send.";
+    }
   }
   await write((d) => void d.messages.push({ id: newId(), userId, direction: "outbound", body, status, error, createdAt: now() }));
 }

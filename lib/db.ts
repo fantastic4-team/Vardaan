@@ -16,7 +16,19 @@ export type User = {
   phone?: string;
   /** Language for phone calls, e.g. "en-IN" or "hi-IN". */
   lang?: string;
+  /** Google account linked for Calendar and Gmail. Server-side only: never send to the browser. */
+  google?: GoogleLink;
   createdAt: string;
+};
+
+export type GoogleLink = {
+  email: string;
+  accessToken: string;
+  refreshToken: string;
+  /** When accessToken expires (ms since epoch). */
+  expiresAt: number;
+  scopes: string[];
+  connectedAt: string;
 };
 
 export type TaskStatus = "planning" | "working" | "needs_input" | "needs_approval" | "done" | "failed";
@@ -69,7 +81,9 @@ export type CallLog = {
   reason: string;
   phone: string;
   status: "queued" | "ringing" | "in-progress" | "completed" | "busy" | "no-answer" | "failed" | "canceled";
-  twilioSid?: string;
+  /** Sarvam Voice Agents ids: the outbound attempt, and the conversation (set once it connects). */
+  sarvamAttemptId?: string;
+  sarvamInteractionId?: string;
   turns: CallTurn[];
   silences: number;
   taskIds: string[];
