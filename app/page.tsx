@@ -1,9 +1,10 @@
 import Link from "next/link";
-import NextMonth from "@/components/NextMonth";
 import PosterArt from "@/components/PosterArt";
-import RevealFooter from "@/components/RevealFooter";
+import Faq from "@/components/landing/Faq";
+import Features from "@/components/landing/Features";
+import Pricing from "@/components/landing/Pricing";
+import SiteFooter from "@/components/landing/SiteFooter";
 import SiteNav from "@/components/SiteNav";
-import WaitlistForm from "@/components/WaitlistForm";
 import { site } from "@/lib/site";
 
 const JSON_LD = {
@@ -18,7 +19,7 @@ const step = (i: number) => ({ "--i": i }) as React.CSSProperties;
 
 export default function Home() {
   return (
-    <RevealFooter>
+    <>
       <div id="top" className="relative flex min-h-svh flex-col overflow-hidden lg:h-svh">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
@@ -52,29 +53,22 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="reveal space-y-5 max-w-[440px] 2xl:max-w-[480px]" style={step(3)}>
+            <div className="reveal max-w-[440px] 2xl:max-w-[480px]" style={step(3)}>
               <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href="/signup"
-                  className="waitlist-button flex h-11 items-center justify-center rounded-[10px] px-6 text-[14px] font-semibold tracking-[-0.01em]"
+                  className="waitlist-button flex h-12 items-center justify-center rounded-[12px] px-7 text-[15px] font-medium tracking-[-0.01em]"
                 >
-                  Create free account →
+                  Get started free
                 </Link>
                 <Link
                   href="/login"
-                  className="flex h-11 items-center justify-center rounded-[10px] border border-white/15 bg-white/[0.04] px-5 text-[14px] font-medium text-ink transition hover:border-white/30 hover:bg-white/[0.08]"
+                  className="flex h-12 items-center justify-center rounded-[12px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.02)_100%)] px-7 text-[15px] font-medium tracking-[-0.01em] text-ink/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-white/25 hover:text-ink"
                 >
                   Log in
                 </Link>
               </div>
-
-              <div id="join" className="border-t border-white/[0.08] pt-4 scroll-mt-24">
-                <p className="mb-2 text-[12px] uppercase tracking-[0.14em] text-mute">Or join email waitlist for updates</p>
-                <WaitlistForm id="hero" />
-                <p className="mt-2.5 pl-1 text-[13px] text-mute">
-                  Beta spots open for <span className="text-ink"><NextMonth /></span>
-                </p>
-              </div>
+              <p className="mt-4 text-[13px] text-ink/45">Free during the private beta. Works on any phone.</p>
             </div>
           </div>
 
@@ -87,6 +81,11 @@ export default function Home() {
           </figure>
         </main>
       </div>
-    </RevealFooter>
+
+      <Features />
+      <Pricing />
+      <Faq />
+      <SiteFooter />
+    </>
   );
 }

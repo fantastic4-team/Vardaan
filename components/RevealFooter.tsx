@@ -156,7 +156,7 @@ export default function RevealFooter({ children }: { children: React.ReactNode }
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">Product</p>
                 <ul className="mt-4 space-y-2.5">
-                  {NAV_LINKS.slice(1).map(({ href, label }) => (
+                  {NAV_LINKS.map(({ href, label }) => (
                     <li key={href}>
                       <Link href={href} onClick={() => setOpen(false)} className="text-white/70 hover:text-ink">
                         {label}

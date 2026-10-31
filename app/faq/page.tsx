@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import SectionPage from "@/components/SectionPage";
+import { FAQS } from "@/lib/landing";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -7,36 +8,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/faq" },
 };
 
-const FAQS = [
-  {
-    q: "What is Vardaan?",
-    a: "Vardaan is a voice-first AI agent that acts on your behalf. You call it, explain what you need in your own words, and it either completes the task in the background or helps you live on the call.",
-  },
-  {
-    q: "Which languages does it understand?",
-    a: "Your own language. Speak the way you naturally do, including mixing languages mid-sentence.",
-  },
-  {
-    q: "Do I need a smartphone or an app?",
-    a: "No. Vardaan works from any phone. There is nothing to install and nothing to type.",
-  },
-  {
-    q: "How does Vardaan tell me a task is done?",
-    a: "It reports back the way that suits you: a callback, an SMS or a WhatsApp message.",
-  },
-  {
-    q: "Will it act without asking me?",
-    a: "Not on anything that matters. When information is missing or a decision carries real consequences, Vardaan calls you back for approval instead of guessing.",
-  },
-  {
-    q: "What is the difference between Call & Cut and Talk & Help?",
-    a: "With Call & Cut you hang up and Vardaan finishes the task in the background. With Talk & Help you stay on the line for real-time support, like understanding a bill or drafting a reply together.",
-  },
-  {
-    q: "When can I start using it?",
-    a: "Vardaan is in private beta and new spots open every month. Join the waitlist and we'll invite you as soon as there is room.",
-  },
-];
 
 export default function Faq() {
   return (
