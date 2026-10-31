@@ -72,6 +72,15 @@ export function HeroSteps() {
           </span>
         );
       })}
+      <span
+        title={MORE.join(", ")}
+        className="flex items-center rounded-full border border-dashed border-white/[0.14] px-3.5 py-1.5 text-[13px] text-ink/55 tabular-nums"
+      >
+        +{MORE.length} more
+      </span>
     </div>
   );
 }
+
+// Everything else Vardaan already does, counted in the "+N more" pill.
+const MORE = ["Google Calendar", "Reading your inbox", "Weather", "Memory", "Approvals", "Call-backs"];
