@@ -828,9 +828,9 @@ body {
   .msg-in, .hero-card-in { animation: none; }
 }
 
-/* Hero right panel: the poster's blue sky behind the grid and the phone. */
+/* Hero right panel: the poster's blue sky; its other colours orbit on top (see .hero-blob). */
 .hero-panel {
-  background: linear-gradient(180deg, #535ce6 0%, #6f7cf2 100%);
+  background: linear-gradient(180deg, #535ce6 0%, #6470ee 100%);
 }
 
 .hero-panel .hero-backdrop {
@@ -851,4 +851,44 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .step-progress { animation: none; width: 100%; }
+}
+
+
+/* Soft colour blobs that orbit slowly around the hero panel, each at its own pace and direction. */
+.hero-blob {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--blob);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 0%, transparent 68%);
+  transition: background-color 3s ease;
+  animation: hero-orbit var(--dur) linear infinite;
+  animation-direction: var(--dir, normal);
+}
+@keyframes hero-orbit {
+  from { transform: translate(-50%, -50%) rotate(0deg) translateX(var(--r)) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg) translateX(var(--r)) rotate(-360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-blob { animation: none; transform: translate(-50%, -50%); }
+}
+
+/* Hero background icons: big, transparent white shapes with an engraved edge, zooming gently. */
+.glass-icon,
+.glass-voice {
+  translate: -50% -50%;
+  opacity: 0.4;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.7)) drop-shadow(0 -1px 0 rgba(30, 30, 110, 0.45));
+}
+.glass-icon {
+  animation: glass-breathe 7s ease-in-out infinite alternate;
+}
+@keyframes glass-breathe {
+  from { transform: scale(0.94); }
+  to { transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-icon { animation: none; }
 }
