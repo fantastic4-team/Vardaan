@@ -81,11 +81,13 @@ export class LLMNotConfigured extends Error {
 // Out of credit or a bad key won't fix itself in seconds, so skip that provider for a while
 // instead of paying a wasted round trip on every step of every call.
 
-const cooldown = ((globalThis as { __vardaanLlmCooldown?: Map<string, number> }).__vardaanLlmCooldown ??= new Map());
+const cooldown = ((globalThis as { __vardaanLlmCooldownV2?: Map<string, number> }).__vardaanLlmCooldownV2 ??= new Map());
 const coolingDown = (key: string) => (cooldown.get(key) ?? 0) > Date.now();
 
 function noteFailure(p: Provider, model: string, status: number, body: string) {
-  if (status === 401 || status === 402 || status === 403 || /insufficient_quota|credit_balance|billing|exceeded your current quota/i.test(body)) {
+  // Only real "no credit" errors bench a whole provider. (Groq's ordinary rate-limit message links
+  // to its billing page, so matching words like "billing" would bench Groq for a mere 429.)
+  if (status === 401 || status === 402 || status === 403 || /insufficient_quota|credit_balance_exhausted|exceeded your current quota/i.test(body)) {
     cooldown.set(p.name, Date.now() + 10 * 60_000); // whole provider: bad key or no credit
   } else if (status === 429) {
     cooldown.set(`${p.name}/${model}`, Date.now() + 20_000); // just this model: rate limit
@@ -101,7 +103,38 @@ function options(model: string): Record<string, unknown> {
   return { temperature: 0.3 };
 }
 
+/**
+ * Gemini requires a "thought signature" on every earlier tool call it sees, and only tool calls
+ * Gemini made itself carry one. When Gemini takes over a conversation another model started,
+ * rewrite those earlier tool steps as plain text so Gemini accepts the history.
+ */
+function forProvider(p: Provider, messages: ChatMessage[]): ChatMessage[] {
+  if (p.name !== "Gemini") return messages;
+  const signed = (c: ToolCall) => Boolean((c as { extra_content?: { google?: { thought_signature?: string } } }).extra_content?.google?.thought_signature);
+  const foreign = new Set<string>();
+  const out: ChatMessage[] = [];
+  for (const m of messages) {
+    if (m.role === "assistant" && m.tool_calls?.length && !m.tool_calls.every(signed)) {
+      m.tool_calls.forEach((c) => foreign.add(c.id));
+      const calls = m.tool_calls.map((c) => `${c.function.name}(${c.function.arguments})`).join(", ");
+      out.push({ role: "assistant", content: [m.content, `[I used: ${calls}]`].filter(Boolean).join("\n") });
+    } else if (m.role === "tool" && foreign.has(m.tool_call_id)) {
+      out.push({ role: "user", content: `[Tool result]\n${m.content}` });
+    } else {
+      out.push(m);
+    }
+  }
+  return out;
+}
+
 const retryable = (status: number) => status === 429 || status === 404 || status === 400 || status === 401 || status === 402 || status === 403 || status >= 500;
+
+/** With LLM_DEBUG=1, log every model attempt (provider, model, status, time) to data/llm-debug.log. */
+async function debugLog(line: string) {
+  if (!process.env.LLM_DEBUG) return;
+  const { appendFile } = await import("node:fs/promises");
+  await appendFile("data/llm-debug.log", `${new Date().toISOString()} ${line}\n`).catch(() => {});
+}
 
 export async function chat(messages: ChatMessage[], tools: ToolSpec[]) {
   const all = providers();
@@ -112,24 +145,28 @@ export async function chat(messages: ChatMessage[], tools: ToolSpec[]) {
     if (coolingDown(p.name)) continue;
     for (const model of p.models) {
       if (coolingDown(`${p.name}/${model}`)) continue;
+      const started = Date.now();
       const res = await fetch(`${p.baseUrl.replace(/\/$/, "")}/chat/completions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(p.apiKey ? { Authorization: `Bearer ${p.apiKey}` } : {}) },
-        body: JSON.stringify({ model, messages, tools, tool_choice: "auto", ...options(model) }),
+        body: JSON.stringify({ model, messages: forProvider(p, messages), tools, tool_choice: "auto", ...options(model) }),
         signal: AbortSignal.timeout(20_000),
       }).catch((err: Error) => ({ ok: false, status: 599, text: async () => err.message }) as unknown as Response);
+      void debugLog(`${p.name}/${model} HTTP ${res.status} ${Date.now() - started}ms msgs=${messages.length}`);
 
       if (res.ok) {
         const data = (await res.json()) as { choices?: { message?: Record<string, unknown> }[] };
         const message = data?.choices?.[0]?.message;
-        if (!message) {
-          errors.push(`${p.name}/${model}: no message`);
+        const content = (message?.content as string | null | undefined) ?? null;
+        const toolCalls = (message?.tool_calls as ToolCall[] | undefined) ?? [];
+        // Reasoning models sometimes spend the whole answer "thinking" and return nothing. A blank
+        // reply would be spoken as "Sorry, I didn't catch that", so ask the next model instead.
+        if (!content?.trim() && !toolCalls.length) {
+          errors.push(`${p.name}/${model}: empty reply`);
+          console.warn(`LLM ${p.name}/${model} returned an empty reply; trying the next one.`);
           continue;
         }
-        return {
-          content: (message.content as string | null) ?? null,
-          toolCalls: (message.tool_calls as ToolCall[] | undefined) ?? [],
-        };
+        return { content, toolCalls };
       }
       const text = await res.text().catch(() => "");
       errors.push(`${p.name}/${model} (${res.status}): ${text.slice(0, 200)}`);

@@ -36,7 +36,21 @@ export async function POST(req: Request) {
   const slow = new Promise<string>((r) =>
     setTimeout(() => r("I'm working on that now. I'll update you on your dashboard as soon as it's done."), REPLY_WITHIN_MS),
   );
-  return NextResponse.json({ reply: await Promise.race([reply, slow]) });
+  return NextResponse.json({ reply: forSpeech(await Promise.race([reply, slow])) });
+}
+
+/** The reply is read aloud: drop markdown, links and emoji, and turn lists into sentences. */
+function forSpeech(text: string) {
+  return text
+    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, "$1") // [label](url) → label
+    .replace(/https?:\/\/\S+/g, "") // bare links aren't useful on the phone
+    .replace(/[*_`#>~]+/g, "") // bold, italics, code, headings, quotes
+    .replace(/^\s*(?:[-•]|\d+[.)])\s+/gm, "") // list markers
+    .replace(/\p{Extended_Pictographic}️?/gu, "")
+    // Line breaks → sentence breaks, unless the line already ended with punctuation.
+    .replace(/[ \t]*\n+\s*/g, (_m, offset: number, all: string) => (/[.!?:;,]/.test(all[offset - 1] ?? "") ? " " : ". "))
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 /**

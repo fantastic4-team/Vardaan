@@ -11,7 +11,12 @@ export const GOOGLE_SCOPES = [
   "email",
   "https://www.googleapis.com/auth/calendar.events",
   "https://www.googleapis.com/auth/gmail.readonly",
+  // Only used for emergency alerts to the contact the user saved in Settings (lib/emergency.ts).
+  "https://www.googleapis.com/auth/gmail.send",
 ];
+
+/** Can Vardaan send email from this Google account? (Accounts linked before gmail.send was added can't.) */
+export const canSendGmail = (link: GoogleLink | null) => Boolean(link?.scopes.some((s) => s.endsWith("/gmail.send")));
 
 /** Time zone for reading and booking events (the user's, not the server's). */
 export const TIME_ZONE = process.env.APP_TIMEZONE || "Asia/Kolkata";
@@ -257,4 +262,23 @@ export async function readEmail(userId: string, id: string) {
   const m = await api<GMessage>(userId, `${GMAIL}/${encodeURIComponent(id)}?format=full`);
   const body = plainText(m.payload).trim().slice(0, 4000) || m.snippet || "(empty)";
   return `From: ${header(m, "From")}\nSubject: ${header(m, "Subject")}\nDate: ${header(m, "Date")}\n\n${body}`;
+}
+
+/** Send a plain-text email from the user's own Gmail. Only used for emergency alerts. */
+export async function sendGmail(userId: string, mail: { to: string; subject: string; body: string; replyTo?: string }) {
+  const link = await googleLinkFor(userId);
+  if (!canSendGmail(link)) throw new Error("Google isn't allowed to send email yet. Press Connect Google in Settings again.");
+  // RFC 2822 message; the subject is encoded so non-English text arrives intact.
+  const subject = `=?UTF-8?B?${Buffer.from(mail.subject, "utf8").toString("base64")}?=`;
+  const raw = [
+    `To: ${mail.to}`,
+    `Subject: ${subject}`,
+    ...(mail.replyTo ? [`Reply-To: ${mail.replyTo}`] : []),
+    "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Transfer-Encoding: base64",
+    "",
+    Buffer.from(mail.body, "utf8").toString("base64"),
+  ].join("\r\n");
+  await api(userId, `${GMAIL}/send`, { method: "POST", body: JSON.stringify({ raw: Buffer.from(raw).toString("base64url") }) });
 }

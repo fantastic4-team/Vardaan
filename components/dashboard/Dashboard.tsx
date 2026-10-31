@@ -24,8 +24,8 @@ const NAV: { id: View; label: string }[] = [
 ];
 
 type Data = { tasks: Task[]; memories: Memory[]; reminders: Reminder[]; calls: CallLog[]; messages: MessageLog[] };
-type Profile = { phone: string; lang: string };
-type Status = { ai: string | null; phone: boolean; phoneNumber: string | null; publicUrl: boolean; email: boolean; search?: string; google?: { configured: boolean; connected: boolean; email: string | null } };
+type Profile = { phone: string; lang: string; emergencyName?: string; emergencyEmail?: string };
+type Status = { ai: string | null; phone: boolean; phoneNumber: string | null; publicUrl: boolean; email: boolean; search?: string; google?: { configured: boolean; connected: boolean; email: string | null }; alerts?: "smtp" | "gmail" | null };
 type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
@@ -952,12 +952,16 @@ function Settings({
 }) {
   const [phone, setPhone] = useState(profile.phone);
   const [lang, setLang] = useState(profile.lang);
+  const [emergencyName, setEmergencyName] = useState(profile.emergencyName ?? "");
+  const [emergencyEmail, setEmergencyEmail] = useState(profile.emergencyEmail ?? "");
   const [err, setErr] = useState("");
   const [origin, setOrigin] = useState("https://your-public-url");
 
   useEffect(() => {
     setPhone(profile.phone);
     setLang(profile.lang);
+    setEmergencyName(profile.emergencyName ?? "");
+    setEmergencyEmail(profile.emergencyEmail ?? "");
   }, [profile]);
 
   useEffect(() => setOrigin(window.location.origin), []);
@@ -976,9 +980,10 @@ function Settings({
     e.preventDefault();
     setErr("");
     try {
-      const saved = await api<Profile>("/api/profile", { method: "POST", body: JSON.stringify({ phone, lang }) });
+      const saved = await api<Profile>("/api/profile", { method: "POST", body: JSON.stringify({ phone, lang, emergencyName, emergencyEmail }) });
       onSaved(saved);
       onToast("Saved.");
+      onStatusChange();
     } catch (error) {
       setErr((error as Error).message);
     }
@@ -1023,6 +1028,45 @@ function Settings({
             ))}
           </select>
         </label>
+        </div>
+
+        <div className="mt-6 border-t border-white/[0.07] pt-5">
+          <p className="text-[14px] text-ink">Emergency contact</p>
+          <p className="mt-1 text-[12.5px] leading-[19px] text-ink/50">
+            Say "alert my emergency contact" (or tell Vardaan you need help) on a call, and it emails this person straight away, with no questions asked.
+          </p>
+          <div className="mt-4 grid gap-5 sm:grid-cols-[240px_minmax(0,1fr)]">
+            <label className="block">
+              <span className="text-[13px] text-ink/70">Name</span>
+              <input
+                value={emergencyName}
+                onChange={(e) => setEmergencyName(e.target.value)}
+                autoComplete="off"
+                placeholder="Maa"
+                className="auth-input mt-1.5 h-12 w-full rounded-[12px] px-4 text-[15px] text-ink outline-none placeholder:text-ink/35"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[13px] text-ink/70">Email</span>
+              <input
+                value={emergencyEmail}
+                onChange={(e) => setEmergencyEmail(e.target.value)}
+                type="email"
+                inputMode="email"
+                autoComplete="off"
+                placeholder="family@example.com"
+                className="auth-input mt-1.5 h-12 w-full rounded-[12px] px-4 text-[15px] text-ink outline-none placeholder:text-ink/35"
+              />
+            </label>
+          </div>
+          {profile.emergencyEmail && status && !status.alerts && (
+            <p className="mt-3 text-[12.5px] text-[#ffd28a]">
+              Vardaan can't send emails yet. Press Connect Google under Apps below (it now asks to send email too), or add SMTP settings.
+            </p>
+          )}
+          {profile.emergencyEmail && status?.alerts && (
+            <p className="mt-3 text-[12.5px] text-[#c9e877]">Ready: alerts go out {status.alerts === "gmail" ? "from your Gmail" : "by email"}.</p>
+          )}
         </div>
         {err && <p className="mt-4 text-[13px] text-[#ffb4a8]">{err}</p>}
         <div className="mt-6 flex items-center justify-end border-t border-white/[0.07] pt-5">

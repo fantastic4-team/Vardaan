@@ -5,7 +5,9 @@ Once you connect Google, Vardaan can do these things on a call or in a task:
 - **Read your calendar:** "What's on my calendar tomorrow?", "Am I free Friday afternoon?"
 - **Book events:** "Book a meeting with rahul@example.com tomorrow at 4pm about the demo, with a Meet link."
   Google emails the invites itself. Vardaan always reads the details back and waits for your yes first.
-- **Read your email (read-only):** "Any unread emails from my professor?", "Read me the latest one from Amazon."
+- **Emergency alerts:** if you save an emergency contact in Settings, "alert my emergency contact"
+  emails them at once from your Gmail, with no questions asked.
+- **Read your email:** "Any unread emails from my professor?", "Read me the latest one from Amazon."
 
 It's free. You need a Google Cloud project with an OAuth client, which takes about 15 minutes.
 
@@ -29,7 +31,7 @@ It's free. You need a Google Cloud project with an OAuth client, which takes abo
 3. Under **Audience → Test users**, click **Add users** and add your own Gmail address.
    While the app is in "Testing", only test users can connect.
 4. Optional: under **Data access → Add or remove scopes**, add `.../auth/calendar.events` and
-   `.../auth/gmail.readonly`.
+   `.../auth/gmail.readonly` and `.../auth/gmail.send`.
 
 ## 3. Create the OAuth client
 
@@ -68,4 +70,6 @@ GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxx
   https://myaccount.google.com/permissions.
 - Times are read and booked in India time (`Asia/Kolkata`). To change that, set
   `APP_TIMEZONE=Region/City` in `.env.local`.
-- Vardaan only ever **reads** Gmail. It can't send, delete or change any email.
+- Vardaan **reads** Gmail and **sends** only one kind of email: emergency alerts to the contact you
+  saved in Settings. It never deletes or changes your email. If you connected Google before
+  emergency alerts existed, press **Connect Google** again to grant the send permission.

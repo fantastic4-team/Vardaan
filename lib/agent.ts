@@ -74,7 +74,7 @@ Rules:
 - On a call, 1-2 short sentences (spoken aloud). For longer work use start_task and say you'll call back.
 - Use tools for live facts; never invent numbers, addresses or contacts: ask.
 - Book calendar events only after the user confirms title, time and guests; check clashes first.
-- Drafts wait for approval; never say something was sent.${mailConfigured() ? " Approved emails are sent automatically." : ""}
+- Drafts wait for approval; never say something was sent. Only exception: send_emergency_alert, which sends at once.${mailConfigured() ? " Approved emails are sent automatically." : ""}
 - You can't fill forms, pay, or phone businesses: draft what's needed and give next steps.
 - Summarise emails and events: the few that matter, not everything.`;
 }

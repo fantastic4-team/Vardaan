@@ -157,7 +157,7 @@ function build(s: IntegrationStatus | null): Integration[] {
     {
       id: "gmail",
       name: "Gmail",
-      body: "\"Any unread emails from my professor?\" Vardaan reads your inbox aloud. Read-only: it never sends or deletes.",
+      body: "\"Any unread emails from my professor?\" Vardaan reads your inbox aloud, and sends emergency alerts to your saved contact. It never deletes anything.",
       tile: "tile-rose",
       icon: ICONS.mail,
       state: s?.google?.connected ? "connected" : "available",
