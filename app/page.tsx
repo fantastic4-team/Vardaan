@@ -20,51 +20,41 @@ const step = (i: number) => ({ "--i": i }) as React.CSSProperties;
 export default function Home() {
   return (
     <>
-      <div id="top" className="relative overflow-hidden">
+      <div id="top" className="relative flex min-h-svh flex-col overflow-hidden lg:h-svh">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
         <SiteNav />
 
-        {/* Centred hero: the headline and actions, then a live call on a phone in the middle, over a
-            soft glow with rings radiating out like a call signal. */}
-        <main className="relative px-5 pt-14 text-center sm:pt-20 lg:pt-24">
-          <div aria-hidden="true" className="hero-backdrop pointer-events-none absolute inset-0" />
-          <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-[62%] -translate-x-1/2 -translate-y-1/2">
-            {[520, 760, 1000].map((size, k) => (
-              <span
-                key={size}
-                className="hero-ring absolute left-1/2 top-1/2 rounded-full border border-[#8ccbff]/[0.14]"
-                style={{ width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2, animationDelay: `${k * 1.3}s` }}
-              />
-            ))}
-          </div>
+        {/* Split screen: the letter on the left, a live call with Vardaan on the right. */}
+        <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-2 lg:grid-rows-1">
+          <div className="flex min-h-0 min-w-0 flex-col justify-between gap-6 px-[max(1.5rem,calc(6vw+1.75rem))] py-7 lg:py-[clamp(28px,7vh,72px)] lg:pr-12">
+            <div className="lg:pt-[clamp(8px,4vh,40px)]">
+              <a
+                href="#join"
+                className="group reveal mb-5 inline-flex items-center gap-3 text-[13px] text-ink/80 transition hover:text-ink lg:mb-7"
+                style={step(1)}
+              >
+                <span className="new-glow">New</span>
+                Private beta is now open
+              </a>
+              <h1
+                className="reveal text-[clamp(34px,5.4vh,46px)] font-medium leading-[1.02] tracking-[-0.03em] text-ink sm:text-[clamp(46px,7.4vh,66px)] lg:text-[clamp(50px,8.4vh,76px)]"
+                style={step(1)}
+              >
+                The AI agent you can call for anything.
+              </h1>
 
-          <div className="relative mx-auto max-w-[920px]">
-            <a
-              href="#join"
-              className="group reveal mb-6 inline-flex items-center gap-3 text-[13px] text-ink/80 transition hover:text-ink"
-              style={step(1)}
-            >
-              <span className="new-glow">New</span>
-              Private beta is now open
-            </a>
-            <h1
-              className="reveal text-[clamp(38px,8vw,80px)] font-medium leading-[1.02] tracking-[-0.035em] text-ink"
-              style={step(1)}
-            >
-              The AI agent you can call for anything.
-            </h1>
+              <p
+                className="reveal mt-4 max-w-[460px] text-[14px] leading-[21px] text-ink/75 sm:text-[15px] sm:leading-[22px] lg:mt-[clamp(20px,5vh,56px)] lg:text-[17px] lg:leading-[28px]"
+                style={step(2)}
+              >
+                Vardaan is a voice-first AI agent. Call, say what you need in your own language, and it gets
+                done, quietly in the background or live with you on the line. No apps, no screens, no typing.
+              </p>
+            </div>
 
-            <p
-              className="reveal mx-auto mt-6 max-w-[600px] text-[15px] leading-[24px] text-ink/75 sm:text-[17px] sm:leading-[28px]"
-              style={step(2)}
-            >
-              Call, say what you need in your own language, and it gets done, quietly in the background or
-              live with you on the line. No apps, no screens, no typing.
-            </p>
-
-            <div className="reveal mt-8" style={step(3)}>
-              <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="reveal max-w-[440px] 2xl:max-w-[480px]" style={step(3)}>
+              <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href="/signup"
                   className="waitlist-button flex h-12 items-center justify-center rounded-[12px] px-7 text-[15px] font-medium tracking-[-0.01em]"
@@ -82,11 +72,21 @@ export default function Home() {
             </div>
           </div>
 
-          <figure className="reveal relative mx-auto mt-12 h-[560px] max-w-[980px] sm:mt-16 sm:h-[620px]" style={step(4)}>
+          {/* The right panel: a fine grid, call-signal rings, and the phone playing a live call. */}
+          <figure className="poster-art-in nav-grid hero-panel relative min-h-[600px] overflow-hidden border-t lg:min-h-0 lg:border-l lg:border-t-0">
+            <div aria-hidden="true" className="hero-backdrop pointer-events-none absolute inset-0" />
+            <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2">
+              {[440, 640, 840].map((size, k) => (
+                <span
+                  key={size}
+                  className="hero-ring absolute rounded-full border border-[#8ccbff]/[0.14]"
+                  style={{ width: size, height: size, left: -size / 2, top: -size / 2, animationDelay: `${k * 1.3}s` }}
+                />
+              ))}
+            </div>
             <HeroPhone />
-            <figcaption className="sr-only">A call with Vardaan: you ask for a reminder and it sets one.</figcaption>
+            <figcaption className="sr-only">A call with Vardaan: you ask for something and it gets it done.</figcaption>
           </figure>
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(180deg,rgba(20,19,18,0)_0%,#141312_100%)]" />
         </main>
       </div>
 

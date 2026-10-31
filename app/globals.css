@@ -827,3 +827,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .msg-in, .hero-card-in { animation: none; }
 }
+
+/* Hero right panel: a quiet, slightly raised surface behind the grid and the phone. */
+.hero-panel {
+  background: linear-gradient(180deg, #19181f 0%, #151419 100%);
+}

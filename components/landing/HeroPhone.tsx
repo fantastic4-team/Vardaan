@@ -120,7 +120,7 @@ export default function HeroPhone() {
 
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center text-left">
-      <div className="hero-float relative">
+      <div className="relative">
         {/* Phone frame */}
         <div className="relative h-[470px] w-[236px] rounded-[44px] border border-white/20 bg-[#0b0a10] p-[8px] shadow-[0_40px_90px_-30px_rgba(10,8,40,0.85),inset_0_0_0_1px_rgba(255,255,255,0.05)] sm:h-[520px] sm:w-[260px]">
           <div className="flex h-full flex-col overflow-hidden rounded-[36px] bg-[linear-gradient(180deg,#2c2b58_0%,#17162d_48%,#0f0e17_100%)] px-4 pt-3">
