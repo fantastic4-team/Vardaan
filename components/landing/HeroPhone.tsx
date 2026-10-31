@@ -133,7 +133,7 @@ export default function HeroPhone() {
         <span className="absolute -left-[3px] top-[148px] h-12 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#c9ccd3,#8b8f98)]" />
         <span className="absolute -left-[3px] top-[206px] h-12 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#c9ccd3,#8b8f98)]" />
         <span className="absolute -right-[3px] top-[160px] h-16 w-[3px] rounded-r-[2px] bg-[linear-gradient(270deg,#c9ccd3,#8b8f98)]" />
-        <div className="relative h-[470px] w-[236px] rounded-[46px] bg-[linear-gradient(145deg,#eef0f4_0%,#a9adb6_25%,#d8dbe1_50%,#9a9ea7_75%,#e4e6eb_100%)] p-[2.5px] shadow-[0_60px_100px_-35px_rgba(30,50,110,0.55),0_25px_45px_-25px_rgba(20,30,70,0.45)] sm:h-[520px] sm:w-[260px]">
+        <div className="relative h-[520px] w-[260px] rounded-[46px] bg-[linear-gradient(145deg,#eef0f4_0%,#a9adb6_25%,#d8dbe1_50%,#9a9ea7_75%,#e4e6eb_100%)] p-[2.5px] shadow-[0_60px_100px_-35px_rgba(30,50,110,0.55),0_25px_45px_-25px_rgba(20,30,70,0.45)]">
           <div className="h-full rounded-[44px] bg-[#0b0c10] p-[6px]">
             <div className="relative flex h-full flex-col overflow-hidden rounded-[38px] bg-[#f1f3f7] px-3 pt-3">
               <div className="flex items-center justify-between px-3 text-[10.5px] font-semibold text-[#1b1d24]">
