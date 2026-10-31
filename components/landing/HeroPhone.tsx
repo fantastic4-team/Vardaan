@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SCENE_MS, useHeroScene } from "@/components/landing/HeroSync";
 
-// The phone in the hero: a live call with Vardaan on a light call screen. A glowing blue card holds
+// The phone in the hero: a photo of a hand holding a phone, with a live call with Vardaan playing
+// behind its transparent screen (public/images/hero-hand.png), so the fingertips stay in front. A glowing blue card holds
 // the live line of the call as a large quote (your request, then Vardaan's reply) above a voice orb
 // that swirls and swells while Vardaan speaks. The result eases in as a card beside the phone.
 // Reduced motion shows one finished exchange.
@@ -65,7 +67,7 @@ function ResultCard({ index, side, leaving }: { index: number; side: "left" | "r
     <div
       className={`hero-card-in absolute hidden items-center gap-3 rounded-[16px] border border-white/80 bg-white/85 py-2.5 pl-2.5 pr-4 shadow-[0_20px_44px_-18px_rgba(30,50,110,0.45)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
         leaving ? "translate-y-1 opacity-0" : ""
-      } ${side === "left" ? "-left-[60%] top-[30%]" : "-right-[60%] top-[50%]"}`}
+      } ${side === "left" ? "-left-[6%] top-[10%]" : "-right-[6%] top-[24%]"}`}
     >
       <span className={`glass-tile nav-tile ${c.tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]`}>
         <Glyph>{c.icon}</Glyph>
@@ -126,70 +128,71 @@ export default function HeroPhone() {
   const clock = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center text-left">
-      <div className="relative">
-        {/* Phone: a silver titanium edge with side buttons, a thin black bezel, and a light screen. */}
-        <span className="absolute -left-[3px] top-[108px] h-7 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#c9ccd3,#8b8f98)]" />
-        <span className="absolute -left-[3px] top-[148px] h-12 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#c9ccd3,#8b8f98)]" />
-        <span className="absolute -left-[3px] top-[206px] h-12 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#c9ccd3,#8b8f98)]" />
-        <span className="absolute -right-[3px] top-[160px] h-16 w-[3px] rounded-r-[2px] bg-[linear-gradient(270deg,#c9ccd3,#8b8f98)]" />
-        <div className="relative h-[520px] w-[260px] rounded-[46px] bg-[linear-gradient(145deg,#eef0f4_0%,#a9adb6_25%,#d8dbe1_50%,#9a9ea7_75%,#e4e6eb_100%)] p-[2.5px] shadow-[0_60px_100px_-35px_rgba(30,50,110,0.55),0_25px_45px_-25px_rgba(20,30,70,0.45)]">
-          <div className="h-full rounded-[44px] bg-[#0b0c10] p-[6px]">
-            <div className="relative flex h-full flex-col overflow-hidden rounded-[38px] bg-[#f1f3f7] px-3 pt-3">
-              <div className="flex items-center justify-between px-3 text-[10.5px] font-semibold text-[#1b1d24]">
-                <span>9:41</span>
-                <span className="h-[20px] w-[76px] rounded-full bg-[#0b0c10]" />
-                <span className="flex items-center gap-1">
-                  <svg viewBox="0 0 16 12" aria-hidden className="h-2.5 w-3 fill-current">
-                    <rect x="0" y="8" width="3" height="4" rx="1" />
-                    <rect x="4.3" y="5.5" width="3" height="6.5" rx="1" />
-                    <rect x="8.6" y="3" width="3" height="9" rx="1" />
-                    <rect x="12.9" y="0" width="3" height="12" rx="1" />
-                  </svg>
-                  <span className="h-2.5 w-[18px] rounded-[3px] border border-current p-[1.5px]">
-                    <span className="block h-full w-3/4 rounded-[1px] bg-current" />
-                  </span>
-                </span>
-              </div>
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-end justify-center text-left">
+      {/* The photo is 1121 by 1403; shown 700 tall, its screen sits at (139, 63), 276 by 598. */}
+      <div className="hand-stage relative h-[700px] w-[559px] shrink-0">
+        <div className="absolute left-[139px] top-[63px] flex h-[598px] w-[276px] flex-col overflow-hidden rounded-[34px] bg-[#f1f3f7] px-3 pt-[38px]">
+          {/* iPhone status bar, laid out around the photo's camera cutout (96 to 182 px across). */}
+          <div className="absolute inset-x-0 top-[12px] flex h-[18px] items-center text-[#0e0f12]">
+            <span className="flex w-[96px] justify-center text-[13px] font-semibold tracking-[-0.01em]">9:41</span>
+            <span className="ml-auto flex w-[94px] items-center justify-center gap-[5px]">
+              <svg viewBox="0 0 17 11" aria-hidden className="h-[10px] w-[16px] fill-current">
+                <rect x="0" y="7" width="3" height="4" rx="0.8" />
+                <rect x="4.6" y="5" width="3" height="6" rx="0.8" />
+                <rect x="9.2" y="2.6" width="3" height="8.4" rx="0.8" />
+                <rect x="13.8" y="0" width="3" height="11" rx="0.8" />
+              </svg>
+              <svg viewBox="0 0 16 11.5" aria-hidden className="h-[10px] w-[14px] fill-current">
+                <path d="M8 2.3c2.3 0 4.4.9 6 2.4l1.3-1.3A10.3 10.3 0 0 0 8 .4 10.3 10.3 0 0 0 .7 3.4L2 4.7a8.5 8.5 0 0 1 6-2.4z" />
+                <path d="M8 5.6c1.4 0 2.6.5 3.6 1.4l1.3-1.3A7 7 0 0 0 8 3.7a7 7 0 0 0-4.9 2l1.3 1.3c1-.9 2.2-1.4 3.6-1.4z" />
+                <path d="M8 8.8c.6 0 1.1.2 1.5.6L8 11 6.5 9.4c.4-.4.9-.6 1.5-.6z" />
+              </svg>
+              <span className="relative flex h-[11px] w-[23px] items-center rounded-[3.5px] border border-current/40 p-[1.5px]">
+                <span className="h-full w-[78%] rounded-[2px] bg-current" />
+                <span className="absolute -right-[3px] top-1/2 h-[4px] w-[1.5px] -translate-y-1/2 rounded-r-[1px] bg-current/40" />
+              </span>
+            </span>
+          </div>
 
-              {/* The glowing call card: name and timer, the live line as a quote, and the voice orb. */}
-              <div className="call-glow relative mt-3 flex flex-1 flex-col items-center rounded-[30px] px-5 pt-6 text-center">
-                <p className="text-[13px] font-medium text-white/85">Vardaan</p>
-                <p className="mt-0.5 text-[11px] text-white/70 tabular-nums">{clock}</p>
+          {/* The glowing call card: name and timer, the live line as a quote, and the voice orb. */}
+          <div className="call-glow relative mt-2 flex flex-1 flex-col items-center rounded-[30px] px-5 pt-7 text-center">
+            <p className="text-[14px] font-medium text-white/85">Vardaan</p>
+            <p className="mt-0.5 text-[11.5px] text-white/70 tabular-nums">{clock}</p>
 
-                <div className={`flex flex-1 flex-col items-center justify-center transition-opacity duration-500 ${leaving ? "opacity-0" : "opacity-100"}`}>
-                  {caption && (
-                    <div key={caption.key} className="msg-in">
-                      <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/60">{caption.who}</p>
-                      <p className="mt-1.5 text-[15.5px] font-medium leading-[21px] text-white">&ldquo;{caption.text}&rdquo;</p>
-                    </div>
-                  )}
+            <div className={`flex flex-1 flex-col items-center justify-center transition-opacity duration-500 ${leaving ? "opacity-0" : "opacity-100"}`}>
+              {caption && (
+                <div key={caption.key} className="msg-in">
+                  <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/60">{caption.who}</p>
+                  <p className="mt-1.5 text-[17px] font-medium leading-[23px] text-white">&ldquo;{caption.text}&rdquo;</p>
                 </div>
-
-                <span className={`voice-orb mb-8 ${speaking ? "is-speaking" : ""}`} />
-              </div>
-
-              {/* Controls: mute, end call and keypad on a soft tray. */}
-              <div className="mx-auto mb-4 mt-3 flex w-full items-center justify-between rounded-full bg-[#e3e6ec] px-2 py-2">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f4f5f8] text-[#6b7080]">
-                  <Glyph className="h-[18px] w-[18px]">
-                    <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v3.5M4 4l16 16" />
-                  </Glyph>
-                </span>
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(160deg,#ff7a63_0%,#f0452f_100%)] text-white shadow-[0_10px_22px_-10px_#f0452f]">
-                  <Glyph className="h-[19px] w-[19px]">
-                    <path d="M3.5 13.5c4.7-4.2 12.3-4.2 17 0l-2.2 2.2-3-1.2v-2.3a10 10 0 0 0-6.6 0v2.3l-3 1.2z" />
-                  </Glyph>
-                </span>
-                <span className="grid h-11 w-11 grid-cols-3 place-content-center gap-[3px] rounded-full bg-[#f4f5f8] px-[13px]">
-                  {Array.from({ length: 9 }, (_, k) => (
-                    <span key={k} className="h-[4px] w-[4px] rounded-full bg-[#4a4f5e]" />
-                  ))}
-                </span>
-              </div>
+              )}
             </div>
+
+            <span className={`voice-orb mb-9 ${speaking ? "is-speaking" : ""}`} />
+          </div>
+
+          {/* Controls: mute, end call and keypad on a soft tray. */}
+          <div className="mx-auto mb-5 mt-3 flex w-full items-center justify-between rounded-full bg-[#e3e6ec] px-2 py-2">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f4f5f8] text-[#6b7080]">
+              <Glyph className="h-[19px] w-[19px]">
+                <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v3.5M4 4l16 16" />
+              </Glyph>
+            </span>
+            <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[linear-gradient(160deg,#ff7a63_0%,#f0452f_100%)] text-white shadow-[0_10px_22px_-10px_#f0452f]">
+              <Glyph className="h-[20px] w-[20px]">
+                <path d="M3.5 13.5c4.7-4.2 12.3-4.2 17 0l-2.2 2.2-3-1.2v-2.3a10 10 0 0 0-6.6 0v2.3l-3 1.2z" />
+              </Glyph>
+            </span>
+            <span className="grid h-12 w-12 grid-cols-3 place-content-center gap-[3px] rounded-full bg-[#f4f5f8] px-[14px]">
+              {Array.from({ length: 9 }, (_, k) => (
+                <span key={k} className="h-[4px] w-[4px] rounded-full bg-[#4a4f5e]" />
+              ))}
+            </span>
           </div>
         </div>
+
+        {/* The hand and phone, on top: the screen is transparent, so the call shows through. */}
+        <Image src="/images/hero-hand.png" alt="" width={1121} height={1403} priority className="hand-photo absolute inset-0 h-full w-full select-none" />
 
         {/* The result of the latest request, alternating sides. */}
         {card && <ResultCard key={card.key} index={card.index} side={card.index % 2 ? "right" : "left"} leaving={leaving} />}
