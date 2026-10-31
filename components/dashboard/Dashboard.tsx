@@ -30,16 +30,16 @@ type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
   { code: "en-IN", label: "English (India)" },
-  { code: "hi-IN", label: "हिन्दी Hindi" },
-  { code: "bn-IN", label: "বাংলা Bengali" },
-  { code: "ta-IN", label: "தமிழ் Tamil" },
-  { code: "te-IN", label: "తెలుగు Telugu" },
-  { code: "mr-IN", label: "मराठी Marathi" },
-  { code: "gu-IN", label: "ગુજરાતી Gujarati" },
-  { code: "kn-IN", label: "ಕನ್ನಡ Kannada" },
-  { code: "ml-IN", label: "മലയാളം Malayalam" },
-  { code: "pa-IN", label: "ਪੰਜਾਬੀ Punjabi" },
-  { code: "od-IN", label: "ଓଡ଼ିଆ Odia" },
+  { code: "hi-IN", label: "à¤¹à¤¿à¤¨à¥à¤¦à¥€ Hindi" },
+  { code: "bn-IN", label: "à¦¬à¦¾à¦‚à¦²à¦¾ Bengali" },
+  { code: "ta-IN", label: "à®¤à®®à®¿à®´à¯ Tamil" },
+  { code: "te-IN", label: "à°¤à±†à°²à±à°—à± Telugu" },
+  { code: "mr-IN", label: "à¤®à¤°à¤¾à¤ à¥€ Marathi" },
+  { code: "gu-IN", label: "àª—à«àªœàª°àª¾àª¤à«€ Gujarati" },
+  { code: "kn-IN", label: "à²•à²¨à³à²¨à²¡ Kannada" },
+  { code: "ml-IN", label: "à´®à´²à´¯à´¾à´³à´‚ Malayalam" },
+  { code: "pa-IN", label: "à¨ªà©°à¨œà¨¾à¨¬à©€ Punjabi" },
+  { code: "od-IN", label: "à¬“à¬¡à¬¼à¬¿à¬† Odia" },
 ];
 
 const CALL_STATUS: Record<CallLog["status"], { label: string; tone: string }> = {
@@ -130,7 +130,7 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
     }
     try {
       await api("/api/voice/call-me", { method: "POST" });
-      showToast(`Calling ${profile.phone}… pick up your phone.`);
+      showToast(`Calling ${profile.phone}â€¦ pick up your phone.`);
       refresh();
     } catch (err) {
       showToast((err as Error).message);
@@ -504,7 +504,7 @@ function Overview({
       icon: "phone" as IconName,
       tone: TONE.call,
       title: `${c.direction === "inbound" ? "You called Vardaan" : c.reason === "Call me" ? "Vardaan called you" : `Vardaan called: ${c.reason}`}`,
-      detail: `${CALL_STATUS[c.status].label}${c.durationSec ? ` · ${duration(c.durationSec)}` : ""}${c.taskIds.length ? ` · ${c.taskIds.length} task handed off` : ""}`,
+      detail: `${CALL_STATUS[c.status].label}${c.durationSec ? ` Â· ${duration(c.durationSec)}` : ""}${c.taskIds.length ? ` Â· ${c.taskIds.length} task handed off` : ""}`,
     })),
     ...data.tasks.map((t) => ({ at: t.updatedAt, icon: "capabilities" as IconName, tone: TONE.task, title: t.request, detail: STATUS[t.status].label })),
     ...data.messages.map((m) => ({
@@ -529,19 +529,35 @@ function Overview({
   const lang = CALL_LANGUAGES.find((l) => l.code === profile.lang)?.label.split(" ").slice(-1)[0] ?? "English";
 
   const ready = Boolean(status?.phone && profile.phone);
+  const setup: { title: string; detail: string; done: boolean; action: string; view: View }[] = [
+    {
+      title: "Your phone number",
+      detail: profile.phone || "The number Vardaan calls, set in Settings.",
+      done: Boolean(profile.phone),
+      action: "Add number",
+      view: "settings",
+    },
+    {
+      title: "Sarvam phone line",
+      detail: status?.phone ? (status.phoneNumber ?? "Connected") : "The number Vardaan calls from.",
+      done: Boolean(status?.phone),
+      action: "Connect",
+      view: "integrations",
+    },
+  ];
 
   return (
     <div className="space-y-8">
       <PageTitle title={`${hello}, ${user.name.split(" ")[0]}.`} sub="Everything Vardaan has done for you, in one place." />
 
-      <section className="call-hero relative overflow-hidden rounded-[18px] border border-white/[0.08] p-5 sm:p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className="glass-tile tile-sky flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px]">
-            <NavIcon name="calls" className="h-6 w-6" />
+      <section className="call-hero relative overflow-hidden rounded-[18px] border border-white/[0.08]">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:gap-5 sm:px-6">
+          <span className="glass-tile tile-sky flex h-11 w-11 shrink-0 items-center justify-center rounded-[13px]">
+            <NavIcon name="calls" className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h2 className="text-[18px] font-medium tracking-[-0.01em] text-ink">{ready ? "Vardaan will ring your phone" : "Set up calling"}</h2>
+              <h2 className="text-[16px] font-medium tracking-[-0.01em] text-ink">{ready ? "Vardaan will ring your phone" : "Set up calling"}</h2>
               {agentStatus && (
                 <span className="flex items-center gap-1.5 text-[12px] text-ink/50">
                   <span className={`h-1.5 w-1.5 rounded-full ${AGENT_STATUS_COLORS[agentStatus.status] ?? "bg-white/30"} ${agentStatus.status === "Executing Task" || agentStatus.status === "On Call" ? "animate-pulse" : ""}`} />
@@ -549,49 +565,73 @@ function Overview({
                 </span>
               )}
             </div>
-            {ready ? (
-              <p className="mt-1 text-[13px] leading-[20px] text-ink/55">
-                Rings <span className="text-ink/85">{profile.phone}</span> in {lang}. You can also call{" "}
-                <span className="text-ink/85">{status?.phoneNumber}</span> any time.
-              </p>
-            ) : (
-              <ol className="mt-2.5 flex flex-wrap gap-2 text-[12.5px]">
-                {[
-                  { done: Boolean(profile.phone), label: "Add your phone number" },
-                  { done: Boolean(status?.phone), label: "Connect a Sarvam number" },
-                ].map((s, i) => (
-                  <li
-                    key={s.label}
-                    className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 ${s.done ? "border-[#8fcf3c]/25 text-ink/70" : "border-white/[0.09] text-ink/80"}`}
-                  >
-                    <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] tabular-nums ${s.done ? "bg-[#8fcf3c]/15 text-[#c9e877]" : "bg-white/[0.07] text-ink/60"}`}
-                    >
-                      {s.done ? <Icon name="check" className="h-3 w-3" /> : i + 1}
-                    </span>
-                    {s.label}
-                  </li>
-                ))}
-              </ol>
-            )}
+            <p className="mt-0.5 text-[13px] leading-[20px] text-ink/55">
+              {ready ? (
+                <>
+                  Rings <span className="text-ink/85">{profile.phone}</span> in {lang}. You can also call{" "}
+                  <span className="text-ink/85">{status?.phoneNumber}</span> any time.
+                </>
+              ) : (
+                "Two steps, then Vardaan can ring you and you can call it."
+              )}
+            </p>
           </div>
           {ready ? (
             <button
               onClick={onCall}
-              className="mic-button flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-full px-6 text-[14px] font-medium text-[#0b1626] sm:self-auto"
+              className="mic-button flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-full px-5 text-[14px] font-medium text-[#0b1626] sm:self-auto"
             >
               <Icon name="phone" className="h-4 w-4" />
               Call me
             </button>
           ) : (
-            <button
-              onClick={() => onView(profile.phone ? "integrations" : "settings")}
-              className="h-10 shrink-0 cursor-pointer self-start rounded-[11px] border border-white/[0.12] bg-white/[0.06] px-4 text-[13px] font-medium text-ink transition hover:border-white/25 hover:bg-white/[0.1] sm:self-auto"
-            >
-              {profile.phone ? "Connect Sarvam" : "Add your number"}
-            </button>
+            <div className="flex shrink-0 items-center gap-3 sm:w-[150px] sm:flex-col sm:items-end sm:gap-2">
+              <span className="text-[12px] text-ink/50 tabular-nums">{setup.filter((s) => s.done).length} of {setup.length} complete</span>
+              <span className="h-1 w-24 overflow-hidden rounded-full bg-white/[0.08] sm:w-full">
+                <span
+                  className="block h-full rounded-full bg-[#8ccbff] transition-[width] duration-500"
+                  style={{ width: `${(setup.filter((s) => s.done).length / setup.length) * 100}%` }}
+                />
+              </span>
+            </div>
           )}
         </div>
+
+        {!ready && (
+          <ol className="grid border-t border-white/[0.07] sm:grid-cols-2 sm:divide-x sm:divide-white/[0.07]">
+            {setup.map((s, i) => (
+              <li key={s.title} className={`flex items-center gap-3.5 px-5 py-4 sm:px-6 ${i ? "border-t border-white/[0.07] sm:border-t-0" : ""}`}>
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11.5px] font-medium tabular-nums ${
+                    s.done ? "bg-[#8fcf3c]/15 text-[#c9e877]" : "border border-white/15 text-ink/60"
+                  }`}
+                >
+                  {s.done ? (
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden>
+                      <path d="m3.5 8.5 3 3 6-7" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[13.5px] ${s.done ? "text-ink/60" : "text-ink"}`}>{s.title}</p>
+                  <p className="mt-0.5 truncate text-[12.5px] text-ink/45">{s.detail}</p>
+                </div>
+                {s.done ? (
+                  <span className="shrink-0 text-[12px] text-[#c9e877]/80">Done</span>
+                ) : (
+                  <button
+                    onClick={() => onView(s.view)}
+                    className="h-8 shrink-0 cursor-pointer rounded-[9px] border border-white/[0.12] bg-white/[0.05] px-3 text-[12.5px] font-medium text-ink transition hover:border-white/25 hover:bg-white/[0.09]"
+                  >
+                    {s.action}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -694,13 +734,13 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
                     <div className="min-w-0">
                       <p className="truncate text-[14px] text-ink">{c.reason}</p>
                       <p className="truncate text-[12px] text-ink/45">
-                        {c.direction === "inbound" ? "Incoming" : "Outgoing"} · {c.phone}
-                        <span className="md:hidden"> · {when(c.startedAt)}</span>
+                        {c.direction === "inbound" ? "Incoming" : "Outgoing"} Â· {c.phone}
+                        <span className="md:hidden"> Â· {when(c.startedAt)}</span>
                       </p>
                     </div>
                   </div>
                   <span className="hidden text-[13px] text-ink/60 md:block">{when(c.startedAt)}</span>
-                  <span className="hidden text-[13px] tabular-nums text-ink/60 md:block">{duration(c.durationSec) || "–"}</span>
+                  <span className="hidden text-[13px] tabular-nums text-ink/60 md:block">{duration(c.durationSec) || "â€“"}</span>
                   <span>
                     <Pill tone={s.tone}>{s.label}</Pill>
                   </span>
@@ -728,7 +768,7 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
                             return t ? (
                               <li key={id} className="flex items-center gap-2">
                                 <span className={`h-1.5 w-1.5 rounded-full ${STATUS[t.status].dot}`} />
-                                {t.request} · {STATUS[t.status].label}
+                                {t.request} Â· {STATUS[t.status].label}
                               </li>
                             ) : null;
                           })}
@@ -828,7 +868,7 @@ function Messages({ messages }: { messages: MessageLog[] }) {
                 </p>
                 <p className={`mt-1 text-[11px] text-ink/45 ${m.direction === "inbound" ? "text-right" : ""}`}>
                   {when(m.createdAt)}
-                  {m.status === "failed" && <span className="text-[#ffb4a8]"> · not delivered: {m.error}</span>}
+                  {m.status === "failed" && <span className="text-[#ffb4a8]"> Â· not delivered: {m.error}</span>}
                 </p>
               </div>
             </li>
@@ -940,7 +980,7 @@ function RemindersView({ reminders, hasPhone, phoneReady, onChange }: { reminder
                 <p className={`text-[15px] ${r.calledAt ? "text-ink/55" : "text-ink"}`}>{r.title}</p>
                 <p className="text-[12px] text-ink/45">
                   {r.dueAt ? new Date(r.dueAt).toLocaleString() : "No time set"}
-                  {r.calledAt && ` · called you ${when(r.calledAt)}`}
+                  {r.calledAt && ` Â· called you ${when(r.calledAt)}`}
                 </p>
               </div>
             </div>
@@ -980,6 +1020,7 @@ function Settings({
   const [phone, setPhone] = useState(profile.phone);
   const [lang, setLang] = useState(profile.lang);
   const [err, setErr] = useState("");
+  const [saving, setSaving] = useState(false);
   const [origin, setOrigin] = useState("https://your-public-url");
 
   useEffect(() => {
@@ -1002,134 +1043,232 @@ function Settings({
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setErr("");
+    setSaving(true);
     try {
       const saved = await api<Profile>("/api/profile", { method: "POST", body: JSON.stringify({ phone, lang }) });
       onSaved(saved);
       onToast("Saved.");
     } catch (error) {
       setErr((error as Error).message);
+    } finally {
+      setSaving(false);
     }
   }
 
-  const checks: { label: string; ok: boolean; detail: string }[] = [
-    { label: "AI model", ok: Boolean(status?.ai), detail: status?.ai ? `Connected: ${status.ai}` : "Add GROQ_API_KEY (free) to .env.local" },
-    { label: "Your phone number", ok: Boolean(profile.phone), detail: profile.phone || "Add it below" },
+  const dirty = phone !== profile.phone || lang !== profile.lang;
+  const base = status?.publicUrl ? "PUBLIC_URL" : origin;
+  const code = "rounded-[5px] bg-white/[0.07] px-1.5 py-0.5 font-mono text-[12px] text-ink/85";
+
+  const checks: { label: string; ok: boolean; optional?: boolean; detail: string; tile: string; icon: React.ReactNode }[] = [
     {
-      label: "Sarvam AI (phone calls)",
-      ok: Boolean(status?.phone),
-      detail: status?.phone ? `Connected: ${status.phoneNumber}` : "Add the SARVAM_* settings and PUBLIC_URL to .env.local (see docs/SARVAM_SETUP.md)",
+      label: "AI model",
+      ok: Boolean(status?.ai),
+      detail: status?.ai ? `Using ${status.ai}` : "Add GROQ_API_KEY (free) to .env.local",
+      tile: "tile-violet",
+      icon: <path d="M12 3.5 13.8 9l5.7 1.5-5.7 1.6L12 17.5l-1.8-5.4L4.5 10.5 10.2 9z" />,
     },
-    { label: "Email sending", ok: Boolean(status?.email), detail: status?.email ? "Connected" : "Optional: add Gmail SMTP settings" },
+    {
+      label: "Your phone number",
+      ok: Boolean(profile.phone),
+      detail: profile.phone || "Add it in Profile above",
+      tile: "tile-sky",
+      icon: (
+        <>
+          <rect x="6.5" y="2.5" width="11" height="19" rx="2.5" />
+          <path d="M10.5 18.5h3" />
+        </>
+      ),
+    },
+    {
+      label: "Phone calls",
+      ok: Boolean(status?.phone),
+      detail: status?.phone ? `Sarvam line ${status.phoneNumber}` : "Add the SARVAM_* settings and PUBLIC_URL to .env.local",
+      tile: "tile-leaf",
+      icon: NAV_ICONS.calls,
+    },
+    {
+      label: "Email sending",
+      ok: Boolean(status?.email),
+      optional: true,
+      detail: status?.email ? "Sending through Gmail" : "Add Gmail SMTP settings to send approved emails",
+      tile: "tile-rose",
+      icon: (
+        <>
+          <rect x="3" y="5" width="18" height="14" rx="2.5" />
+          <path d="m4 7 8 6 8-6" />
+        </>
+      ),
+    },
   ];
 
   return (
-    <div className="space-y-8">
+    <div>
       <PageTitle title="Settings" sub="Your phone, the language Vardaan speaks on calls, and what's connected." />
 
-      <form onSubmit={save} className="app-panel max-w-[760px] p-6">
-        <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_240px]">
-        <label className="block">
-          <span className="text-[13px] text-ink/70">Your mobile number</span>
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            inputMode="tel"
-            autoComplete="tel"
-            placeholder="98765 43210"
-            className="auth-input mt-1.5 h-12 w-full rounded-[12px] px-4 text-[15px] text-ink outline-none placeholder:text-ink/35"
-          />
-          <span className="mt-1.5 block text-[12px] text-ink/45">Vardaan calls this number, and recognises you when you call from it.</span>
-        </label>
-        <label className="block">
-          <span className="text-[13px] text-ink/70">Language on calls</span>
-          <select value={lang} onChange={(e) => setLang(e.target.value)} className="auth-input mt-1.5 h-12 w-full rounded-[12px] px-3 text-[15px] text-ink">
-            {CALL_LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code} className="bg-[#1c1b1a]">
-                {l.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        </div>
-        {err && <p className="mt-4 text-[13px] text-[#ffb4a8]">{err}</p>}
-        <div className="mt-6 flex items-center justify-end border-t border-white/[0.07] pt-5">
-          <button className="waitlist-button h-10 cursor-pointer rounded-[10px] px-5 text-[14px]">Save changes</button>
-        </div>
-      </form>
-
-      <section className="max-w-[760px]">
-        <SectionLabel>Connections</SectionLabel>
-        <ul className="app-panel divide-y divide-white/[0.06]">
-          {checks.map((c) => (
-            <li key={c.label} className="flex items-start gap-3 px-5 py-4">
-              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${c.ok ? "bg-[#8fcf3c]/20 text-[#c9e877]" : "bg-white/[0.08] text-ink/40"}`}>
-                {c.ok ? <Icon name="check" className="h-3.5 w-3.5" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
-              </span>
-              <div className="min-w-0">
-                <p className="text-[14px] text-ink">{c.label}</p>
-                <p className="break-words text-[13px] text-ink/55">{c.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="max-w-[760px]">
-        <SectionLabel>Apps</SectionLabel>
-        <ul className="app-panel divide-y divide-white/[0.06]">
-          <li className="flex items-center gap-4 px-5 py-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[14px] text-ink">Google Calendar and Gmail</p>
-              <p className="break-words text-[13px] text-ink/55">
-                {status?.google?.connected
-                  ? `Connected: ${status.google.email}. Vardaan can read your calendar, book events with invites, and read your email.`
-                  : status?.google?.configured
-                    ? "Let Vardaan read your calendar, book events (Google emails the invites) and read your email."
-                    : "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local first (see docs/GOOGLE_SETUP.md)."}
-              </p>
+      <div className="mt-8 max-w-[1000px] divide-y divide-white/[0.07] border-t border-white/[0.07]">
+        <SettingsSection title="Profile" sub="How Vardaan reaches you and the language it speaks on calls.">
+          <form onSubmit={save} className="app-panel overflow-hidden">
+            <div className="grid gap-5 p-5 sm:grid-cols-[minmax(0,1fr)_220px] sm:p-6">
+              <label className="block">
+                <span className="text-[13px] font-medium text-ink/80">Mobile number</span>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="98765 43210"
+                  className="auth-input mt-2 h-11 w-full rounded-[10px] px-3.5 text-[14px] text-ink outline-none placeholder:text-ink/35 tabular-nums"
+                />
+                <span className="mt-2 block text-[12px] leading-[18px] text-ink/45">Vardaan calls this number, and recognises you when you call from it.</span>
+              </label>
+              <label className="block">
+                <span className="text-[13px] font-medium text-ink/80">Language on calls</span>
+                <span className="relative mt-2 block">
+                  <select
+                    value={lang}
+                    onChange={(e) => setLang(e.target.value)}
+                    className="auth-input h-11 w-full cursor-pointer appearance-none rounded-[10px] pl-3.5 pr-9 text-[14px] text-ink outline-none"
+                  >
+                    {CALL_LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code} className="bg-[#1c1b1a]">
+                        {l.label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/45">
+                    <path d="m4.5 6.5 3.5 3.5 3.5-3.5" />
+                  </svg>
+                </span>
+              </label>
             </div>
-            {status?.google?.connected ? (
-              <button onClick={disconnectGoogle} className="h-9 shrink-0 cursor-pointer rounded-[10px] border border-white/[0.12] px-4 text-[13px] text-ink/80 hover:bg-white/[0.06]">
-                Disconnect
+            <div className="flex items-center justify-between gap-4 border-t border-white/[0.07] bg-black/15 px-5 py-3.5 sm:px-6">
+              <p className={`text-[12.5px] ${err ? "text-[#ffb4a8]" : "text-ink/40"}`}>{err || (dirty ? "You have unsaved changes." : "All changes saved.")}</p>
+              <button
+                disabled={!dirty || saving}
+                className="h-9 shrink-0 cursor-pointer rounded-[9px] bg-ink px-4 text-[13px] font-medium text-[#141312] transition hover:bg-white disabled:cursor-default disabled:bg-white/[0.08] disabled:text-ink/35"
+              >
+                {saving ? "Saving" : "Save changes"}
               </button>
-            ) : (
-              status?.google?.configured && (
-                <a href="/api/google/connect" className="waitlist-button flex h-9 shrink-0 items-center rounded-[10px] px-4 text-[13px]">
-                  Connect Google
-                </a>
-              )
-            )}
-          </li>
-          <li className="flex items-center gap-4 px-5 py-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[14px] text-ink">Live weather</p>
-              <p className="text-[13px] text-ink/55">Always on (Open-Meteo, free). Ask "Will it rain in Pune tomorrow?"</p>
             </div>
-          </li>
-        </ul>
-      </section>
+          </form>
+        </SettingsSection>
 
-      <section className="max-w-[760px]">
-        <SectionLabel>Sarvam setup</SectionLabel>
-        <ol className="app-panel space-y-4 p-6 text-[14px] leading-[22px] text-ink/70">
-          <li>
-            <span className="text-ink">1.</span> In the Sarvam dashboard, add wallet credit, complete KYC and rent a phone number (Deploy → Phone Numbers → Rent from Sarvam).
-          </li>
-          <li>
-            <span className="text-ink">2.</span> Give this app a stable public address (for example a free ngrok static domain) and put it in <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">PUBLIC_URL</code> in .env.local with your <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">SARVAM_*</code> settings. Restart the app.
-          </li>
-          <li>
-            <span className="text-ink">3.</span> Create a voice agent with an API tool named <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-ink">ask_vardaan</code> and set the inbound webhook:
-            <div className="mt-2 space-y-1.5 font-mono text-[12.5px] text-ink/85">
-              <p className="break-all rounded-[8px] bg-black/30 px-3 py-2">ask_vardaan tool (POST) → {status?.publicUrl ? "PUBLIC_URL" : origin}/api/sarvam/turn</p>
-              <p className="break-all rounded-[8px] bg-black/30 px-3 py-2">Call webhook → {status?.publicUrl ? "PUBLIC_URL" : origin}/api/sarvam/webhook?token=SARVAM_WEBHOOK_SECRET</p>
-            </div>
-          </li>
-          <li>
-            <span className="text-ink">4.</span> Save your number above and press Call me. Full steps: docs/SARVAM_SETUP.md.
-          </li>
-        </ol>
-      </section>
+        <SettingsSection title="Connections" sub="What Vardaan needs to think, call and send for you. Keys live in .env.local on the server.">
+          <ul className="app-panel divide-y divide-white/[0.06]">
+            {checks.map((c) => (
+              <li key={c.label} className="flex items-center gap-3.5 px-5 py-3.5">
+                <span className={`glass-tile nav-tile ${c.tile} flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] ${c.ok ? "" : "opacity-60"}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-4 w-4">
+                    {c.icon}
+                  </svg>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13.5px] text-ink">{c.label}</p>
+                  <p className="truncate text-[12.5px] text-ink/50">{c.detail}</p>
+                </div>
+                <SettingsBadge ok={c.ok} label={c.ok ? "Connected" : c.optional ? "Optional" : "Not set up"} />
+              </li>
+            ))}
+          </ul>
+        </SettingsSection>
+
+        <SettingsSection title="Apps" sub="Extra abilities Vardaan can use while it works on your tasks.">
+          <ul className="app-panel divide-y divide-white/[0.06]">
+            <li className="flex items-center gap-3.5 px-5 py-3.5">
+              <span className={`glass-tile nav-tile tile-amber flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] ${status?.google?.connected ? "" : "opacity-60"}`}>
+                <NavIcon name="reminders" className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13.5px] text-ink">Google Calendar and Gmail</p>
+                <p className="text-[12.5px] leading-[18px] text-ink/50">
+                  {status?.google?.connected
+                    ? `Connected as ${status.google.email}. Reads your calendar and email, and books events with invites.`
+                    : status?.google?.configured
+                      ? "Read your calendar, book events with invites, and read your email."
+                      : "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local first."}
+                </p>
+              </div>
+              {status?.google?.connected ? (
+                <button onClick={disconnectGoogle} className="h-8 shrink-0 cursor-pointer rounded-[9px] border border-white/[0.12] px-3 text-[12.5px] text-ink/80 transition hover:bg-white/[0.06]">
+                  Disconnect
+                </button>
+              ) : status?.google?.configured ? (
+                <a href="/api/google/connect" className="flex h-8 shrink-0 items-center rounded-[9px] bg-ink px-3 text-[12.5px] font-medium text-[#141312] transition hover:bg-white">
+                  Connect
+                </a>
+              ) : (
+                <SettingsBadge ok={false} label="Not set up" />
+              )}
+            </li>
+            <li className="flex items-center gap-3.5 px-5 py-3.5">
+              <span className="glass-tile nav-tile tile-sky flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-4 w-4">
+                  <path d="M7 18.5h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 9.5a4.5 4.5 0 0 0 0 9z" />
+                </svg>
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13.5px] text-ink">Live weather</p>
+                <p className="text-[12.5px] text-ink/50">Free with Open-Meteo. Ask &quot;Will it rain in Pune tomorrow?&quot;</p>
+              </div>
+              <SettingsBadge ok label="Always on" />
+            </li>
+          </ul>
+        </SettingsSection>
+
+        <SettingsSection title="Calling setup" sub="Connect a Sarvam phone number so Vardaan can call you. Full guide in docs/SARVAM_SETUP.md.">
+          <ol className="app-panel divide-y divide-white/[0.06]">
+            {[
+              <>In the Sarvam dashboard, add wallet credit, complete KYC and rent a phone number from Deploy, Phone Numbers.</>,
+              <>
+                Give this app a stable public address, such as a free ngrok static domain. Put it in <code className={code}>PUBLIC_URL</code> in .env.local with your{" "}
+                <code className={code}>SARVAM_*</code> settings, then restart the app.
+              </>,
+              <>
+                Create a voice agent with an API tool named <code className={code}>ask_vardaan</code> and point it and the call webhook at:
+                <span className="mt-2.5 block space-y-1.5">
+                  {[
+                    ["Tool (POST)", `${base}/api/sarvam/turn`],
+                    ["Webhook", `${base}/api/sarvam/webhook?token=SARVAM_WEBHOOK_SECRET`],
+                  ].map(([k, v]) => (
+                    <span key={k} className="flex flex-col gap-1 rounded-[9px] border border-white/[0.06] bg-black/25 px-3 py-2 sm:flex-row sm:gap-3">
+                      <span className="w-[84px] shrink-0 text-[11.5px] uppercase tracking-[0.06em] text-ink/40">{k}</span>
+                      <span className="break-all font-mono text-[12px] text-ink/85">{v}</span>
+                    </span>
+                  ))}
+                </span>
+              </>,
+              <>Save your number in Profile and press Call me.</>,
+            ].map((step, i) => (
+              <li key={i} className="flex gap-3.5 px-5 py-4">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/15 text-[11.5px] font-medium text-ink/60 tabular-nums">{i + 1}</span>
+                <p className="min-w-0 flex-1 pt-0.5 text-[13px] leading-[21px] text-ink/70">{step}</p>
+              </li>
+            ))}
+          </ol>
+        </SettingsSection>
+      </div>
     </div>
+  );
+}
+
+function SettingsSection({ title, sub, children }: { title: string; sub: string; children: React.ReactNode }) {
+  return (
+    <section className="grid gap-4 py-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
+      <div>
+        <h2 className="text-[15px] font-medium text-ink">{title}</h2>
+        <p className="mt-1 text-[13px] leading-[20px] text-ink/50">{sub}</p>
+      </div>
+      <div className="min-w-0">{children}</div>
+    </section>
+  );
+}
+
+function SettingsBadge({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span
+      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] ${ok ? "border-[#8fcf3c]/30 bg-[#8fcf3c]/12 text-[#c9e877]" : "border-white/10 bg-white/[0.05] text-ink/55"}`}
+    >
+      {label}
+    </span>
   );
 }
