@@ -121,9 +121,16 @@ export default function HeroPhone() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center text-left">
       <div className="relative">
-        {/* Phone frame */}
-        <div className="relative h-[470px] w-[236px] rounded-[44px] border border-white/20 bg-[#0b0a10] p-[8px] shadow-[0_40px_90px_-30px_rgba(10,8,40,0.85),inset_0_0_0_1px_rgba(255,255,255,0.05)] sm:h-[520px] sm:w-[260px]">
-          <div className="flex h-full flex-col overflow-hidden rounded-[36px] bg-[linear-gradient(180deg,#2c2b58_0%,#17162d_48%,#0f0e17_100%)] px-4 pt-3">
+        {/* Phone: a brushed-metal edge with side buttons, a thin black bezel, and the screen. */}
+        <span className="absolute -left-[3px] top-[108px] h-7 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#55555f,#2a2a31)]" />
+        <span className="absolute -left-[3px] top-[148px] h-12 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#55555f,#2a2a31)]" />
+        <span className="absolute -left-[3px] top-[206px] h-12 w-[3px] rounded-l-[2px] bg-[linear-gradient(90deg,#55555f,#2a2a31)]" />
+        <span className="absolute -right-[3px] top-[160px] h-16 w-[3px] rounded-r-[2px] bg-[linear-gradient(270deg,#55555f,#2a2a31)]" />
+        <div className="relative h-[470px] w-[236px] rounded-[46px] bg-[linear-gradient(145deg,#6b6b78_0%,#2b2b33_22%,#16161b_50%,#2b2b33_78%,#5a5a66_100%)] p-[2.5px] shadow-[0_60px_100px_-35px_rgba(16,18,70,0.75),0_25px_45px_-25px_rgba(10,10,40,0.6)] sm:h-[520px] sm:w-[260px]">
+          <div className="h-full rounded-[44px] bg-[#050507] p-[7px]">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[37px] bg-[linear-gradient(180deg,#2c2b58_0%,#17162d_48%,#0f0e17_100%)] px-4 pt-3">
+            {/* Glass reflection across the screen. */}
+            <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0.02)_32%,transparent_33%)]" />
             <div className="flex items-center justify-between px-1.5 text-[10.5px] font-medium text-ink/85">
               <span>9:41</span>
               <span className="h-[20px] w-[76px] rounded-full bg-black" />
@@ -141,11 +148,7 @@ export default function HeroPhone() {
             </div>
 
             <div className="mt-5 flex flex-col items-center text-center">
-              <span className="relative flex h-16 w-16 items-center justify-center">
-                <span className="ring-pulse absolute inset-0 rounded-full border border-[#8ccbff]/50" />
-                <span className="ring-pulse absolute inset-0 rounded-full border border-[#8ccbff]/50 [animation-delay:1.2s]" />
-                <span className="mic-button relative flex h-16 w-16 items-center justify-center rounded-full text-[22px] font-semibold text-[#0b1626]">V</span>
-              </span>
+              <span className="mic-button flex h-16 w-16 items-center justify-center rounded-full text-[22px] font-semibold text-[#0b1626]">V</span>
               <p className="mt-3 text-[16px] font-medium text-ink">Vardaan</p>
               <p className="mt-0.5 text-[11.5px] text-[#c9e877] tabular-nums">On call · {clock}</p>
             </div>
@@ -194,6 +197,7 @@ export default function HeroPhone() {
                 </Glyph>
               </span>
             </div>
+          </div>
           </div>
         </div>
 

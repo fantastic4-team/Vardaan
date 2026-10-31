@@ -828,7 +828,13 @@ body {
   .msg-in, .hero-card-in { animation: none; }
 }
 
-/* Hero right panel: a quiet, slightly raised surface behind the grid and the phone. */
+/* Hero right panel: the poster's blue sky behind the grid and the phone. */
 .hero-panel {
-  background: linear-gradient(180deg, #19181f 0%, #151419 100%);
+  background: linear-gradient(180deg, #535ce6 0%, #6f7cf2 100%);
+}
+
+.hero-panel .hero-backdrop {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px) 0 0 / 56px 56px;
 }

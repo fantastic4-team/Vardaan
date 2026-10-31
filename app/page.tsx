@@ -72,18 +72,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* The right panel: a fine grid, call-signal rings, and the phone playing a live call. */}
+          {/* The right panel: the poster's blue sky with grain, and the phone playing a live call. */}
           <figure className="poster-art-in nav-grid hero-panel relative min-h-[600px] overflow-hidden border-t lg:min-h-0 lg:border-l lg:border-t-0">
-            <div aria-hidden="true" className="hero-backdrop pointer-events-none absolute inset-0" />
-            <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2">
-              {[440, 640, 840].map((size, k) => (
-                <span
-                  key={size}
-                  className="hero-ring absolute rounded-full border border-[#8ccbff]/[0.14]"
-                  style={{ width: size, height: size, left: -size / 2, top: -size / 2, animationDelay: `${k * 1.3}s` }}
-                />
-              ))}
-            </div>
+            <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             <HeroPhone />
             <figcaption className="sr-only">A call with Vardaan: you ask for something and it gets it done.</figcaption>
           </figure>
