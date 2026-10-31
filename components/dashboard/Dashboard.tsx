@@ -476,27 +476,29 @@ const NavIcon = ({ name, className }: { name: View | "logout"; className?: strin
 
 type Theme = "dark" | "skin";
 
-const THEMES: { id: Theme; label: string; swatch: string }[] = [
-  { id: "dark", label: "Dark", swatch: "bg-[#141312]" },
-  { id: "skin", label: "Sand", swatch: "bg-[#f2e3d3]" },
-];
-
-const ThemeSwitch = ({ theme, onChange }: { theme: Theme; onChange: (t: Theme) => void }) => (
-  <div role="radiogroup" aria-label="Colour theme" className="flex h-9 items-center gap-0.5 rounded-[10px] border border-white/[0.09] bg-white/[0.03] p-1">
-    {THEMES.map((t) => (
-      <button
-        key={t.id}
-        role="radio"
-        aria-checked={theme === t.id}
-        onClick={() => onChange(t.id)}
-        className={`flex h-7 cursor-pointer items-center gap-2 rounded-[7px] px-2.5 text-[12px] transition ${theme === t.id ? "bg-white/[0.09] text-ink" : "text-ink/50 hover:text-ink"}`}
-      >
-        <span className={`h-3 w-3 rounded-full ring-1 ring-black/20 ${t.swatch}`} />
-        {t.label}
-      </button>
-    ))}
-  </div>
-);
+// One icon button beside the bell: a sun switches to the light Sand theme, a moon switches back.
+const ThemeSwitch = ({ theme, onChange }: { theme: Theme; onChange: (t: Theme) => void }) => {
+  const dark = theme === "dark";
+  return (
+    <button
+      onClick={() => onChange(dark ? "skin" : "dark")}
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+      title={dark ? "Light theme" : "Dark theme"}
+      className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-white/[0.09] bg-white/[0.03] text-ink/70 transition hover:border-white/20 hover:text-ink"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-[18px] w-[18px]">
+        {dark ? (
+          <>
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" />
+          </>
+        ) : (
+          <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" />
+        )}
+      </svg>
+    </button>
+  );
+};
 
 const StatusChip = ({ ok, label }: { ok: boolean; label: string }) => (
   <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-ink/65">
