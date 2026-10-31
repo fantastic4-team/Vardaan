@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-// The phone floating over the hero art: a live call with Vardaan that plays on a loop. You ask for
-// a reminder, Vardaan replies, and a "Reminder set" card pops out beside the phone. Reduced motion
-// shows the finished call.
-type Step = 0 | 1 | 2 | 3;
-const TIMING: Record<Step, number> = { 0: 900, 1: 1300, 2: 1200, 3: 4200 };
+// The phone in the hero: a live call with Vardaan that plays like a real chat. Each request slides
+// in, Vardaan types, replies, and the result eases in as a card beside the phone. Three requests
+// run in turn; older messages drift up and fade. Reduced motion shows one finished exchange.
+type Msg = { id: number; role: "you" | "vardaan"; text: string };
+
+const SCRIPT = [
+  { ask: "Remind me to call Maa on Sunday at 7.", reply: "Done. I'll ring you on Sunday at 7 pm.", card: 0 },
+  { ask: "Email my landlord the kitchen tap is leaking.", reply: "Drafted it. I'll call you to approve before it goes.", card: 1 },
+  { ask: "Find a good phone under ₹15,000 for Papa.", reply: "On it. I'll call you back with three picks.", card: 2 },
+];
 
 const WAVE = [0.35, 0.6, 0.9, 0.5, 0.75, 1, 0.65, 0.4, 0.8, 0.55, 0.95, 0.7, 0.45, 0.85, 0.6, 0.3, 0.7, 0.9, 0.5, 0.65, 0.4, 0.8];
 
@@ -22,39 +27,88 @@ function Glyph({ children, className = "h-4 w-4" }: { children: React.ReactNode;
   );
 }
 
-function FloatCard({ show, tile, icon, title, sub, className }: { show: boolean; tile: string; icon: React.ReactNode; title: string; sub: string; className: string }) {
+const CARDS = [
+  {
+    tile: "tile-amber",
+    title: "Reminder set",
+    sub: "Call Maa · Sun, 7:00 pm",
+    icon: (
+      <>
+        <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5z" />
+        <path d="M10 19a2.2 2.2 0 0 0 4 0" />
+      </>
+    ),
+  },
+  {
+    tile: "tile-rose",
+    title: "Email drafted",
+    sub: "Waiting for your OK",
+    icon: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="2.5" />
+        <path d="m4 7 8 6 8-6" />
+      </>
+    ),
+  },
+  { tile: "tile-leaf", title: "Researching", sub: "Calls you back when done", icon: PHONE },
+];
+
+function ResultCard({ index, side }: { index: number; side: "left" | "right" }) {
+  const c = CARDS[index];
   return (
     <div
-      className={`hero-card absolute flex items-center gap-3 rounded-[14px] border border-white/15 bg-[#14131c]/90 py-2.5 pl-2.5 pr-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.75)] ${show ? "is-in" : ""} ${className}`}
+      className={`hero-card-in absolute hidden items-center gap-3 rounded-[14px] border border-white/15 bg-[#14131c]/90 py-2.5 pl-2.5 pr-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.75)] sm:flex ${
+        side === "left" ? "-left-[58%] top-[30%]" : "-right-[58%] top-[46%]"
+      }`}
     >
-      <span className={`glass-tile nav-tile ${tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]`}>
-        <Glyph>{icon}</Glyph>
+      <span className={`glass-tile nav-tile ${c.tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]`}>
+        <Glyph>{c.icon}</Glyph>
       </span>
       <span className="min-w-0">
-        <span className="block whitespace-nowrap text-[12.5px] font-medium text-ink">{title}</span>
-        <span className="block whitespace-nowrap text-[11px] text-ink/60">{sub}</span>
+        <span className="block whitespace-nowrap text-[12.5px] font-medium text-ink">{c.title}</span>
+        <span className="block whitespace-nowrap text-[11px] text-ink/60">{c.sub}</span>
       </span>
     </div>
   );
 }
 
 export default function HeroPhone() {
-  const [step, setStep] = useState<Step>(0);
+  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [typing, setTyping] = useState(false);
+  const [card, setCard] = useState<{ key: number; index: number } | null>(null);
   const [still, setStill] = useState(false);
   const [seconds, setSeconds] = useState(12);
+  const ids = useRef(0);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setStill(true);
-      setStep(3);
+      setMsgs([
+        { id: 1, role: "you", text: SCRIPT[0].ask },
+        { id: 2, role: "vardaan", text: SCRIPT[0].reply },
+      ]);
+      setCard({ key: 1, index: 0 });
+      return;
     }
+    // Play the script: request, typing, reply and result card, then the next request.
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
+    const push = (role: Msg["role"], text: string) => setMsgs((m) => [...m, { id: ++ids.current, role, text }].slice(-4));
+    function play(i: number) {
+      const line = SCRIPT[i % SCRIPT.length];
+      timers = [];
+      at(500, () => push("you", line.ask));
+      at(1300, () => setTyping(true));
+      at(2700, () => {
+        setTyping(false);
+        push("vardaan", line.reply);
+      });
+      at(3100, () => setCard({ key: ids.current, index: line.card }));
+      at(6200, () => play(i + 1));
+    }
+    play(0);
+    return () => timers.forEach(clearTimeout);
   }, []);
-
-  useEffect(() => {
-    if (still) return;
-    const t = setTimeout(() => setStep((s) => ((s + 1) % 4) as Step), TIMING[step]);
-    return () => clearTimeout(t);
-  }, [step, still]);
 
   useEffect(() => {
     if (still) return;
@@ -96,21 +150,25 @@ export default function HeroPhone() {
               <p className="mt-0.5 text-[11.5px] text-[#c9e877] tabular-nums">On call · {clock}</p>
             </div>
 
-            {/* Transcript */}
-            <div className="mt-4 flex min-h-[132px] flex-1 flex-col justify-end gap-2 pb-1">
-              <p className={`chat-in ml-auto max-w-[88%] rounded-[14px] rounded-br-[4px] bg-[#8ccbff] px-3 py-2 text-[11.5px] leading-[16px] text-[#0b1626] ${step >= 1 ? "is-in" : ""}`}>
-                Remind me to call Maa on Sunday at 7.
-              </p>
-              <div className="relative">
-                <span className={`chat-in absolute bottom-0 left-0 flex h-[30px] items-center gap-1 rounded-[14px] rounded-bl-[4px] bg-white/[0.1] px-3 ${step === 2 ? "is-in" : ""}`}>
+            {/* Transcript: new messages slide up from the bottom; older ones fade out at the top. */}
+            <div className="hero-transcript mt-4 flex min-h-0 flex-1 flex-col justify-end gap-2 overflow-hidden pb-1">
+              {msgs.map((m) => (
+                <p
+                  key={m.id}
+                  className={`msg-in max-w-[88%] shrink-0 rounded-[14px] px-3 py-2 text-[11.5px] leading-[16px] ${
+                    m.role === "you" ? "ml-auto rounded-br-[4px] bg-[#8ccbff] text-[#0b1626]" : "rounded-bl-[4px] bg-white/[0.1] text-ink/90"
+                  }`}
+                >
+                  {m.text}
+                </p>
+              ))}
+              {typing && (
+                <span className="msg-in flex h-[30px] w-fit shrink-0 items-center gap-1 rounded-[14px] rounded-bl-[4px] bg-white/[0.1] px-3">
                   <span className="typing-dot" />
                   <span className="typing-dot" />
                   <span className="typing-dot" />
                 </span>
-                <p className={`chat-in max-w-[88%] rounded-[14px] rounded-bl-[4px] bg-white/[0.1] px-3 py-2 text-[11.5px] leading-[16px] text-ink/90 ${step === 3 ? "is-in" : ""}`}>
-                  Done. I&apos;ll ring you on Sunday at 7 pm to call Maa.
-                </p>
-              </div>
+              )}
             </div>
 
             <div className="mt-3 flex h-8 items-center justify-between gap-[2px] px-1">
@@ -139,41 +197,8 @@ export default function HeroPhone() {
           </div>
         </div>
 
-        {/* Cards that pop out beside the phone */}
-        <FloatCard
-          show={step === 3}
-          tile="tile-amber"
-          icon={
-            <>
-              <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5z" />
-              <path d="M10 19a2.2 2.2 0 0 0 4 0" />
-            </>
-          }
-          title="Reminder set"
-          sub="Call Maa · Sun, 7:00 pm"
-          className="-left-[54%] top-[18%] hidden sm:flex"
-        />
-        <FloatCard
-          show
-          tile="tile-rose"
-          icon={
-            <>
-              <rect x="3" y="5" width="18" height="14" rx="2.5" />
-              <path d="m4 7 8 6 8-6" />
-            </>
-          }
-          title="Email drafted"
-          sub="Waiting for your OK"
-          className="-right-[50%] bottom-[22%] hidden sm:flex"
-        />
-        <FloatCard
-          show
-          tile="tile-leaf"
-          icon={PHONE}
-          title="Calls you back"
-          sub="When the task is done"
-          className="-right-[44%] top-[8%] hidden xl:flex"
-        />
+        {/* The result of the latest request, alternating sides. */}
+        {card && <ResultCard key={card.key} index={card.index} side={card.index % 2 ? "right" : "left"} />}
       </div>
     </div>
   );
