@@ -438,8 +438,8 @@ const SectionLabel = ({ children, action }: { children: React.ReactNode; action?
   </div>
 );
 
-const Empty = ({ icon, children }: { icon?: IconName; children: React.ReactNode }) => (
-  <div className="app-panel flex flex-col items-center px-6 py-10 text-center">
+const Empty = ({ icon, fill, children }: { icon?: IconName; fill?: boolean; children: React.ReactNode }) => (
+  <div className={`app-panel flex flex-col items-center px-6 py-10 text-center ${fill ? "min-h-[220px] flex-1 justify-center" : ""}`}>
     {icon && (
       <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.05] text-ink/45">
         <Icon name={icon} className="h-5 w-5" />
@@ -650,7 +650,7 @@ function Overview({
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section>
+        <section className="flex flex-col">
           <SectionLabel>Recent activity</SectionLabel>
           {activity.length ? (
             <ol className="app-panel relative px-5 py-2">
@@ -671,17 +671,21 @@ function Overview({
               ))}
             </ol>
           ) : (
-            <Empty icon="overview">No activity yet. Press Call me and tell Vardaan what you need. Every call, task and message shows up here.</Empty>
+            <Empty icon="overview" fill>
+              No activity yet. Press Call me and tell Vardaan what you need. Every call, task and message shows up here.
+            </Empty>
           )}
         </section>
 
-        <aside>
+        <aside className="flex flex-col">
           <SectionLabel>Needs you</SectionLabel>
-          <div className="space-y-3">
+          <div className="flex flex-1 flex-col gap-3">
             {needing.length ? (
               needing.map((t) => <TaskCard key={t.id} task={t} onChange={onChange} onToast={onToast} />)
             ) : (
-              <Empty icon="check">Nothing is waiting on you. When Vardaan has a question or a draft to approve, it shows up here and you get a text.</Empty>
+              <Empty icon="check" fill>
+                You&apos;re all caught up. Questions and drafts to approve show up here.
+              </Empty>
             )}
           </div>
         </aside>
