@@ -303,13 +303,17 @@ function AccountMenu({
     <div ref={ref} className="relative mt-auto">
       {open && (
         <div role="menu" className="absolute inset-x-0 bottom-full mb-2 rounded-[12px] border border-white/10 bg-[#1d1c1a] p-1.5 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.85)]">
-          <div className="border-b border-white/[0.07] px-3 pb-2.5 pt-2">
-            <p className="text-[13px] text-ink">{user.name}</p>
-            <p className="mt-0.5 break-all text-[12px] text-ink/50">{user.email}</p>
-            {phone && <p className="text-[12px] text-ink/50">{phone}</p>}
+          <div className="flex items-start gap-3 border-b border-white/[0.07] px-3 pb-3 pt-2">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#8ccbff]/15 text-[12px] font-medium text-[#b9e0ff]">{initials(user.name)}</span>
+            <span className="min-w-0">
+              <span className="block truncate text-[13px] text-ink">{user.name}</span>
+              <span className="mt-0.5 block break-all text-[12px] text-ink/50">{user.email}</span>
+              {phone && <span className="block text-[12px] text-ink/50">{phone}</span>}
+            </span>
           </div>
           <div className="pt-1.5">
-            <button role="menuitem" onClick={() => (setOpen(false), onSettings())} className={`${item} text-ink/80`}>
+            <button role="menuitem" onClick={() => (setOpen(false), onSettings())} className={`${item} flex items-center gap-2.5 text-ink/80`}>
+              <NavIcon name="settings" className="h-4 w-4 text-ink/60" />
               Settings
             </button>
             <button role="menuitem" onClick={onLogout} className={`${item} flex items-center gap-2.5 text-[#ffb4a8]`}>
