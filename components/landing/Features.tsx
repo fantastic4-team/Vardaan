@@ -58,33 +58,64 @@ const WAVE = [
   0.75, 0.5, 0.3,
 ];
 
+// Round call buttons on the phone screen.
+const CallButton = ({ tone, children }: { tone: string; children: React.ReactNode }) => (
+  <span className={`flex h-10 w-10 items-center justify-center rounded-full ${tone}`}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-[18px] w-[18px]">
+      {children}
+    </svg>
+  </span>
+);
+
 function ModeArt({ live }: { live: boolean }) {
   return (
-    <div className="mode-art relative flex min-h-[272px] items-center justify-center px-6 pb-7 pt-16">
-      <div className="w-full max-w-[320px] rounded-[16px] border border-white/[0.12] bg-[#16151d]/85 p-4 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-3">
-          <span className="mic-button flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-[#0b1626]">V</span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13.5px] font-medium text-ink">Vardaan</p>
-            <p className="text-[11.5px] text-ink/50">{live ? "On call · 0:07" : "Call ended · 0:42"}</p>
+    <div className="mode-art relative flex h-[360px] justify-center overflow-hidden pt-14">
+      {/* The phone: a dark frame with the call screen inside, cropped by the card like a product shot. */}
+      <div className="relative h-[420px] w-[232px] shrink-0 rounded-[40px] border border-white/[0.16] bg-[#0b0a10] p-[7px] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9),inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+        <div className="h-full overflow-hidden rounded-[33px] bg-[linear-gradient(180deg,#2a2950_0%,#16152a_45%,#111019_100%)] px-4 pt-2.5">
+          <div className="flex items-center justify-between px-1.5 text-[10px] font-medium text-ink/80">
+            <span>9:41</span>
+            <span className="h-[18px] w-[70px] rounded-full bg-black" />
+            <span className="flex items-center gap-1">
+              <svg viewBox="0 0 16 12" aria-hidden className="h-2.5 w-3 fill-current">
+                <rect x="0" y="8" width="3" height="4" rx="1" />
+                <rect x="4.3" y="5.5" width="3" height="6.5" rx="1" />
+                <rect x="8.6" y="3" width="3" height="9" rx="1" />
+                <rect x="12.9" y="0" width="3" height="12" rx="1" />
+              </svg>
+              <span className="h-2.5 w-[18px] rounded-[3px] border border-current p-[1.5px]">
+                <span className="block h-full w-3/4 rounded-[1px] bg-current" />
+              </span>
+            </span>
           </div>
-          <span
-            className={`rounded-full border px-2 py-0.5 text-[10.5px] font-medium ${
-              live ? "border-[#8fcf3c]/35 bg-[#8fcf3c]/12 text-[#c9e877]" : "border-white/15 bg-white/[0.05] text-ink/60"
-            }`}
-          >
-            {live ? "Live" : "Working"}
-          </span>
-        </div>
 
-        {live ? (
-          <div className="mt-4 flex h-12 items-center justify-between gap-[3px]" aria-hidden>
-            {WAVE.map((h, k) => (
-              <span key={k} className="wave-bar w-[4px] rounded-full bg-[linear-gradient(180deg,#b9e0ff_0%,#74bdf8_100%)]" style={{ height: `${h * 100}%`, animationDelay: `${(k % 8) * 0.11}s` }} />
-            ))}
+          <div className="mt-6 flex flex-col items-center text-center">
+            <span className="mic-button flex h-14 w-14 items-center justify-center rounded-full text-[20px] font-semibold text-[#0b1626]">V</span>
+            <p className="mt-3 text-[15px] font-medium text-ink">Vardaan</p>
+            <p className={`mt-0.5 text-[11.5px] ${live ? "text-[#c9e877]" : "text-ink/55"}`}>{live ? "On call · 0:07" : "Call ended · 0:42"}</p>
           </div>
-        ) : (
-          <ol className="mt-3.5 space-y-2 text-[12px]">
+
+          {live ? (
+            <>
+              <div className="mt-5 flex h-10 items-center justify-between gap-[2px] px-1" aria-hidden>
+                {WAVE.slice(0, 24).map((h, k) => (
+                  <span key={k} className="wave-bar w-[3px] rounded-full bg-[linear-gradient(180deg,#b9e0ff_0%,#74bdf8_100%)]" style={{ height: `${h * 100}%`, animationDelay: `${(k % 8) * 0.11}s` }} />
+                ))}
+              </div>
+              <div className="mt-6 flex items-center justify-center gap-5">
+                <CallButton tone="bg-white/[0.1] text-ink/85">
+                  <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v3.5" />
+                </CallButton>
+                <CallButton tone="bg-[#ff5d6e] text-white">
+                  <path d="M3.5 13.5c4.7-4.2 12.3-4.2 17 0l-2.2 2.2-3-1.2v-2.3a10 10 0 0 0-6.6 0v2.3l-3 1.2z" />
+                </CallButton>
+                <CallButton tone="bg-white/[0.1] text-ink/85">
+                  <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+                </CallButton>
+              </div>
+            </>
+          ) : (
+            <ol className="mt-5 space-y-2.5 rounded-[14px] border border-white/[0.08] bg-white/[0.04] px-3 py-3 text-[11.5px]">
             {[
               { label: "Find the landlord's email", state: "done" },
               { label: "Draft the message", state: "done" },
@@ -104,12 +135,14 @@ function ModeArt({ live }: { live: boolean }) {
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#8ccbff]" />
                   )}
                 </span>
-                <span className={s.state === "done" ? "text-ink/55 line-through decoration-white/20" : "text-ink/90"}>{s.label}</span>
+                <span className={`text-left ${s.state === "done" ? "text-ink/55 line-through decoration-white/20" : "text-ink/90"}`}>{s.label}</span>
               </li>
             ))}
           </ol>
-        )}
+          )}
+        </div>
       </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-[linear-gradient(180deg,rgba(24,23,22,0)_0%,#181716_100%)]" />
     </div>
   );
 }
@@ -138,7 +171,7 @@ export default function Features() {
               <div className="flex flex-1 flex-col px-6 pb-7 lg:px-8 lg:pb-9">
                 <h3 className="text-[28px] font-medium tracking-[-0.02em] text-ink">{m.name}</h3>
                 <p className="mt-2 max-w-[460px] text-[15px] leading-[24px] text-ink/65">{m.body}</p>
-                <ChatDemo ask={m.example} reply={m.reply} live={i === 1} />
+                <ChatDemo ask={m.example} reply={m.reply} />
               </div>
             </article>
           </InView>

@@ -741,3 +741,17 @@ body {
   .text-ink\/80 { color: color-mix(in oklab, var(--color-ink) 85%, transparent); }
   .text-ink\/85 { color: color-mix(in oklab, var(--color-ink) 89%, transparent); }
 }
+
+/* Sand: crisp, fully opaque icon tiles and a light card for the selected sidebar row. */
+.theme-skin .glass-tile.opacity-80 { opacity: 1; }
+.theme-skin .glass-tile {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.12),
+    0 6px 14px -8px var(--tile-a);
+}
+.theme-skin .bg-white\/\[0\.07\] {
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 2px rgba(91, 59, 34, 0.1), inset 0 0 0 1px rgba(91, 59, 34, 0.08);
+}
+.theme-skin .hover\:bg-white\/\[0\.035\]:hover { background-color: rgba(255, 255, 255, 0.45); }
