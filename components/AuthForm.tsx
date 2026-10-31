@@ -64,6 +64,20 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         {loading ? (signup ? "Creating account…" : "Logging in…") : signup ? "Create account" : "Log in"}
       </button>
 
+      <div className="my-5 flex items-center gap-3 text-[12px] uppercase tracking-[0.14em] text-ink/35">
+        <span className="h-px flex-1 bg-white/10" />
+        or
+        <span className="h-px flex-1 bg-white/10" />
+      </div>
+      {/* A plain link: /demo signs in to the read-only demo account and opens the dashboard. */}
+      <a
+        href="/demo"
+        className="flex h-11 w-full items-center justify-center rounded-[10px] border border-white/[0.12] bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.02)_100%)] text-[14px] font-medium text-ink/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-white/25 hover:text-ink"
+      >
+        Try the demo
+      </a>
+      <p className="mt-2 text-center text-[12px] text-ink/40">Explore a sample account. No sign-up needed.</p>
+
       <p className="mt-5 text-[13px] text-mute">
         {signup ? "Already have an account? " : "New to Vardaan? "}
         <Link href={signup ? "/login" : "/signup"} className="text-ink underline underline-offset-2">

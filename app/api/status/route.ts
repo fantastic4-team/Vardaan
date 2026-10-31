@@ -14,5 +14,7 @@ export async function GET() {
     twilioNumber: twilioConfigured() ? process.env.TWILIO_PHONE_NUMBER : null,
     publicUrl: Boolean(publicUrl()),
     email: mailConfigured(),
+    // Which web search provider the agent uses (see lib/search.ts).
+    search: process.env.TAVILY_API_KEY ? "tavily" : process.env.BRAVE_API_KEY ? "brave" : "duckduckgo",
   });
 }

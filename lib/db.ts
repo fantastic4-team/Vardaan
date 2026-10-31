@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+import { DEMO_USER_ID, demoData } from "@/lib/demo";
 
 // A small JSON-file store for local development. Every write goes through one queue so
 // concurrent requests never overwrite each other. Swap this module for a hosted database
@@ -102,13 +103,40 @@ type Data = {
 const FILE = path.join(process.cwd(), "data", "db.json");
 const EMPTY: Data = { users: [], tasks: [], memories: [], reminders: [], calls: [], messages: [] };
 
-async function load(): Promise<Data> {
+async function loadFile(): Promise<Data> {
   try {
     return { ...EMPTY, ...JSON.parse(await fs.readFile(FILE, "utf8")) };
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") return structuredClone(EMPTY);
     throw err;
   }
+}
+
+/** The stored data plus the read-only demo account, which lives only in memory. */
+async function load(): Promise<Data> {
+  const data = await loadFile();
+  const demo = demoData();
+  return {
+    users: [...data.users, demo.user],
+    tasks: [...data.tasks, ...demo.tasks],
+    memories: [...data.memories, ...demo.memories],
+    reminders: [...data.reminders, ...demo.reminders],
+    calls: [...data.calls, ...demo.calls],
+    messages: [...data.messages, ...demo.messages],
+  };
+}
+
+/** Drop the demo account before saving, so it's never written to disk. */
+function withoutDemo(data: Data): Data {
+  const keep = <T extends { userId: string }>(rows: T[]) => rows.filter((r) => r.userId !== DEMO_USER_ID);
+  return {
+    users: data.users.filter((u) => u.id !== DEMO_USER_ID),
+    tasks: keep(data.tasks),
+    memories: keep(data.memories),
+    reminders: keep(data.reminders),
+    calls: keep(data.calls),
+    messages: keep(data.messages),
+  };
 }
 
 let queue: Promise<unknown> = Promise.resolve();
@@ -126,7 +154,7 @@ export function write<T>(fn: (data: Data) => T): Promise<T> {
     const result = fn(data);
     await fs.mkdir(path.dirname(FILE), { recursive: true });
     const tmp = `${FILE}.${process.pid}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(data, null, 2));
+    await fs.writeFile(tmp, JSON.stringify(withoutDemo(data), null, 2));
     await fs.rename(tmp, FILE);
     return result;
   });

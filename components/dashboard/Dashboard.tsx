@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import TaskCard, { STATUS, canCancel, inProgress, needsYou } from "@/components/dashboard/TaskCard";
 import { api } from "@/components/dashboard/api";
+import Integrations from "@/components/dashboard/Integrations";
 import Icon from "@/components/docs/Icon";
 import type { IconName } from "@/lib/docs-content";
 import type { CallLog, Memory, MessageLog, Reminder, Task } from "@/lib/db";
 
-type View = "overview" | "calls" | "tasks" | "messages" | "memory" | "reminders" | "settings";
+type View = "overview" | "calls" | "tasks" | "messages" | "memory" | "reminders" | "integrations" | "settings";
 
 const NAV: { id: View; label: string }[] = [
   { id: "overview", label: "Overview" },
@@ -18,12 +19,13 @@ const NAV: { id: View; label: string }[] = [
   { id: "messages", label: "Messages" },
   { id: "memory", label: "Memory" },
   { id: "reminders", label: "Reminders" },
+  { id: "integrations", label: "Integrations" },
   { id: "settings", label: "Settings" },
 ];
 
 type Data = { tasks: Task[]; memories: Memory[]; reminders: Reminder[]; calls: CallLog[]; messages: MessageLog[] };
 type Profile = { phone: string; lang: string };
-type Status = { ai: string | null; phone: boolean; twilioNumber: string | null; publicUrl: boolean; email: boolean };
+type Status = { ai: string | null; phone: boolean; twilioNumber: string | null; publicUrl: boolean; email: boolean; search?: string };
 type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
@@ -63,7 +65,7 @@ function when(iso: string) {
 
 const duration = (s?: number) => (s === undefined ? "" : s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`);
 
-export default function Dashboard({ user }: { user: { name: string; email: string } }) {
+export default function Dashboard({ user, demo = false }: { user: { name: string; email: string }; demo?: boolean }) {
   const router = useRouter();
   const [view, setView] = useState<View>("overview");
   const [data, setData] = useState<Data>({ tasks: [], memories: [], reminders: [], calls: [], messages: [] });
@@ -149,7 +151,9 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
                 view === n.id ? "bg-white/[0.07] text-ink" : "text-ink/60 hover:bg-white/[0.035] hover:text-ink"
               }`}
             >
-              <NavIcon name={n.id} className={`h-[17px] w-[17px] shrink-0 ${view === n.id ? "text-[#b9e0ff]" : "text-ink/45"}`} />
+              <span className={`glass-tile nav-tile ${NAV_TILES[n.id]} flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] ${view === n.id ? "" : "opacity-80"}`}>
+                <NavIcon name={n.id} className="h-4 w-4" />
+              </span>
               {n.label}
               {!!badge[n.id] && (
                 <span className="ml-auto min-w-[20px] rounded-full bg-[#f6e27a]/15 px-1.5 text-center text-[11px] tabular-nums leading-[18px] text-[#f6e27a]">{badge[n.id]}</span>
@@ -201,12 +205,24 @@ export default function Dashboard({ user }: { user: { name: string; email: strin
           </div>
         </div>
         <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-6 sm:px-8 lg:px-12 lg:pt-10">
+        {demo && (
+          <div className="mb-6 flex flex-col gap-3 rounded-[14px] border border-[#8ccbff]/25 bg-[#8ccbff]/[0.07] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[14px] text-ink">You&apos;re exploring a demo account.</p>
+              <p className="mt-0.5 text-[13px] text-ink/55">The calls, tasks and messages are samples. Changes are turned off.</p>
+            </div>
+            <Link href="/signup" onClick={() => void fetch("/api/auth/logout", { method: "POST" })} className="waitlist-button flex h-10 shrink-0 items-center justify-center rounded-[10px] px-5 text-[14px]">
+              Create free account
+            </Link>
+          </div>
+        )}
         {view === "overview" && <Overview user={user} data={data} profile={profile} status={status} agentStatus={agentStatus} onCall={callMe} onView={setView} onChange={refresh} onToast={showToast} />}
         {view === "calls" && <Calls calls={data.calls} tasks={data.tasks} onCall={callMe} onToast={showToast} />}
         {view === "tasks" && <Tasks tasks={data.tasks} onChange={refresh} onToast={showToast} />}
         {view === "messages" && <Messages messages={data.messages} />}
         {view === "memory" && <MemoryView memories={data.memories} onChange={refresh} />}
         {view === "reminders" && <RemindersView reminders={data.reminders} hasPhone={Boolean(profile.phone)} phoneReady={Boolean(status?.phone)} onChange={refresh} />}
+        {view === "integrations" && <Integrations status={status} />}
         {view === "settings" && <Settings profile={profile} status={status} onSaved={setProfile} onToast={showToast} />}
         </div>
       </main>
@@ -328,6 +344,13 @@ const NAV_ICONS: Record<View | "logout", React.ReactNode> = {
       <path d="M10.3 20.5a2 2 0 0 0 3.4 0" />
     </>
   ),
+  integrations: (
+    <>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="2" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="2" />
+      <path d="M7 10.5V14a3 3 0 0 0 3 3h3.5M17 13.5V10a3 3 0 0 0-3-3h-3.5" />
+    </>
+  ),
   settings: (
     <>
       <path d="M4 7h10M18 7h2M4 17h2M10 17h10" />
@@ -341,6 +364,18 @@ const NAV_ICONS: Record<View | "logout", React.ReactNode> = {
       <path d="m15.5 16.5 4.5-4.5-4.5-4.5M20 12H9.5" />
     </>
   ),
+};
+
+// Each page's tile colour in the sidebar (see .glass-tile in globals.css).
+const NAV_TILES: Record<View, string> = {
+  overview: "tile-violet",
+  calls: "tile-leaf",
+  tasks: "tile-sky",
+  messages: "tile-teal",
+  memory: "tile-rose",
+  reminders: "tile-amber",
+  integrations: "tile-indigo",
+  settings: "tile-slate",
 };
 
 const NavIcon = ({ name, className }: { name: View | "logout"; className?: string }) => (

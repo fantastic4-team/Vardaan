@@ -1,4 +1,5 @@
 import { newId, now, read, write, type CallLog } from "@/lib/db";
+import { DEMO_USER_ID } from "@/lib/demo";
 import { createCall, sendSms, twilioConfigured } from "@/lib/twilio";
 
 // Phone features on top of Twilio: placing calls to a user, and texting them updates.
@@ -11,6 +12,7 @@ import { createCall, sendSms, twilioConfigured } from "@/lib/twilio";
  * @param taskId   – Optional task that triggered this call; linked in the call log.
  */
 export async function startCall(userId: string, reason: string, taskId?: string) {
+  if (userId === DEMO_USER_ID) throw new Error("The demo can't place calls. Create a free account to talk to Vardaan.");
   if (!twilioConfigured()) throw new Error("Phone calls aren't set up yet. Add your Twilio keys and PUBLIC_URL to .env.local.");
   const user = await read((d) => d.users.find((u) => u.id === userId));
   if (!user?.phone) throw new Error("Add your phone number in Settings first.");
@@ -53,7 +55,7 @@ export async function updateCall(id: string, patch: Partial<CallLog> | ((c: Call
 
 /** Text the user, if phone features are set up and they have a number. Never throws. */
 export async function notifyUser(userId: string, body: string) {
-  if (!twilioConfigured()) return;
+  if (!twilioConfigured() || userId === DEMO_USER_ID) return;
   const user = await read((d) => d.users.find((u) => u.id === userId));
   if (!user?.phone) return;
   let status: "sent" | "failed" = "sent";
