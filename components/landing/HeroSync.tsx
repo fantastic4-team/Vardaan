@@ -84,3 +84,18 @@ export function HeroSteps() {
 
 // Everything else Vardaan already does, counted in the "+N more" pill.
 const MORE = ["Google Calendar", "Reading your inbox", "Weather", "Memory", "Approvals", "Call-backs"];
+
+// Three dots beside the hero phone, one per scene; the active one stretches into a pill.
+export function SceneDots() {
+  const { scene } = useHeroScene();
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute right-[3%] top-1/2 hidden -translate-y-1/2 flex-col items-center gap-2.5 sm:flex">
+      {STEPS.map((s, i) => (
+        <span
+          key={s.label}
+          className={`w-2 rounded-full transition-all duration-500 ease-out ${i === scene ? "h-7 bg-white" : "h-2 bg-white/40"}`}
+        />
+      ))}
+    </div>
+  );
+}

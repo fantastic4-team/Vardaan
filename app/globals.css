@@ -893,7 +893,7 @@ body {
   .glass-icon { animation: none; }
 }
 
-/* Hero orbit: the logo rings travel round the phone on an invisible circle and stay upright as it turns.
+/* Hero logos: the logo rings sit evenly round the phone on an invisible circle and stay upright as it turns.
    Its diameter keeps every logo clear of the phone (520px tall, 260px wide). */
 .hero-orbit {
   --d: min(640px, 92vw);
@@ -904,7 +904,6 @@ body {
   height: var(--d);
   translate: -50% -50%;
   border-radius: 50%;
-  animation: orbit-spin 70s linear infinite;
 }
 @media (min-width: 1024px) {
   .hero-orbit { --d: min(640px, 46vw); }
@@ -917,15 +916,6 @@ body {
   height: 64px;
   margin: -32px 0 0 -32px;
   transform: rotate(var(--a)) translateX(calc(var(--d) / 2)) rotate(calc(-1 * var(--a)));
-}
-.hero-orbit-upright {
-  animation: orbit-spin 70s linear infinite reverse;
-}
-@keyframes orbit-spin {
-  to { transform: rotate(360deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-orbit, .hero-orbit-upright { animation: none; }
 }
 .hero-ring-logo {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%);

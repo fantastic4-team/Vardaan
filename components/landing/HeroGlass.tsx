@@ -1,8 +1,7 @@
 import { BRANDS } from "@/components/dashboard/BrandLogo";
 
-// Glassy rings with white logos for what Vardaan does, riding a faint circle round the hero phone.
-// The circle turns slowly and each logo stays upright. It is wide enough that no logo ever passes
-// behind the phone.
+// Glassy rings with white logos for what Vardaan does, set evenly on an invisible circle round
+// the hero phone, wide enough that none sits behind it.
 const LINE = { fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
 const LOGOS: Record<string, React.ReactNode> = {
@@ -49,8 +48,8 @@ export default function HeroGlass() {
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">
       <div className="hero-orbit">
         {ORDER.map((key, i) => (
-          <span key={key} className="hero-orbit-item" style={{ "--a": `${(360 / ORDER.length) * i}deg` } as React.CSSProperties}>
-            <span className="hero-orbit-upright hero-ring-logo flex h-full w-full items-center justify-center rounded-full text-white">
+          <span key={key} className="hero-orbit-item" style={{ "--a": `${(360 / ORDER.length) * i + 22.5}deg` } as React.CSSProperties}>
+            <span className="hero-ring-logo flex h-full w-full items-center justify-center rounded-full text-white">
               <svg viewBox="0 0 24 24" className="h-7 w-7">
                 {LOGOS[key]}
               </svg>

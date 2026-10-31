@@ -3,7 +3,7 @@ import Faq from "@/components/landing/Faq";
 import Features from "@/components/landing/Features";
 import HeroGlass from "@/components/landing/HeroGlass";
 import HeroPhone from "@/components/landing/HeroPhone";
-import { HeroSteps, HeroSync } from "@/components/landing/HeroSync";
+import { HeroSteps, HeroSync, SceneDots } from "@/components/landing/HeroSync";
 import Pricing from "@/components/landing/Pricing";
 import SiteFooter from "@/components/landing/SiteFooter";
 import SiteNav from "@/components/SiteNav";
@@ -83,6 +83,7 @@ export default function Home() {
             <HeroGlass />
             <div aria-hidden="true" className="poster-grain pointer-events-none absolute inset-0" />
             <HeroPhone />
+            <SceneDots />
             <figcaption className="sr-only">A call with Vardaan: you ask for something and it gets it done.</figcaption>
           </figure>
         </main>
