@@ -14,7 +14,7 @@ export function HeroSync({ children }: { children: React.ReactNode }) {
 export const useHeroScene = () => useContext(SceneContext);
 
 // How long one scene plays on the phone, so the progress line fills in step with it.
-export const SCENE_MS = 6800;
+export const SCENE_MS = 5200;
 
 const STEPS = [
   {

@@ -116,12 +116,12 @@ export default function HeroPhone() {
       setCaption(null);
       setCard(null);
       setLeaving(false);
-      at(300, () => setCaption({ key: ++key, who: "You", text: line.ask }));
-      at(2100, () => setSpeaking(true));
-      at(2600, () => setCaption({ key: ++key, who: "Vardaan", text: line.reply }));
-      at(2650, () => setCard({ key, index: line.card }));
-      at(5200, () => setSpeaking(false));
-      at(SCENE_MS - 600, () => setLeaving(true));
+      at(150, () => setCaption({ key: ++key, who: "You", text: line.ask }));
+      at(1200, () => setSpeaking(true));
+      at(1600, () => setCaption({ key: ++key, who: "Vardaan", text: line.reply }));
+      at(1600, () => setCard({ key, index: line.card }));
+      at(3800, () => setSpeaking(false));
+      at(SCENE_MS - 450, () => setLeaving(true));
       at(SCENE_MS, () => play(i + 1));
     }
     play(0);
@@ -202,7 +202,7 @@ export default function HeroPhone() {
         {card && (
           <>
             <ResultCard key={`a${card.key}`} card={CARDS[card.index][0]} spot="-left-[70px] top-[6%]" leaving={leaving} delay={0} />
-            <ResultCard key={`b${card.key}`} card={CARDS[card.index][1]} spot="left-[426px] top-[68%]" leaving={leaving} delay={110} />
+            <ResultCard key={`b${card.key}`} card={CARDS[card.index][1]} spot="left-[426px] top-[68%]" leaving={leaving} delay={0} />
           </>
         )}
       </div>
