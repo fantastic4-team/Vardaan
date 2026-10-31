@@ -1,4 +1,5 @@
 import GardenScene from "@/components/GardenScene";
+import ChatDemo from "@/components/landing/ChatDemo";
 import InView from "@/components/landing/InView";
 import SectionHeading, { GUTTER } from "@/components/landing/SectionHeading";
 import { FEATURES, MODES, type FeatureIcon } from "@/lib/landing";
@@ -48,13 +49,8 @@ const ICONS: Record<FeatureIcon, React.ReactNode> = {
   ),
 };
 
-// Icon tile colours, taken from the garden art: sky, violet, poppy and leaf.
-const TONES = [
-  "bg-[#8ccbff]/12 text-[#b9e0ff] ring-1 ring-inset ring-[#8ccbff]/20",
-  "bg-[#a99bff]/12 text-[#c7b8ff] ring-1 ring-inset ring-[#a99bff]/20",
-  "bg-[#ff8fa3]/12 text-[#ffb4c1] ring-1 ring-inset ring-[#ff8fa3]/20",
-  "bg-[#acbe62]/14 text-[#d4e59a] ring-1 ring-inset ring-[#acbe62]/25",
-];
+// Glossy icon tiles in the garden's colours: rose, sky, violet and leaf (see .glass-tile).
+const TONES = ["tile-rose", "tile-sky", "tile-violet", "tile-leaf"];
 
 export default function Features() {
   return (
@@ -62,8 +58,8 @@ export default function Features() {
       <SectionHeading
         id="features-title"
         eyebrow="Features"
-        title="One phone call. Everything handled."
-        intro="Vardaan works the way you already do: you talk, it listens, and it gets on with it. Two ways to use it, one assistant behind both."
+        title="One call. Everything handled."
+        intro="Talk to Vardaan the way you would to someone you trust. It understands your language, remembers what matters, and gets the work done, whether you hang up or stay on the line."
       />
 
       {/* The two modes: a garden scene, what the mode is, and a short sample of the conversation. */}
@@ -72,7 +68,7 @@ export default function Features() {
           <InView key={m.name} i={i} className="h-full">
             <article className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] transition duration-300 hover:border-white/20">
               <div aria-hidden="true" className="relative h-48 overflow-hidden sm:h-56">
-                <GardenScene scene={m.scene} className="absolute inset-0 h-full w-full transition duration-700 group-hover:scale-[1.03]" />
+                <GardenScene scene={m.scene} className="art-drift absolute inset-0 h-full w-full" />
                 <div className="poster-grain absolute inset-0" />
                 <div className="absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(180deg,rgba(23,22,21,0)_0%,#171615_100%)]" />
                 <span className="absolute left-6 top-6 rounded-full border border-white/20 bg-black/35 px-3 py-1 text-[12px] text-ink/90 lg:left-8 lg:top-7">
@@ -82,14 +78,7 @@ export default function Features() {
               <div className="flex flex-1 flex-col px-6 pb-7 lg:px-8 lg:pb-9">
                 <h3 className="text-[28px] font-medium tracking-[-0.02em] text-ink">{m.name}</h3>
                 <p className="mt-2 max-w-[460px] text-[15px] leading-[24px] text-ink/65">{m.body}</p>
-                <div className="mt-auto space-y-2.5 pt-7">
-                  <p className="ml-auto w-fit max-w-[88%] rounded-[16px] rounded-br-[5px] bg-[#8ccbff] px-4 py-2.5 text-[14px] leading-[21px] text-[#0b1626]">
-                    {m.example}
-                  </p>
-                  <p className="w-fit max-w-[88%] rounded-[16px] rounded-bl-[5px] border border-white/10 bg-white/[0.06] px-4 py-2.5 text-[14px] leading-[21px] text-ink/90">
-                    {m.reply}
-                  </p>
-                </div>
+                <ChatDemo ask={m.example} reply={m.reply} live={i === 1} />
               </div>
             </article>
           </InView>
@@ -100,8 +89,8 @@ export default function Features() {
         {FEATURES.map((f, i) => (
           <InView key={f.title} i={i % 4} className="h-full">
             <div className="h-full rounded-[18px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.012)_100%)] p-6 transition duration-300 hover:-translate-y-0.5 hover:border-white/20">
-              <span className={`flex h-11 w-11 items-center justify-center rounded-[12px] ${TONES[i % TONES.length]}`}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-5 w-5">
+              <span className={`glass-tile ${TONES[i % TONES.length]} flex h-14 w-14 items-center justify-center rounded-[16px]`}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-7 w-7">
                   {ICONS[f.icon]}
                 </svg>
               </span>

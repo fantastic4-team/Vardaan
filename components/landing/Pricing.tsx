@@ -11,7 +11,7 @@ export default function Pricing() {
         id="pricing-title"
         eyebrow="Pricing"
         title="Free while we're in beta."
-        intro="Use everything Vardaan does today at no cost. Paid plans arrive after the beta, and you'll hear from us well before anything changes."
+        intro="Everything Vardaan does today, at no cost. Paid plans arrive after the beta, and you'll hear from us well before anything changes."
       />
 
       <div className="mt-14 grid gap-5 lg:grid-cols-3">
