@@ -507,12 +507,12 @@ const StatusChip = ({ ok, label }: { ok: boolean; label: string }) => (
 
 function PageTitle({ title, sub, action }: { title: string; sub?: string; action?: React.ReactNode }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <div>
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
         <h1 className="text-[clamp(26px,3vw,32px)] font-medium leading-[1.15] tracking-[-0.02em] text-ink">{title}</h1>
         {sub && <p className="mt-2 max-w-[640px] text-[14px] leading-[22px] text-ink/55">{sub}</p>}
       </div>
-      {action}
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
@@ -782,6 +782,14 @@ function Overview({
 
 // ---- Calls -------------------------------------------------------------------------------------
 
+// A readable title and type for each call, from its direction and the reason it was placed.
+function callKind(c: CallLog): { title: string; label: string; tile: string } {
+  if (c.direction === "inbound") return { title: "You called Vardaan", label: "Incoming", tile: "tile-leaf" };
+  if (c.reason.startsWith("Reminder:")) return { title: c.reason.slice(9).trim(), label: "Reminder call", tile: "tile-amber" };
+  if (c.reason.startsWith("Task result:")) return { title: c.reason.slice(12).trim(), label: "Task update", tile: "tile-violet" };
+  return { title: c.reason === "Call me" ? "Vardaan called you" : c.reason, label: "Outgoing", tile: "tile-sky" };
+}
+
 function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Task[]; onCall: () => void; onToast: (t: string) => void }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
@@ -796,6 +804,20 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
           </button>
         }
       />
+      {calls.length > 0 && (
+        <div className="app-panel mb-4 grid grid-cols-3 divide-x divide-white/[0.06]">
+          {[
+            { label: "Calls", value: String(calls.length) },
+            { label: "Talk time", value: duration(calls.reduce((s, c) => s + (c.durationSec ?? 0), 0)) || "0s" },
+            { label: "Incoming / outgoing", value: `${calls.filter((c) => c.direction === "inbound").length} / ${calls.filter((c) => c.direction !== "inbound").length}` },
+          ].map((s) => (
+            <div key={s.label} className="px-5 py-4">
+              <p className="text-[12px] text-ink/50">{s.label}</p>
+              <p className="mt-1 text-[20px] font-medium tracking-[-0.01em] text-ink tabular-nums">{s.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
       {calls.length === 0 ? (
         <Empty icon="phone">No calls yet. Press Call me, or call your Vardaan number from your phone.</Empty>
       ) : (
@@ -810,6 +832,7 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
           {calls.map((c) => {
             const s = CALL_STATUS[c.status];
             const isOpen = open === c.id;
+            const kind = callKind(c);
             return (
               <li key={c.id} className={isOpen ? "bg-white/[0.015]" : ""}>
                 <button
@@ -818,13 +841,13 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
                   className="grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3.5 text-left transition hover:bg-white/[0.025] md:grid-cols-[minmax(0,1fr)_140px_90px_110px]"
                 >
                   <div className="flex min-w-0 items-center gap-3.5">
-                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${c.direction === "inbound" ? TONE.text : TONE.call}`}>
-                      <Icon name="phone" className={`h-4 w-4 ${c.direction === "inbound" ? "-scale-x-100" : ""}`} />
+                    <span className={`glass-tile nav-tile ${kind.tile} flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]`}>
+                      <NavIcon name="calls" className={`h-4 w-4 ${c.direction === "inbound" ? "-scale-x-100" : ""}`} />
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate text-[14px] text-ink">{c.reason}</p>
+                      <p className="truncate text-[14px] text-ink">{kind.title}</p>
                       <p className="truncate text-[12px] text-ink/45">
-                        {c.direction === "inbound" ? "Incoming" : "Outgoing"} · {c.phone}
+                        {kind.label} · {c.phone}
                         <span className="md:hidden"> · {when(c.startedAt)}</span>
                       </p>
                     </div>
