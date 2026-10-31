@@ -30,16 +30,16 @@ type AgentStatus = { status: string; activeTasks: number; activeCalls: number };
 
 const CALL_LANGUAGES = [
   { code: "en-IN", label: "English (India)" },
-  { code: "hi-IN", label: "à¤¹à¤¿à¤¨à¥à¤¦à¥€ Hindi" },
-  { code: "bn-IN", label: "à¦¬à¦¾à¦‚à¦²à¦¾ Bengali" },
-  { code: "ta-IN", label: "à®¤à®®à®¿à®´à¯ Tamil" },
-  { code: "te-IN", label: "à°¤à±†à°²à±à°—à± Telugu" },
-  { code: "mr-IN", label: "à¤®à¤°à¤¾à¤ à¥€ Marathi" },
-  { code: "gu-IN", label: "àª—à«àªœàª°àª¾àª¤à«€ Gujarati" },
-  { code: "kn-IN", label: "à²•à²¨à³à²¨à²¡ Kannada" },
-  { code: "ml-IN", label: "à´®à´²à´¯à´¾à´³à´‚ Malayalam" },
-  { code: "pa-IN", label: "à¨ªà©°à¨œà¨¾à¨¬à©€ Punjabi" },
-  { code: "od-IN", label: "à¬“à¬¡à¬¼à¬¿à¬† Odia" },
+  { code: "hi-IN", label: "हिन्दी Hindi" },
+  { code: "bn-IN", label: "বাংলা Bengali" },
+  { code: "ta-IN", label: "தமிழ் Tamil" },
+  { code: "te-IN", label: "తెలుగు Telugu" },
+  { code: "mr-IN", label: "मराठी Marathi" },
+  { code: "gu-IN", label: "ગુજરાતી Gujarati" },
+  { code: "kn-IN", label: "ಕನ್ನಡ Kannada" },
+  { code: "ml-IN", label: "മലയാളം Malayalam" },
+  { code: "pa-IN", label: "ਪੰਜਾਬੀ Punjabi" },
+  { code: "od-IN", label: "ଓଡ଼ିଆ Odia" },
 ];
 
 const CALL_STATUS: Record<CallLog["status"], { label: string; tone: string }> = {
@@ -130,7 +130,7 @@ export default function Dashboard({ user, demo = false }: { user: { name: string
     }
     try {
       await api("/api/voice/call-me", { method: "POST" });
-      showToast(`Calling ${profile.phone}â€¦ pick up your phone.`);
+      showToast(`Calling ${profile.phone}… pick up your phone.`);
       refresh();
     } catch (err) {
       showToast((err as Error).message);
@@ -504,7 +504,7 @@ function Overview({
       icon: "phone" as IconName,
       tone: TONE.call,
       title: `${c.direction === "inbound" ? "You called Vardaan" : c.reason === "Call me" ? "Vardaan called you" : `Vardaan called: ${c.reason}`}`,
-      detail: `${CALL_STATUS[c.status].label}${c.durationSec ? ` Â· ${duration(c.durationSec)}` : ""}${c.taskIds.length ? ` Â· ${c.taskIds.length} task handed off` : ""}`,
+      detail: `${CALL_STATUS[c.status].label}${c.durationSec ? ` · ${duration(c.durationSec)}` : ""}${c.taskIds.length ? ` · ${c.taskIds.length} task handed off` : ""}`,
     })),
     ...data.tasks.map((t) => ({ at: t.updatedAt, icon: "capabilities" as IconName, tone: TONE.task, title: t.request, detail: STATUS[t.status].label })),
     ...data.messages.map((m) => ({
@@ -738,13 +738,13 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
                     <div className="min-w-0">
                       <p className="truncate text-[14px] text-ink">{c.reason}</p>
                       <p className="truncate text-[12px] text-ink/45">
-                        {c.direction === "inbound" ? "Incoming" : "Outgoing"} Â· {c.phone}
-                        <span className="md:hidden"> Â· {when(c.startedAt)}</span>
+                        {c.direction === "inbound" ? "Incoming" : "Outgoing"} · {c.phone}
+                        <span className="md:hidden"> · {when(c.startedAt)}</span>
                       </p>
                     </div>
                   </div>
                   <span className="hidden text-[13px] text-ink/60 md:block">{when(c.startedAt)}</span>
-                  <span className="hidden text-[13px] tabular-nums text-ink/60 md:block">{duration(c.durationSec) || "â€“"}</span>
+                  <span className="hidden text-[13px] tabular-nums text-ink/60 md:block">{duration(c.durationSec) || "–"}</span>
                   <span>
                     <Pill tone={s.tone}>{s.label}</Pill>
                   </span>
@@ -772,7 +772,7 @@ function Calls({ calls, tasks, onCall, onToast }: { calls: CallLog[]; tasks: Tas
                             return t ? (
                               <li key={id} className="flex items-center gap-2">
                                 <span className={`h-1.5 w-1.5 rounded-full ${STATUS[t.status].dot}`} />
-                                {t.request} Â· {STATUS[t.status].label}
+                                {t.request} · {STATUS[t.status].label}
                               </li>
                             ) : null;
                           })}
@@ -872,7 +872,7 @@ function Messages({ messages }: { messages: MessageLog[] }) {
                 </p>
                 <p className={`mt-1 text-[11px] text-ink/45 ${m.direction === "inbound" ? "text-right" : ""}`}>
                   {when(m.createdAt)}
-                  {m.status === "failed" && <span className="text-[#ffb4a8]"> Â· not delivered: {m.error}</span>}
+                  {m.status === "failed" && <span className="text-[#ffb4a8]"> · not delivered: {m.error}</span>}
                 </p>
               </div>
             </li>
@@ -984,7 +984,7 @@ function RemindersView({ reminders, hasPhone, phoneReady, onChange }: { reminder
                 <p className={`text-[15px] ${r.calledAt ? "text-ink/55" : "text-ink"}`}>{r.title}</p>
                 <p className="text-[12px] text-ink/45">
                   {r.dueAt ? new Date(r.dueAt).toLocaleString() : "No time set"}
-                  {r.calledAt && ` Â· called you ${when(r.calledAt)}`}
+                  {r.calledAt && ` · called you ${when(r.calledAt)}`}
                 </p>
               </div>
             </div>
