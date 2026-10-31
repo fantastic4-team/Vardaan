@@ -74,7 +74,7 @@ function ResultCard({ card, spot, leaving, delay }: { card: Card; spot: string; 
   return (
     <div
       style={{ animationDelay: `${delay}ms` }}
-      className={`hero-card-in absolute hidden w-[196px] items-center gap-3 rounded-[16px] border border-[#e7ebf3] bg-white py-3 pl-3 pr-3.5 shadow-[0_22px_44px_-18px_rgba(30,50,110,0.4),0_2px_5px_rgba(30,50,110,0.06)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
+      className={`hero-card-in absolute hidden w-[188px] items-center gap-3 rounded-[16px] border border-[#e7ebf3] bg-white py-3 pl-3 pr-3.5 shadow-[0_22px_44px_-18px_rgba(30,50,110,0.4),0_2px_5px_rgba(30,50,110,0.06)] transition-[opacity,transform] duration-500 ease-out sm:flex ${
         leaving ? "translate-y-1 opacity-0" : ""
       } ${spot}`}
     >
@@ -113,15 +113,15 @@ export default function HeroPhone() {
       const line = SCRIPT[i % SCRIPT.length];
       timers = [];
       setScene(i % SCRIPT.length);
-      setCaption(null);
-      setCard(null);
+      // One continuous call: the next request replaces the last reply straight away, and the cards
+      // stay up until the new reply swaps them, so nothing ever goes blank.
+      setCaption({ key: ++key, who: "You", text: line.ask });
       setLeaving(false);
-      at(150, () => setCaption({ key: ++key, who: "You", text: line.ask }));
       at(1200, () => setSpeaking(true));
       at(1600, () => setCaption({ key: ++key, who: "Vardaan", text: line.reply }));
       at(1600, () => setCard({ key, index: line.card }));
       at(3800, () => setSpeaking(false));
-      at(SCENE_MS - 450, () => setLeaving(true));
+      at(SCENE_MS - 320, () => setLeaving(true));
       at(SCENE_MS, () => play(i + 1));
     }
     play(0);
@@ -163,7 +163,7 @@ export default function HeroPhone() {
             <p className="text-[14px] font-medium text-white/85">Vardaan</p>
             <p className="mt-0.5 text-[11.5px] text-white/70 tabular-nums">{clock}</p>
 
-            <div className={`flex flex-1 flex-col items-center justify-center transition-opacity duration-500 ${leaving ? "opacity-0" : "opacity-100"}`}>
+            <div className={`flex flex-1 flex-col items-center justify-center transition-opacity duration-300 ${leaving ? "opacity-0" : "opacity-100"}`}>
               {caption && (
                 <div key={caption.key} className="msg-in">
                   <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/60">{caption.who}</p>
@@ -177,19 +177,20 @@ export default function HeroPhone() {
 
           {/* Controls: mute, end call and keypad on a soft tray. */}
           <div className="mx-auto mb-5 mt-3 flex w-full items-center justify-between rounded-full bg-[#e3e6ec] px-2 py-2">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f4f5f8] text-[#6b7080]">
-              <Glyph className="h-[19px] w-[19px]">
-                <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v3.5M4 4l16 16" />
-              </Glyph>
+            {/* Filled call icons from Google's Material icon set (Apache 2.0). */}
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f4f5f8] text-[#3c4150]">
+              <svg viewBox="0 0 24 24" aria-hidden className="h-[21px] w-[21px] fill-current">
+                <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3 3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z" />
+              </svg>
             </span>
             <span className="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[linear-gradient(160deg,#ff7a63_0%,#f0452f_100%)] text-white shadow-[0_10px_22px_-10px_#f0452f]">
-              <Glyph className="h-[20px] w-[20px]">
-                <path d="M3.5 13.5c4.7-4.2 12.3-4.2 17 0l-2.2 2.2-3-1.2v-2.3a10 10 0 0 0-6.6 0v2.3l-3 1.2z" />
-              </Glyph>
+              <svg viewBox="0 0 24 24" aria-hidden className="h-[24px] w-[24px] fill-current">
+                <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 0 0-2.67-1.85.996.996 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+              </svg>
             </span>
             <span className="grid h-12 w-12 grid-cols-3 place-content-center gap-[3px] rounded-full bg-[#f4f5f8] px-[14px]">
               {Array.from({ length: 9 }, (_, k) => (
-                <span key={k} className="h-[4px] w-[4px] rounded-full bg-[#4a4f5e]" />
+                <span key={k} className="h-[4.5px] w-[4.5px] rounded-full bg-[#3c4150]" />
               ))}
             </span>
           </div>
@@ -201,8 +202,8 @@ export default function HeroPhone() {
         {/* What the latest request did, top left, and what happens next, bottom right. */}
         {card && (
           <>
-            <ResultCard key={`a${card.key}`} card={CARDS[card.index][0]} spot="-left-[70px] top-[6%]" leaving={leaving} delay={0} />
-            <ResultCard key={`b${card.key}`} card={CARDS[card.index][1]} spot="left-[426px] top-[68%]" leaving={leaving} delay={0} />
+            <ResultCard key={`a${card.key}`} card={CARDS[card.index][0]} spot="-left-[66px] top-[6%]" leaving={false} delay={0} />
+            <ResultCard key={`b${card.key}`} card={CARDS[card.index][1]} spot="left-[444px] top-[68%]" leaving={false} delay={0} />
           </>
         )}
       </div>
