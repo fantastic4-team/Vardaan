@@ -893,20 +893,39 @@ body {
   .glass-icon { animation: none; }
 }
 
-/* Hero logo rows: glassy rings with white logos, sliding side by side and fading at the edges. */
-.hero-marquee {
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+/* Hero orbit: the logo rings travel round the phone on an invisible circle and stay upright as it turns.
+   Its diameter keeps every logo clear of the phone (520px tall, 260px wide). */
+.hero-orbit {
+  --d: min(640px, 92vw);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--d);
+  height: var(--d);
+  translate: -50% -50%;
+  border-radius: 50%;
+  animation: orbit-spin 70s linear infinite;
 }
-.hero-marquee-track {
-  animation: hero-marquee 36s linear infinite;
+@media (min-width: 1024px) {
+  .hero-orbit { --d: min(640px, 46vw); }
 }
-.hero-marquee-track.is-reverse {
-  animation-direction: reverse;
+.hero-orbit-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  transform: rotate(var(--a)) translateX(calc(var(--d) / 2)) rotate(calc(-1 * var(--a)));
 }
-@keyframes hero-marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+.hero-orbit-upright {
+  animation: orbit-spin 70s linear infinite reverse;
+}
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-orbit, .hero-orbit-upright { animation: none; }
 }
 .hero-ring-logo {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 100%);
@@ -916,7 +935,4 @@ body {
 .hero-ring-logo svg {
   opacity: 0.9;
   filter: drop-shadow(0 1px 0 rgba(30, 30, 110, 0.35));
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-marquee-track { animation: none; }
 }

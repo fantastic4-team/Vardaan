@@ -1,8 +1,8 @@
 import { BRANDS } from "@/components/dashboard/BrandLogo";
 
-// Two rows of glassy rings above and below the hero phone, each holding a white logo for what
-// Vardaan does. The rows slide side by side in opposite directions and fade out at the edges, so
-// the logos never pass behind the phone.
+// Glassy rings with white logos for what Vardaan does, riding a faint circle round the hero phone.
+// The circle turns slowly and each logo stays upright. It is wide enough that no logo ever passes
+// behind the phone.
 const LINE = { fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
 const LOGOS: Record<string, React.ReactNode> = {
@@ -42,31 +42,22 @@ const LOGOS: Record<string, React.ReactNode> = {
   ),
 };
 
-const TOP = ["calls", "calendar", "gmail", "reminders", "whatsapp", "research", "memory", "languages"];
-const BOTTOM = ["gmail", "languages", "calls", "memory", "calendar", "research", "whatsapp", "reminders"];
-
-function Row({ items, className, reverse }: { items: string[]; className: string; reverse?: boolean }) {
-  // The list is drawn twice so the slide loops without a gap.
-  return (
-    <div className={`hero-marquee absolute inset-x-0 overflow-hidden ${className}`}>
-      <div className={`hero-marquee-track flex w-max gap-5 ${reverse ? "is-reverse" : ""}`}>
-        {[...items, ...items].map((key, i) => (
-          <span key={i} className="hero-ring-logo flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-white">
-            <svg viewBox="0 0 24 24" className="h-7 w-7">
-              {LOGOS[key]}
-            </svg>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
+const ORDER = ["calls", "calendar", "gmail", "reminders", "whatsapp", "research", "memory", "languages"];
 
 export default function HeroGlass() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-      <Row items={TOP} className="top-[6%]" />
-      <Row items={BOTTOM} className="bottom-[6%]" reverse />
+      <div className="hero-orbit">
+        {ORDER.map((key, i) => (
+          <span key={key} className="hero-orbit-item" style={{ "--a": `${(360 / ORDER.length) * i}deg` } as React.CSSProperties}>
+            <span className="hero-orbit-upright hero-ring-logo flex h-full w-full items-center justify-center rounded-full text-white">
+              <svg viewBox="0 0 24 24" className="h-7 w-7">
+                {LOGOS[key]}
+              </svg>
+            </span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
