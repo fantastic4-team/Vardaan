@@ -1,7 +1,7 @@
 import { BRANDS } from "@/components/dashboard/BrandLogo";
 
 // Large, transparent white icons engraved into the hero background, one for each thing Vardaan
-// does: calling, its voice, reminders, Google Calendar, Gmail and weather. They stay in view and
+// does: calling, its voice, reminders, Google Calendar and Gmail. They stay in view and
 // slowly zoom in and out in place, each on its own beat.
 const LINE = { fill: "none", stroke: "currentColor", strokeWidth: 1.1, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
@@ -47,14 +47,6 @@ const TILES: { x: string; y: string; size: number; delay: number; icon: React.Re
     size: 92,
     delay: 6,
     icon: <path fill="currentColor" fillOpacity={0.7} d={BRANDS.gmail.d} />,
-  },
-  {
-    label: "Weather",
-    x: "50%",
-    y: "9%",
-    size: 72,
-    delay: 8,
-    icon: <path {...LINE} d="M7 18.5h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 9.5a4.5 4.5 0 0 0 0 9z" />,
   },
 ];
 
