@@ -2,6 +2,7 @@ import Link from "next/link";
 import Faq from "@/components/landing/Faq";
 import Features from "@/components/landing/Features";
 import HeroPhone from "@/components/landing/HeroPhone";
+import { HeroSteps, HeroSync } from "@/components/landing/HeroSync";
 import Pricing from "@/components/landing/Pricing";
 import SiteFooter from "@/components/landing/SiteFooter";
 import SiteNav from "@/components/SiteNav";
@@ -26,6 +27,7 @@ export default function Home() {
         <SiteNav />
 
         {/* Split screen: the letter on the left, a live call with Vardaan on the right. */}
+        <HeroSync>
         <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-2 lg:grid-rows-1">
           <div className="flex min-h-0 min-w-0 flex-col justify-between gap-6 px-[max(1.5rem,calc(6vw+1.75rem))] py-7 lg:py-[clamp(28px,7vh,72px)] lg:pr-12">
             <div className="lg:pt-[clamp(8px,4vh,40px)]">
@@ -51,6 +53,9 @@ export default function Home() {
                 Vardaan is a voice-first AI agent. Call, say what you need in your own language, and it gets
                 done, quietly in the background or live with you on the line. No apps, no screens, no typing.
               </p>
+              <div className="reveal" style={step(3)}>
+                <HeroSteps />
+              </div>
             </div>
 
             <div className="reveal max-w-[440px] 2xl:max-w-[480px]" style={step(3)}>
@@ -79,6 +84,7 @@ export default function Home() {
             <figcaption className="sr-only">A call with Vardaan: you ask for something and it gets it done.</figcaption>
           </figure>
         </main>
+        </HeroSync>
       </div>
 
       <Features />

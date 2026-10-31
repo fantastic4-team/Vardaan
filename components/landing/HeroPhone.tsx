@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SCENE_MS, useHeroScene } from "@/components/landing/HeroSync";
 
-// The phone in the hero: a live call with Vardaan that plays like a real chat. Each request slides
-// in, Vardaan types, replies, and the result eases in as a card beside the phone. Three requests
-// run in turn; older messages drift up and fade. Reduced motion shows one finished exchange.
+// The phone in the hero: a live call with Vardaan. Each exchange plays as one clean scene: the
+// request slides in, Vardaan types and replies, the result eases in as a card beside the phone,
+// then it all fades out and the next request begins. Reduced motion shows one finished exchange.
 type Msg = { id: number; role: "you" | "vardaan"; text: string };
 
 const SCRIPT = [
@@ -53,11 +54,11 @@ const CARDS = [
   { tile: "tile-leaf", title: "Researching", sub: "Calls you back when done", icon: PHONE },
 ];
 
-function ResultCard({ index, side }: { index: number; side: "left" | "right" }) {
+function ResultCard({ index, side, leaving }: { index: number; side: "left" | "right"; leaving: boolean }) {
   const c = CARDS[index];
   return (
     <div
-      className={`hero-card-in absolute hidden items-center gap-3 rounded-[14px] border border-white/15 bg-[#14131c]/90 py-2.5 pl-2.5 pr-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.75)] sm:flex ${
+      className={`hero-card-in absolute hidden items-center gap-3 transition-[opacity,transform] duration-500 ease-out ${leaving ? "translate-y-1 opacity-0" : ""} rounded-[14px] border border-white/15 bg-[#14131c]/90 py-2.5 pl-2.5 pr-4 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.75)] sm:flex ${
         side === "left" ? "-left-[58%] top-[30%]" : "-right-[58%] top-[46%]"
       }`}
     >
@@ -76,9 +77,11 @@ export default function HeroPhone() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [typing, setTyping] = useState(false);
   const [card, setCard] = useState<{ key: number; index: number } | null>(null);
+  const [leaving, setLeaving] = useState(false);
   const [still, setStill] = useState(false);
   const [seconds, setSeconds] = useState(12);
   const ids = useRef(0);
+  const { setScene } = useHeroScene();
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -90,25 +93,30 @@ export default function HeroPhone() {
       setCard({ key: 1, index: 0 });
       return;
     }
-    // Play the script: request, typing, reply and result card, then the next request.
+    // Play the script one exchange at a time: request, typing, reply, result card, then fade out.
     let timers: ReturnType<typeof setTimeout>[] = [];
     const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
-    const push = (role: Msg["role"], text: string) => setMsgs((m) => [...m, { id: ++ids.current, role, text }].slice(-4));
+    const push = (role: Msg["role"], text: string) => setMsgs((m) => [...m, { id: ++ids.current, role, text }]);
     function play(i: number) {
       const line = SCRIPT[i % SCRIPT.length];
       timers = [];
-      at(500, () => push("you", line.ask));
-      at(1300, () => setTyping(true));
-      at(2700, () => {
+      setScene(i % SCRIPT.length);
+      setMsgs([]);
+      setCard(null);
+      setLeaving(false);
+      at(400, () => push("you", line.ask));
+      at(1200, () => setTyping(true));
+      at(2600, () => {
         setTyping(false);
         push("vardaan", line.reply);
       });
-      at(3100, () => setCard({ key: ids.current, index: line.card }));
-      at(6200, () => play(i + 1));
+      at(3000, () => setCard({ key: ids.current, index: line.card }));
+      at(SCENE_MS - 600, () => setLeaving(true));
+      at(SCENE_MS, () => play(i + 1));
     }
     play(0);
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [setScene]);
 
   useEffect(() => {
     if (still) return;
@@ -153,12 +161,12 @@ export default function HeroPhone() {
               <p className="mt-0.5 text-[11.5px] text-[#c9e877] tabular-nums">On call · {clock}</p>
             </div>
 
-            {/* Transcript: new messages slide up from the bottom; older ones fade out at the top. */}
-            <div className="hero-transcript mt-4 flex min-h-0 flex-1 flex-col justify-end gap-2 overflow-hidden pb-1">
+            {/* Transcript: the current exchange only, so bubbles are never cut off. */}
+            <div className={`mt-4 flex min-h-0 flex-1 flex-col justify-end gap-2.5 pb-1 transition-[opacity,transform] duration-500 ease-out ${leaving ? "-translate-y-1 opacity-0" : "opacity-100"}`}>
               {msgs.map((m) => (
                 <p
                   key={m.id}
-                  className={`msg-in max-w-[88%] shrink-0 rounded-[14px] px-3 py-2 text-[11.5px] leading-[16px] ${
+                  className={`msg-in max-w-[88%] shrink-0 rounded-[16px] px-3.5 py-2.5 text-[12px] leading-[17px] ${
                     m.role === "you" ? "ml-auto rounded-br-[4px] bg-[#8ccbff] text-[#0b1626]" : "rounded-bl-[4px] bg-white/[0.1] text-ink/90"
                   }`}
                 >
@@ -202,7 +210,7 @@ export default function HeroPhone() {
         </div>
 
         {/* The result of the latest request, alternating sides. */}
-        {card && <ResultCard key={card.key} index={card.index} side={card.index % 2 ? "right" : "left"} />}
+        {card && <ResultCard key={card.key} index={card.index} side={card.index % 2 ? "right" : "left"} leaving={leaving} />}
       </div>
     </div>
   );
