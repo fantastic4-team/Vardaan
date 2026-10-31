@@ -534,40 +534,63 @@ function Overview({
     <div className="space-y-8">
       <PageTitle title={`${hello}, ${user.name.split(" ")[0]}.`} sub="Everything Vardaan has done for you, in one place." />
 
-      <section className="call-hero relative overflow-hidden rounded-[20px] border border-white/10 p-6 sm:p-8">
-        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="max-w-[540px]">
-            <div className="flex flex-wrap items-center gap-2 text-[12px]">
-              <StatusChip ok={ready} label={ready ? "Calling ready" : "Calling not set up"} />
-              {ready && <StatusChip ok label={`Speaks ${lang}`} />}
+      <section className="call-hero relative overflow-hidden rounded-[18px] border border-white/[0.08] p-5 sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <span className="glass-tile tile-sky flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px]">
+            <NavIcon name="calls" className="h-6 w-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 className="text-[18px] font-medium tracking-[-0.01em] text-ink">{ready ? "Vardaan will ring your phone" : "Set up calling"}</h2>
               {agentStatus && (
-                <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-ink/65">
+                <span className="flex items-center gap-1.5 text-[12px] text-ink/50">
                   <span className={`h-1.5 w-1.5 rounded-full ${AGENT_STATUS_COLORS[agentStatus.status] ?? "bg-white/30"} ${agentStatus.status === "Executing Task" || agentStatus.status === "On Call" ? "animate-pulse" : ""}`} />
                   {agentStatus.status}
                 </span>
               )}
             </div>
-            <h2 className="mt-4 text-[clamp(22px,2.6vw,30px)] font-medium leading-tight tracking-[-0.02em] text-ink">
-              {ready ? "Vardaan will ring your phone." : "Set up calling to your phone."}
-            </h2>
-            <p className="mt-2 text-[14px] leading-[22px] text-ink/65">
-              {ready ? (
-                <>
-                  Press Call me and Vardaan rings <span className="text-ink">{profile.phone}</span>. Talk, or tell it what to do and hang
-                  up. You can also call <span className="text-ink">{status?.phoneNumber}</span> any time.
-                </>
-              ) : (
-                "Add your number in Settings and connect your Sarvam phone number. Then Vardaan can call you, and you can call it."
-              )}
-            </p>
+            {ready ? (
+              <p className="mt-1 text-[13px] leading-[20px] text-ink/55">
+                Rings <span className="text-ink/85">{profile.phone}</span> in {lang}. You can also call{" "}
+                <span className="text-ink/85">{status?.phoneNumber}</span> any time.
+              </p>
+            ) : (
+              <ol className="mt-2.5 flex flex-wrap gap-2 text-[12.5px]">
+                {[
+                  { done: Boolean(profile.phone), label: "Add your phone number" },
+                  { done: Boolean(status?.phone), label: "Connect a Sarvam number" },
+                ].map((s, i) => (
+                  <li
+                    key={s.label}
+                    className={`flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 ${s.done ? "border-[#8fcf3c]/25 text-ink/70" : "border-white/[0.09] text-ink/80"}`}
+                  >
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] tabular-nums ${s.done ? "bg-[#8fcf3c]/15 text-[#c9e877]" : "bg-white/[0.07] text-ink/60"}`}
+                    >
+                      {s.done ? <Icon name="check" className="h-3 w-3" /> : i + 1}
+                    </span>
+                    {s.label}
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
-          <button
-            onClick={ready ? onCall : () => onView("settings")}
-            className="mic-button flex h-14 shrink-0 cursor-pointer items-center justify-center gap-2.5 self-start rounded-full px-7 text-[15px] font-medium text-[#0b1626] sm:self-auto"
-          >
-            <Icon name={ready ? "phone" : "config"} className="h-5 w-5" />
-            {ready ? "Call me" : "Set up"}
-          </button>
+          {ready ? (
+            <button
+              onClick={onCall}
+              className="mic-button flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-full px-6 text-[14px] font-medium text-[#0b1626] sm:self-auto"
+            >
+              <Icon name="phone" className="h-4 w-4" />
+              Call me
+            </button>
+          ) : (
+            <button
+              onClick={() => onView(profile.phone ? "integrations" : "settings")}
+              className="h-10 shrink-0 cursor-pointer self-start rounded-[11px] border border-white/[0.12] bg-white/[0.06] px-4 text-[13px] font-medium text-ink transition hover:border-white/25 hover:bg-white/[0.1] sm:self-auto"
+            >
+              {profile.phone ? "Connect Sarvam" : "Add your number"}
+            </button>
+          )}
         </div>
       </section>
 
