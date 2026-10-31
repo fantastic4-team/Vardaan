@@ -17,10 +17,10 @@ export default function Pricing() {
       <div className="mt-14 grid gap-5 lg:grid-cols-3">
         {PLANS.map((p, i) => (
           <InView key={p.name} i={i} className="h-full">
-            {/* The available plan gets a slowly turning gradient border; the others a plain one. */}
+            {/* The available plan gets a light-blue border and glow; the others a plain one. */}
             <article
               className={`relative h-full rounded-[22px] border ${
-                p.highlight ? "plan-glow border-transparent shadow-[0_30px_70px_-35px_rgba(140,203,255,0.55)]" : "border-white/10"
+                p.highlight ? "border-[#8ccbff]/35 shadow-[0_0_0_1px_rgba(140,203,255,0.06),0_30px_70px_-35px_rgba(140,203,255,0.5)]" : "border-white/10"
               }`}
             >
               <div className="flex h-full flex-col overflow-hidden rounded-[21px] bg-[#171615]">

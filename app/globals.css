@@ -514,33 +514,3 @@ body {
   }
 }
 
-/* The available plan's border: the garden's colours turning slowly around the card. */
-@property --plan-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-.plan-glow::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  padding: 1px;
-  border-radius: inherit;
-  background: conic-gradient(from var(--plan-angle), #8ccbff, #c7b8ff, #ff8fa3, #f6e27a, #acbe62, #8ccbff);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: plan-spin 8s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes plan-spin {
-  to { --plan-angle: 360deg; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .plan-glow::before {
-    animation: none;
-  }
-}
